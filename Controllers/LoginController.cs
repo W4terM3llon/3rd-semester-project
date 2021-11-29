@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +20,7 @@ namespace RestaurantSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class LoginController : ControllerBase
     {
         private readonly UserManager<User> userManager;
@@ -37,7 +39,7 @@ namespace RestaurantSystem.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] Login model)
         {
-            var user = await userManager.FindByEmailAsync(model.Email);
+            var user = await userManager.FindByNameAsync(model.Email); //Email is the username too
             if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
             {
                 var userRoles = await userManager.GetRolesAsync(user);
@@ -73,16 +75,26 @@ namespace RestaurantSystem.Controllers
         {
             var userExists = await userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status400BadRequest, new { Status = "Error", Message = "User already exists!" });
 
-            User user = new User()
+            if (model.Email == "" || model.FirstName == "" || model.LastName == "" || model.AccountingAddress.Street == "" || model.AccountingAddress.Appartment == "" || model.PhoneNumber == "") { 
+                return BadRequest(new { Error = "Empty fields not allowed"});
+            }
+
+            var address = new Address()
+            {
+                Street = model.AccountingAddress.Street,
+                Appartment = model.AccountingAddress.Appartment
+            };
+
+            User user = new Customer()
             {
                 SystemId = new Random().Next(1, 1000).ToString(), //Replace by real id generator
                 Email = model.Email,
                 UserName = model.Email,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
-                AccountingAddress = model.Address,
+                AccountingAddress = address,
                 PhoneNumber = model.PhoneNumber,
                 SecurityStamp = Guid.NewGuid().ToString(),
             };
@@ -93,9 +105,9 @@ namespace RestaurantSystem.Controllers
                 var enumerator = errors.GetEnumerator();
                 enumerator.MoveNext();
                 var message = string.Join(", ", enumerator.Current.Description);
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = message });
+                return StatusCode(StatusCodes.Status400BadRequest, new { Status = "Error", Message = message });
             }
-            await userManager.AddToRoleAsync(user, "User");
+            await userManager.AddToRoleAsync(user, "Customer");
 
             return Ok(new { Status = "Success", Message = "User created successfully!" });
         }

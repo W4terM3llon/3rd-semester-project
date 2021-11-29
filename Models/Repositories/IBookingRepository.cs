@@ -10,8 +10,10 @@ namespace RestaurantSystem.Models.Repositories
     {
         public Task<IEnumerable<Booking>> GetAllAsync();
         public Task<Booking> GetAsync(string id);
-        public Task<BookingRequest> CreateAsync(BookingRequest bookingRequest);
-        public Task<BookingRequest> UpdateAsync(BookingRequest bookingRequest);
+        public Task<Booking> CreateAsync(Booking bookingRequest);
+        public Task<Booking> UpdateAsync(Booking bookingRequest);
         public Task<Booking> DeleteAsync(string id);
+        public Task<bool> IfExist(string id);
+        public Task<Booking> ConvertAlterBookingRequest(BookingRequest request);
     }
 }

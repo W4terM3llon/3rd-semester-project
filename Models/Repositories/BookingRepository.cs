@@ -20,33 +20,28 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<IEnumerable<Booking>> GetAllAsync()
         {
-            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).ToListAsync();
+            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).Include(booking => booking.Table).ToListAsync();
 
         }
 
         public async Task<Booking> GetAsync(string id)
         {
-            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).FirstOrDefaultAsync(booking => booking.Id == id);
+            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).Include(booking => booking.Table).FirstOrDefaultAsync(booking => booking.Id == id);
         }
 
-        public async Task<BookingRequest> UpdateAsync(BookingRequest bookingRequest)
+        public async Task<Booking> UpdateAsync(Booking booking)
         {
-            if (await IfExist(bookingRequest.Id) && await IfRequestDataCorrect(bookingRequest) && !await IfBookingOverlap(bookingRequest))
+            if (await IfExist(booking.Id) && await IfTimeAvailable(booking))
             {
-                var table = await _context.Table.FirstOrDefaultAsync(table => table.Id == bookingRequest.Table);
-                var user = await _context.User.FirstOrDefaultAsync(user => user.SystemId == bookingRequest.User);
-                var diningPeriod = await _context.DiningPeriod.FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == bookingRequest.DiningPeriod);
-                var day = new DateTime(bookingRequest.Day.Year, bookingRequest.Day.Month, bookingRequest.Day.Day);
+                var date = new DateTime(booking.Date.Year, booking.Date.Month, booking.Date.Day);
 
-                var contextBooking = await GetAsync(bookingRequest.Id);
-
-                contextBooking.Table = table;
-                contextBooking.User = user;
-                contextBooking.DiningPeriod = diningPeriod;
-                contextBooking.Day= day;
+                var contextBooking = await GetAsync(booking.Id);
+                contextBooking.Date = date;
+                contextBooking.DiningPeriod = booking.DiningPeriod;
+                contextBooking.Table = booking.Table;
 
                 await _context.SaveChangesAsync();
-                return bookingRequest;
+                return booking;
             }
             else
             {
@@ -55,26 +50,13 @@ namespace RestaurantSystem.Models.Repositories
 
         }
 
-        public async Task<BookingRequest> CreateAsync(BookingRequest bookingRequest)
+        public async Task<Booking> CreateAsync(Booking booking)
         {
-            if (await IfRequestDataCorrect(bookingRequest) && !await IfBookingOverlap(bookingRequest))
+            if (await IfTimeAvailable(booking))
             {
-                var table = await _context.Table.FirstOrDefaultAsync(table => table.Id == bookingRequest.Table);
-                var user = await _context.User.FirstOrDefaultAsync(user => user.SystemId == bookingRequest.User);
-                var diningPeriod = await _context.DiningPeriod.FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == bookingRequest.DiningPeriod);
-                var day = new DateTime(bookingRequest.Day.Year, bookingRequest.Day.Month, bookingRequest.Day.Day);
-                var booking = new Booking
-                {
-                    Id = new Random().Next(1, 1000).ToString(), //Replace by real id generator
-                    Table = table,
-                    User = user,
-                    DiningPeriod = diningPeriod,
-                    Day = day
-                };
-
                 await _context.Booking.AddAsync(booking);
                 await _context.SaveChangesAsync();
-                return bookingRequest;
+                return booking;
             }
             else
             {
@@ -88,7 +70,6 @@ namespace RestaurantSystem.Models.Repositories
             {
                 var booking = await GetAsync(id);
                 _context.Booking.Remove(booking);
-                booking.Table.AvailablePeriods.Add(booking.DiningPeriod);
                 await _context.SaveChangesAsync();
                 return booking;
             }
@@ -98,31 +79,46 @@ namespace RestaurantSystem.Models.Repositories
             }
         }
 
-        private async Task<bool> IfExist(string id)
+        public async Task<bool> IfExist(string id)
         {
             return await _context.Booking.AnyAsync(booking => booking.Id == id);
         }
 
-        private async Task<bool> IfRequestDataCorrect(BookingRequest bookingRequest) 
+        private async Task<bool> IfTimeAvailable(Booking bookingPretender)
         {
-            var diningPeriod = await _context.DiningPeriod.FirstOrDefaultAsync(period => period.Id == bookingRequest.DiningPeriod);
-            if (diningPeriod == null ||
-                !await _context.Table.AnyAsync(table => table.Id == bookingRequest.Table && table.AvailablePeriods.Contains(diningPeriod)) ||
-                !await _context.User.AnyAsync(user => user.SystemId == bookingRequest.User))
+            if (await _context.Booking.AnyAsync(booking => booking.Date == bookingPretender.Date && booking.Table == bookingPretender.Table && booking.DiningPeriod == bookingPretender.DiningPeriod))
             {
                 return false;
             }
-            return true;
-        }
-
-        private async Task<bool> IfBookingOverlap(BookingRequest bookingRequest)
-        {
-            var day = new DateTime(bookingRequest.Day.Year, bookingRequest.Day.Month, bookingRequest.Day.Day);
-            if (await _context.Booking.AnyAsync(booking => (booking.Table.Id == bookingRequest.Table && booking.DiningPeriod.Id == bookingRequest.DiningPeriod && booking.Day.Equals(day))))
+            else
             {
                 return true;
             }
-            return false;
+        }
+
+        public async Task<Booking> ConvertAlterBookingRequest(BookingRequest request)
+        {
+            var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
+            var table = await _context.Table.FirstOrDefaultAsync(table => table.Id == request.Table);
+            var user = await _context.Customer.FirstOrDefaultAsync(user => user.SystemId == request.User);
+            var diningPeriod = await _context.DiningPeriod.FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == request.DiningPeriod);
+            var date = new DateTime(request.Date.Year, request.Date.Month, request.Date.Day);
+
+            if (restaurant == null || table == null || user == null || diningPeriod == null)
+            {
+                return null;
+            }
+
+            var booking = new Booking()
+            {
+                Id = new Random().Next(1, 1000).ToString(),
+                Table = table,
+                User =  user,
+                DiningPeriod = diningPeriod,
+                Date = date,
+                Restaurant = restaurant
+            };
+            return booking;
         }
     }
 }

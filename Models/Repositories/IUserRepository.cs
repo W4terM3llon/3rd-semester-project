@@ -8,9 +8,9 @@ namespace RestaurantSystem.Models.Repositories
 {
     public interface IUserRepository
     {
-        public Task<IEnumerable<User>> GetAllAsync();
-        public Task<User> GetAsync(string id);
-        public Task<User> UpdateAsync(Register register);
-        public Task<User> DeleteAsync(string id);
+        public Task<IEnumerable<Customer>> GetAllAsync();
+        public Task<Customer> GetAsync(string id);
+        public Task<Customer> UpdateAsync(Register register);
+        public Task<Customer> DeleteAsync(string id);
     }
 }

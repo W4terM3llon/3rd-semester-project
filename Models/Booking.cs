@@ -13,9 +13,10 @@ namespace RestaurantSystem.Models
         [JsonIgnore]
         public int DBId { get; set; }
         public string Id { get; set; }
+        public DateTime Date { get; set; }
         public Table Table { get; set; }
-        public User User { get; set; }
         public DiningPeriod DiningPeriod { get; set; }
-        public DateTime Day { get; set; }
+        public User User { get; set; }
+        public Restaurant Restaurant { get; set; }
     }
 }

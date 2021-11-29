@@ -9,8 +9,9 @@ namespace RestaurantSystem.Models.Repositories
     {
         public Task<IEnumerable<Restaurant>> GetAllAsync();
         public Task<Restaurant> GetAsync(string id);
-        public Task<Restaurant> CreateAsync(Restaurant user);
+        public Task<Restaurant> CreateAsync(Restaurant user, string everyDayUseAccountEmail);
         public Task<Restaurant> UpdateAsync(Restaurant user);
         public Task<Restaurant> DeleteAsync(string id);
+        public Task<bool> IfExist(string id);
     }
 }

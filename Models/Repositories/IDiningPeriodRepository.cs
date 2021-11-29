@@ -8,10 +8,11 @@ namespace RestaurantSystem.Models.Repositories
 {
     interface IDiningPeriodRepository
     {
-        public Task<IEnumerable<DiningPeriodRequest>> GetAllAsync();
-        public Task<DiningPeriodRequest> GetAsync(string id);
-        public Task<DiningPeriodRequest> CreateAsync(DiningPeriodRequest diningPeriodRequest);
-        public Task<DiningPeriodRequest> UpdateAsync(DiningPeriodRequest diningPeriodRequest);
-        public Task<DiningPeriodRequest> DeleteAsync(string id);
+        public Task<IEnumerable<DiningPeriod>> GetAllAsync();
+        public Task<DiningPeriod> GetAsync(string id);
+        public Task<DiningPeriod> CreateAsync(DiningPeriod diningPeriodRequest);
+        public Task<DiningPeriod> UpdateAsync(DiningPeriod diningPeriodRequest);
+        public Task<DiningPeriod> DeleteAsync(string id);
+        public Task<bool> IfExist(string id);
     }
 }

@@ -17,85 +17,63 @@ namespace RestaurantSystem.Models.Repositories
         {
             _context = context;
         }
-        public async Task<IEnumerable<DiningPeriodRequest>> GetAllAsync()
+        public async Task<IEnumerable<DiningPeriod>> GetAllAsync()
         {
             var diningPeriods = await _context.DiningPeriod.Include(diningPeriod => diningPeriod.Restaurant).ToListAsync();
-            var diningPeriodRequest = diningPeriods.ConvertAll(x => new DiningPeriodRequest { Id = x.Id, TimeStartMinutes = x.TimeStartMinutes, DurationMinutes = x.DurationMinutes, Name = x.Name, Restaurant = x.Restaurant.Id, DayOfWeek = x.DayOfWeek });
-            return diningPeriodRequest;
+            //var diningPeriodRequest = diningPeriods.ConvertAll(x => new DiningPeriodRequest { Id = x.Id, TimeStartMinutes = x.TimeStartMinutes, DurationMinutes = x.DurationMinutes, Name = x.Name, Restaurant = x.Restaurant.Id});
+            return diningPeriods;
         }
-        public async Task<DiningPeriodRequest> GetAsync(string id)
+        public async Task<DiningPeriod> GetAsync(string id)
         {
             if (await IfExist(id))
             {
                 var diningPeriod = await _context.DiningPeriod.Include(diningPeriod => diningPeriod.Restaurant).FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == id);
-                var diningPeriodRequest = new DiningPeriodRequest
-                {
-                    Id = diningPeriod.Id,
-                    TimeStartMinutes = diningPeriod.TimeStartMinutes,
-                    DurationMinutes = diningPeriod.DurationMinutes,
-                    Name = diningPeriod.Name,
-                    Restaurant = diningPeriod.Restaurant.Id,
-                    DayOfWeek = diningPeriod.DayOfWeek
-                };
-                return diningPeriodRequest;
-            }
-            else 
-            {
-                return null;
-            }
-        }
-        public async Task<DiningPeriodRequest> UpdateAsync(DiningPeriodRequest diningPeriodRequest)
-        {
-            if (await IfExist(diningPeriodRequest.Id) || await IfPeriodsOverlap(diningPeriodRequest) || !IfDiningTimeCorrent(diningPeriodRequest))
-            {
-                var diningPeriod = await _context.DiningPeriod.FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == diningPeriodRequest.Id);
-                diningPeriod.TimeStartMinutes = diningPeriodRequest.TimeStartMinutes;
-                diningPeriod.DurationMinutes = diningPeriodRequest.DurationMinutes;
-                diningPeriod.Name = diningPeriodRequest.Name;
-                diningPeriod.DayOfWeek = diningPeriodRequest.DayOfWeek;
-                await _context.SaveChangesAsync();
-                return diningPeriodRequest;
+                return diningPeriod;
             }
             else
             {
                 return null;
             }
         }
-        public async Task<DiningPeriodRequest> CreateAsync(DiningPeriodRequest diningPeriodRequest)
+        public async Task<DiningPeriod> UpdateAsync(DiningPeriod diningPeriod)
         {
-            var restaurant = await _context.Restaurant.FirstOrDefaultAsync(restaurant => restaurant.Id == diningPeriodRequest.Restaurant);
-
-            if (restaurant == null || await IfPeriodsOverlap(diningPeriodRequest) || !IfDiningTimeCorrent(diningPeriodRequest))
+            if (await IfExist(diningPeriod.Id) || await IfPeriodsOverlap(diningPeriod) || !IfDiningTimeCorrent(diningPeriod))
+            {
+                var diningPeriodContext = await _context.DiningPeriod.FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == diningPeriod.Id);
+                diningPeriodContext.TimeStartMinutes = diningPeriod.TimeStartMinutes;
+                diningPeriodContext.DurationMinutes = diningPeriod.DurationMinutes;
+                diningPeriodContext.Name = diningPeriod.Name;
+                await _context.SaveChangesAsync();
+                return diningPeriodContext;
+            }
+            else
             {
                 return null;
             }
+        }
+        public async Task<DiningPeriod> CreateAsync(DiningPeriod diningPeriod)
+        {
+            var restaurant = await _context.Restaurant.FirstOrDefaultAsync(restaurant => restaurant.Id == diningPeriod.Restaurant.Id);
 
-            var diningPeriod = new DiningPeriod
+            if (restaurant == null || await IfPeriodsOverlap(diningPeriod) || !IfDiningTimeCorrent(diningPeriod))
             {
-                Id = new Random().Next(1, 1000).ToString(), //Replace by real id generator
-                Name = diningPeriodRequest.Name,
-                TimeStartMinutes = diningPeriodRequest.TimeStartMinutes,
-                DurationMinutes = diningPeriodRequest.DurationMinutes,
-                Restaurant = restaurant,
-                DayOfWeek = diningPeriodRequest.DayOfWeek
-            };
+                return null;
+            }
 
             await _context.DiningPeriod.AddAsync(diningPeriod);
             await _context.SaveChangesAsync();
-
-            diningPeriodRequest.Id = diningPeriod.Id;
-            return diningPeriodRequest;
+            return diningPeriod;
         }
 
-        public async Task<DiningPeriodRequest> DeleteAsync(string id)
+        public async Task<DiningPeriod> DeleteAsync(string id)
         {
             if (await IfExist(id))
             {
-                var diningPeriodRequest = await GetAsync(id);
                 var diningPeriod = await _context.DiningPeriod.FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == id);
+
                 _context.DiningPeriod.Remove(diningPeriod);
                 await _context.SaveChangesAsync();
-                return diningPeriodRequest;
+                return diningPeriod;
             }
             else
             {
@@ -103,24 +81,23 @@ namespace RestaurantSystem.Models.Repositories
             }
         }
 
-        private async Task<bool> IfExist(string id)
+        public async Task<bool> IfExist(string id)
         {
             return await _context.DiningPeriod.AnyAsync(diningPeriod => diningPeriod.Id == id);
         }
 
-        private async Task<bool> IfPeriodsOverlap(DiningPeriodRequest diningPeriodRequest) 
+        private async Task<bool> IfPeriodsOverlap(DiningPeriod diningPeriod) 
         {
-            var requestPeriodStart = diningPeriodRequest.TimeStartMinutes;
-            var requestPeriodEnd = (diningPeriodRequest.TimeStartMinutes + diningPeriodRequest.DurationMinutes) % (24 * 60);
+            var requestPeriodStart = diningPeriod.TimeStartMinutes;
+            var requestPeriodEnd = (diningPeriod.TimeStartMinutes + diningPeriod.DurationMinutes) % (24 * 60);
 
-            var diningPeriodRequests = await GetAllAsync();
-            foreach (DiningPeriodRequest DPR in diningPeriodRequests)
+            var diningPeriods = await GetAllAsync();
+            foreach (DiningPeriod DPR in diningPeriods)
             {
                 int presentPeriodStart = DPR.TimeStartMinutes;
                 var presentPeriodEnd = (DPR.TimeStartMinutes + DPR.DurationMinutes) % (24 * 60);
 
-                if ((diningPeriodRequest.DayOfWeek== DPR.DayOfWeek) &&
-                    ((requestPeriodStart >= presentPeriodStart && requestPeriodStart <= presentPeriodEnd) ||
+                if (((requestPeriodStart >= presentPeriodStart && requestPeriodStart <= presentPeriodEnd) ||
                     (requestPeriodEnd >= presentPeriodStart && requestPeriodEnd <= presentPeriodEnd) ||
                     (requestPeriodStart <= presentPeriodStart && requestPeriodEnd >= presentPeriodEnd)))
                 {
@@ -131,9 +108,9 @@ namespace RestaurantSystem.Models.Repositories
             return false;
         }
 
-        private bool IfDiningTimeCorrent(DiningPeriodRequest diningPeriodRequest) 
+        private bool IfDiningTimeCorrent(DiningPeriod diningPeriod) 
         {
-            if (diningPeriodRequest.TimeStartMinutes > 24 * 60 || diningPeriodRequest.TimeStartMinutes < 0 || diningPeriodRequest.DurationMinutes > 24 * 60 || diningPeriodRequest.DurationMinutes <= 0 || ((int)diningPeriodRequest.DayOfWeek) < 0 || ((int)diningPeriodRequest.DayOfWeek) > 6)
+            if (diningPeriod.TimeStartMinutes > 24 * 60 || diningPeriod.TimeStartMinutes < 0 || diningPeriod.DurationMinutes > 24 * 60 || diningPeriod.DurationMinutes <= 0)
             {
                 return false;
             }
@@ -141,6 +118,25 @@ namespace RestaurantSystem.Models.Repositories
             {
                 return true;
             }
+        }
+
+        public async Task<DiningPeriod> ConvertAlterDiningPeriodRequest(DiningPeriodRequest request)
+        {
+            var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
+            if (restaurant == null)
+            {
+                return null;
+            }
+
+            var diningPeriod = new DiningPeriod()
+            {
+                Id = new Random().Next(1, 1000).ToString(),
+                Name = request.Name,
+                TimeStartMinutes = request.TimeStartMinutes,
+                DurationMinutes = request.DurationMinutes,
+                Restaurant = restaurant
+            };
+            return diningPeriod;
         }
     }
 }

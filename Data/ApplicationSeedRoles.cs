@@ -19,7 +19,8 @@ namespace RestaurantSystem.Data
             List<string> roles = new List<string>
             {
                 "RestaurantManager",
-                "User"
+                "RestaurantEveryDayUse",
+                "Customer"
             };
 
             foreach (string role in roles)
@@ -30,7 +31,7 @@ namespace RestaurantSystem.Data
 
                 if (!hasRole.Result)
                 {
-                    roleResult = roleManager.CreateAsync(new UserRole("Administrator"));
+                    roleResult = roleManager.CreateAsync(new UserRole(role));
                     roleResult.Wait();
                 }
             }

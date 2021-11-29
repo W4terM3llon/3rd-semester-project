@@ -21,29 +21,29 @@ namespace RestaurantSystem.Models.Repositories
             _userManager = userManager;
         }
 
-        public async Task<IEnumerable<User>> GetAllAsync()
+        public async Task<IEnumerable<Customer>> GetAllAsync()
         {
-            return await _context.User.Include(user => user.AccountingAddress).ToListAsync();
+            return await _context.Customer.Include(user => user.AccountingAddress).ToListAsync();
             
         }
 
-        public async Task<User> GetAsync(string id)
+        public async Task<Customer> GetAsync(string id)
         {
-            var user = await _context.User.Include(user => user.AccountingAddress).FirstOrDefaultAsync(user => user.SystemId == id);
+            var user = await _context.Customer.Include(user => user.AccountingAddress).FirstOrDefaultAsync(user => user.SystemId == id);
             return user;
         }
 
-        public async Task<User> UpdateAsync(Register register)
+        public async Task<Customer> UpdateAsync(Register register)
         {
             if (await IfExist(register.SystemId))
             {
-                User user = await GetAsync(register.SystemId);
+                Customer user = await GetAsync(register.SystemId);
                 user.Email = register.Email;
                 user.UserName = register.Email;
                 user.FirstName = register.FirstName;
                 user.LastName = register.LastName;
-                user.AccountingAddress.Street = register.Address.Street;
-                user.AccountingAddress.Appartment = register.Address.Appartment;
+                user.AccountingAddress.Street = register.AccountingAddress.Street;
+                user.AccountingAddress.Appartment = register.AccountingAddress.Appartment;
                 user.PhoneNumber = register.PhoneNumber;
 
                 await _userManager.UpdateAsync(user);
@@ -56,7 +56,7 @@ namespace RestaurantSystem.Models.Repositories
             }
         }
 
-        public async Task<User> DeleteAsync(string id)
+        public async Task<Customer> DeleteAsync(string id)
         {
             if (await IfExist(id))
             {
@@ -75,7 +75,7 @@ namespace RestaurantSystem.Models.Repositories
 
         private async Task<bool> IfExist(string id) 
         {
-            return await _context.User.AnyAsync(user => user.SystemId == id);
+            return await _context.Customer.AnyAsync(user => user.SystemId == id);
         }
     }
 }

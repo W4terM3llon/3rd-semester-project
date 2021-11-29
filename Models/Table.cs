@@ -13,9 +13,9 @@ namespace RestaurantSystem.Models
         [JsonIgnore]
         public int DbId { get; set; }
         public string Id { get; set; }
-        public Restaurant Restaurant { get; set; }
         public string SeatNumber { get; set; }
         public string Description { get; set; }
-        public List<DiningPeriod> AvailablePeriods { get; set; } //many to many
+        public Restaurant Restaurant { get; set; }
+
     }
 }

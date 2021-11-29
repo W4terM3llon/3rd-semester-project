@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
 using System;
@@ -18,83 +20,76 @@ namespace RestaurantSystem.Models.Repositories
         {
             _context = context;
         }
-        public async Task<IEnumerable<TableRequest>> GetAllAsync()
+        public async Task<IEnumerable<Table>> GetAllAsync(TableRequest tableQuery)
         {
-            var tables = await _context.Table.Include(table => table.Restaurant).Include(table => table.AvailablePeriods).ToListAsync();
-            var tableRequests = tables.ConvertAll(x => new TableRequest { Id = x.Id, SeatNumber = x.SeatNumber, Description = x.Description, Restaurant = x.Restaurant.Id, AvailablePeriods = x.AvailablePeriods.ConvertAll(period => period.Id) });
-            return tableRequests;
+            var tables = await _context.Table.Include(table => table.Restaurant).Where(table=>
+            (table.Id==tableQuery.Id || tableQuery.Id == null) &&
+            (table.SeatNumber == tableQuery.SeatNumber || tableQuery.SeatNumber == null) &&
+            (table.Description == tableQuery.Description || tableQuery.Description == null) &&
+            (table.Restaurant.Id == tableQuery.Restaurant || tableQuery.Restaurant == null)
+            ).ToListAsync();
+            return tables;
         }
-        public async Task<TableRequest> GetAsync(string id)
+        public async Task<Table> GetAsync(string id)
         {
             if (await IfExist(id))
             {
-                var table = await _context.Table.Include(table => table.Restaurant).Include(table => table.AvailablePeriods).FirstOrDefaultAsync(table => table.Id == id);
-                var tableRequest = new TableRequest { Id = table.Id, SeatNumber = table.SeatNumber, Description = table.Description, Restaurant = table.Restaurant.Id, AvailablePeriods = table.AvailablePeriods.ConvertAll(period => period.Id) };
-                return tableRequest;
+                var table = await _context.Table.FirstOrDefaultAsync(table => table.Id == id);
+                return table;
             }
             else
             {
                 return null;
             }
         }
-        public async Task<TableRequest> UpdateAsync(TableRequest tableRequest)
+        public async Task<Table> UpdateAsync(Table table)
         {
-            if (await IfExist(tableRequest.Id) && await IfDiningPeriodsExist(tableRequest.AvailablePeriods))
+            if (await IfExist(table.Id))
             {
-                var contextTable = await _context.Table.Include(table => table.AvailablePeriods).FirstOrDefaultAsync(table => table.Id==tableRequest.Id);
+                var contextTable = await _context.Table.FirstOrDefaultAsync(table => table.Id== table.Id);
 
-                contextTable.SeatNumber = tableRequest.SeatNumber;
-                contextTable.Description = tableRequest.Description;
-                contextTable.AvailablePeriods = tableRequest.AvailablePeriods.Select(diningPeriodId => _context.DiningPeriod.FirstOrDefault(period => period.Id == diningPeriodId)).ToList();
+                contextTable.SeatNumber = table.SeatNumber;
+                contextTable.Description = table.Description;
 
                 await _context.SaveChangesAsync();
-                return tableRequest;
+                return contextTable;
             }
             else
             {
                 return null;
             }
         }
-        public async Task<TableRequest> CreateAsync(TableRequest tableRequest)
+        public async Task<Table> CreateAsync(Table table)
         {
-            var restaurant = await _context.Restaurant.FirstOrDefaultAsync(restaurant => restaurant.Id == tableRequest.Restaurant);
+            var restaurant = await _context.Restaurant.FirstOrDefaultAsync(restaurant => restaurant.Id == table.Restaurant.Id);
 
-            if (restaurant == null || !await IfDiningPeriodsExist(tableRequest.AvailablePeriods))
+            if (restaurant == null)
             {
                 return null;
             }
-
-            var table = new Table
-            {
-                Id = new Random().Next(1, 1000).ToString(), //Replace by real id generator
-                SeatNumber = tableRequest.SeatNumber,
-                Description = tableRequest.Description,
-                Restaurant = restaurant,
-                AvailablePeriods = tableRequest.AvailablePeriods.Select(diningPeriodId => _context.DiningPeriod.FirstOrDefault(period => period.Id == diningPeriodId)).ToList()
-            };
 
             await _context.Table.AddAsync(table);
             await _context.SaveChangesAsync();
-            tableRequest.Id = table.Id;
-            return tableRequest;
+            return table;
         }
 
-        public async Task<TableRequest> DeleteAsync(string id)
+        public async Task<Table> DeleteAsync(string id)
         {
             if (await IfExist(id))
             {
-                var tableRequest = await GetAsync(id);
-                var table = await _context.Table.FirstOrDefaultAsync(table => table.Id == id);
+                var table = await _context.Table.Include(table => table.Restaurant).FirstOrDefaultAsync(table => table.Id == id);
+
                 _context.Table.Remove(table);
                 await _context.SaveChangesAsync();
-                return tableRequest;
+                return table;
             }
             else
             {
                 return null;
             }
         }
-        private async Task<bool> IfExist(string id)
+
+        public async Task<bool> IfExist(string id)
         {
             return await _context.Table.AnyAsync(table => table.Id == id);
         }
@@ -108,6 +103,24 @@ namespace RestaurantSystem.Models.Repositories
                 }
             }
             return true;
+        }
+
+        public async Task<Table> ConvertAlterTableRequest(TableRequest request)
+        {
+            var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
+            if (restaurant == null)
+            {
+                return null;
+            }
+
+            var table = new Table()
+            {
+                Id = new Random().Next(1, 1000).ToString(),
+                SeatNumber = request.SeatNumber,
+                Description = request.Description,
+                Restaurant = restaurant
+            };
+            return table;
         }
     }
 }
