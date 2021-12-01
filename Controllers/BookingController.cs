@@ -31,9 +31,9 @@ namespace RestaurantSystem.Controllers
         // GET: api/Booking
         [HttpGet]
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetBooking()
+        public async Task<ActionResult<IEnumerable<Booking>>> GetBooking([FromQuery] BookingRequest bookingQuery)
         {
-            var bookings = await _bookingRepository.GetAllAsync();
+            var bookings = await _bookingRepository.GetAllAsync(bookingQuery);
             return Ok(bookings);
         }
 
@@ -55,7 +55,7 @@ namespace RestaurantSystem.Controllers
         // PUT: api/Booking/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> PutBooking(string id, BookingRequest bookingRequest)
         {
             var oldBooking = await _bookingRepository.GetAsync(id);
@@ -117,7 +117,7 @@ namespace RestaurantSystem.Controllers
         // POST: api/Booking
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
+        [Authorize(Roles = "Customer")]
         public async Task<ActionResult<BookingRequest>> PostBooking(BookingRequest bookingRequest)
         {
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;

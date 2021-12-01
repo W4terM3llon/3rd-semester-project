@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,13 +29,13 @@ namespace RestaurantSystem.Controllers
         }
 
         // GET: api/Users
-        [HttpGet]
-        [Authorize(Roles = "RestaurantManager")]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsersAsync()
-        {
-            var users = await this.userRepository.GetAllAsync();
-            return Ok(users);
-        }
+        //[HttpGet]
+        //[Authorize(Roles = "RestaurantManager")]
+        //public async Task<ActionResult<IEnumerable>> GetUsersAsync()
+        //{
+        //    var users = await this.userRepository.GetAllAsync();
+        //    return Ok(users);
+        //}
 
         // GET: api/Users/5
         [HttpGet("{id}")]

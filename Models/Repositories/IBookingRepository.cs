@@ -8,7 +8,7 @@ namespace RestaurantSystem.Models.Repositories
 {
     interface IBookingRepository
     {
-        public Task<IEnumerable<Booking>> GetAllAsync();
+        public Task<IEnumerable<Booking>> GetAllAsync(BookingRequest bookingQuery);
         public Task<Booking> GetAsync(string id);
         public Task<Booking> CreateAsync(Booking bookingRequest);
         public Task<Booking> UpdateAsync(Booking bookingRequest);

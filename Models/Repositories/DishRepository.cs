@@ -25,6 +25,7 @@ namespace RestaurantSystem.Models.Repositories
                 (dish.Price == dishQuery.Price || dishQuery.Price == 0) &&
                 (dish.Description == dishQuery.Description || dishQuery.Description == null) &&
                 (dish.DishCategory.Id == dishQuery.DishCategory || dishQuery.DishCategory == null) &&
+                (dish.Restaurant.Id == dishQuery.Restaurant || dishQuery.Restaurant == null) &&
                 (dish.Restaurant.Id == dishQuery.Restaurant || dishQuery.Restaurant == null)
                 ).ToListAsync();
             return dishCreated;

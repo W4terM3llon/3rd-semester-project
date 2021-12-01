@@ -18,9 +18,16 @@ namespace RestaurantSystem.Models.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Booking>> GetAllAsync()
+        public async Task<IEnumerable<Booking>> GetAllAsync(BookingRequest bookingQuery)
         {
-            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).Include(booking => booking.Table).ToListAsync();
+            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).Include(booking => booking.Table).Where(booking =>
+
+            (booking.Id == bookingQuery.Id || bookingQuery.Id == null) &&
+            ((booking.Date.Year == bookingQuery.Date.Year && booking.Date.Month == booking.Date.Month && booking.Date.Day == booking.Date.Day) || bookingQuery.Date == DateTime.MinValue) &&
+            (booking.Table.Id == bookingQuery.Table || bookingQuery.Table == null) &&
+            (booking.DiningPeriod.Id == bookingQuery.DiningPeriod || bookingQuery.Restaurant == null) &&
+            (booking.User.SystemId == bookingQuery.User || bookingQuery.User == null)
+            ).ToListAsync();
 
         }
 
