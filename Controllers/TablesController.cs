@@ -47,13 +47,12 @@ namespace RestaurantSystem.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<Table>> GetTableAsync(string id)
         {
-            var restaurant = await _tableRepository.GetAsync(id);
-
-            if (restaurant == null)
+            if (!await _tableRepository.IfExist(id))
             {
-                return NotFound();
+                return NotFound(new { Error = "Table with given id not found" });
             }
 
+            var restaurant = await _tableRepository.GetAsync(id);
             return Ok(restaurant);
         }
 
@@ -63,29 +62,27 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager")]
         public async Task<IActionResult> PutTableAsync(string id, TableRequest tableRequest)
         {
+            if (await _tableRepository.IfExist(id))
+            {
+                return NotFound(new { Error = "Table with given id not found" });
+            }
+
             var oldTable = await _tableRepository.GetAsync(id);
             if (id != tableRequest.Id || tableRequest.Restaurant != oldTable.Restaurant.Id)
             {
                 return BadRequest(new { Error = "Id and restaurant can not be changed" });
             }
 
+            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            if (!await _permissionValidation.isManagerTableOwnerAsync(id, currentUserEmail))
+            {
+                return Unauthorized(new { Error = "This table does not belong to your restaurant" });
+            }
+
             var table = await _tableRepository.ConvertAlterTableRequest(tableRequest);
             if (table == null)
             {
                 return NotFound(new { Error = "One of table dependencies not found" });
-            }
-
-            if (await _tableRepository.IfExist(id))
-            {
-                var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-                if (!await _permissionValidation.isManagerTableOwnerAsync(id, currentUserEmail))
-                {
-                    return Unauthorized(new { Error = "This table does not belong to your restaurant" });
-                }
-            }
-            else
-            {
-                return NotFound(new { Error = "Table with given id not found" });
             }
 
             var updated = await _tableRepository.UpdateAsync(table);

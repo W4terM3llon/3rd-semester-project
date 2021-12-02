@@ -27,8 +27,8 @@ namespace Restaurant_system_new.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable>> GetDish([FromQuery] string restaurant, [FromQuery] DateTime date)
         {
-            if (restaurant == null || date == null) {
-                return BadRequest();
+            if (restaurant == null || date == DateTime.MinValue) {
+                return BadRequest(new { Error = "Restaurant and date are required" });
             }
 
             var dishes = await _tableFreePeriodsRepository.GetAllAsync(restaurant, date);

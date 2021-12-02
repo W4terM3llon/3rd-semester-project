@@ -113,7 +113,7 @@ namespace RestaurantSystem.Models.Repositories
             var manager = await _context.User.FirstOrDefaultAsync(manager => manager.Email == currentUserEmail);
             var restaurant = new Restaurant()
             {
-                Id = new Random().Next(1, 1000).ToString(),
+                Id = request.Id,
                 Name = request.Name,
                 IsTableBookingEnabled = request.IsTableBookingEnabled,
                 IsDeliveryAvailable = request.IsDeliveryAvailable,

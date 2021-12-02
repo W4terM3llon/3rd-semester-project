@@ -11,6 +11,11 @@ using RestaurantSystem.Models.Repositories;
 
 namespace RestaurantSystem.Controllers
 {
+
+    //there is no validation
+    //neither tested not reviewed
+
+    /*
     [Route("api/[controller]")]
     [ApiController]
     public class DiscountsController : ControllerBase
@@ -91,5 +96,5 @@ namespace RestaurantSystem.Controllers
 
             return NoContent();
         }
-    }
+}*/
 }

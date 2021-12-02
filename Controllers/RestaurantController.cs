@@ -33,7 +33,6 @@ namespace RestaurantSystem.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Restaurant>>> GetRestaurantsAsync()
         {
-            //var queryParams = HttpContext.Request.Query.ToDictionary(query => query.Key.ToString(), query => query.Value.ToString());
             var restaurants = await _restaurantRepository.GetAllAsync();
             return Ok(restaurants);
         }
@@ -43,13 +42,12 @@ namespace RestaurantSystem.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<Restaurant>> GetRestaurantAsync(string id)
         {
-            var restaurant = await _restaurantRepository.GetAsync(id);
-
-            if (restaurant == null)
+            if (!await _restaurantRepository.IfExist(id))
             {
-                return NotFound();
+                return NotFound(new { Error = "Restaurant with given id not found" });
             }
 
+            var restaurant = await _restaurantRepository.GetAsync(id);
             return Ok(restaurant);
         }
 
@@ -59,34 +57,26 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager")]
         public async Task<ActionResult> PutRestaurantAsync(string id, RestaurantRequest request)
         {
-            if (id != request.Id)
-            {
-                return BadRequest();
-            }
-
-
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             if (await _restaurantRepository.IfExist(id))
             {
-                if (!await _permissionValidation.isManagerRestaurantOwnerAsync(id, currentUserEmail))
-                {
-                    return Unauthorized();
-                }
-            }
-            else
-            { 
-                return NotFound(); 
+                return NotFound(new { Error = "Restaurant with given id not found" });
             }
 
+            if (id != request.Id)
+            {
+                return BadRequest(new { Error = "Id can not be changed" });
+            }
+
+            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(id, currentUserEmail))
+            {
+                return Unauthorized(new { Error = "This restaurant is not managed by your account" });
+            }
+            
             var restaurant = await _restaurantRepository.ConvertAlterRestaurantRequest(request, currentUserEmail);
             var returnedRestaurant = await _restaurantRepository.UpdateAsync(restaurant);
 
-            if (returnedRestaurant == null)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
+            return Ok(returnedRestaurant);
         }
 
         // POST: api/Restaurants
@@ -99,14 +89,12 @@ namespace RestaurantSystem.Controllers
             var restaurant = await _restaurantRepository.ConvertAlterRestaurantRequest(request, currentUserEmail);
             var created = await _restaurantRepository.CreateAsync(restaurant, request.EveryDayUseAccountEmail);
 
-            if (created != null)
+            if (created == null)
             {
-                return CreatedAtAction("GetRestaurant", new { id = created.Id }, created);
+                return BadRequest(new { Error = "Could not create restaurant, email for every day use account may already exist or is incorrect" });
             }
-            else 
-            {
-                return BadRequest();
-            }
+
+            return CreatedAtAction("GetRestaurant", new { id = created.Id }, created);
         }
 
         // DELETE: api/Restaurants/5
@@ -119,20 +107,15 @@ namespace RestaurantSystem.Controllers
                 var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
                 if (!await _permissionValidation.isManagerRestaurantOwnerAsync(id, currentUserEmail))
                 {
-                    return Unauthorized();
+                    return Unauthorized(new { Error = "This restaurant is not managed by your account" });
                 }
             }
             else
             {
-                return NotFound();
+                return NotFound(new { Error = "Restaurant with given id not found" });
             }
 
             var returnedRestaurant = await _restaurantRepository.DeleteAsync(id);
-
-            if (returnedRestaurant == null)
-            {
-                return NotFound();
-            }
 
             return NoContent();
         }

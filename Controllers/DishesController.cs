@@ -31,9 +31,14 @@ namespace RestaurantSystem.Controllers
         // GET: api/Dishes
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<Dish>>> GetDish([FromQuery] DishRequest dishQuery)
+        public async Task<ActionResult<IEnumerable<Dish>>> GetDish([FromQuery] string restaurantId, string id)
         {
-            var dishes = await _dishRepository.GetAllAsync(dishQuery);
+            if (restaurantId == null)
+            {
+                return BadRequest(new { Error = "Restaurant id required" });
+            }
+
+            var dishes = await _dishRepository.GetAllAsync(restaurantId);
             return Ok(dishes);
         }
 
@@ -42,12 +47,12 @@ namespace RestaurantSystem.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<Dish>> GetDish(string id)
         {
-            var dish = await _dishRepository.GetAsync(id);
-
-            if (dish == null)
+            if (!await _dishRepository.IfExist(id))
             {
-                return NotFound();
+                return NotFound(new { Error = "Dish with given id not found" });
             }
+
+            var dish = await _dishRepository.GetAsync(id);
 
             return Ok(dish);
         }
@@ -58,67 +63,55 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager")]
         public async Task<IActionResult> PutDish(string id, DishRequest dishRequest)
         {
+            if (!await _dishRepository.IfExist(id))
+            {
+                return NotFound(new { Error = "Dish with given id not found" });
+            }
+
             var oldDish = await _dishRepository.GetAsync(id);
-            if (id != dishRequest.Id || oldDish.Restaurant.Id==dishRequest.Restaurant)
+            if (id != dishRequest.Id || oldDish.Restaurant.Id != dishRequest.Restaurant)
             {
-                return BadRequest();
+                return BadRequest(new { Error = "Id and restaurant can not be changed" });
             }
 
-            var booking = await _dishRepository.ConvertAlterDishRequest(dishRequest);
-            if (booking == null)
+            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            if (!await _permissionValidation.isManagerDishOwnerAsync(id, currentUserEmail))
             {
-                return BadRequest();
+                return Unauthorized(new { Error = "This dish does not belong to your restaurant" });
             }
-
-            if (await _dishRepository.IfExist(id))
-            {
-                var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-                if (!await _permissionValidation.isManagerDishOwnerAsync(id, currentUserEmail))
-                {
-                    return Unauthorized();
-                }
-            }
-            else
-            {
-                return NotFound();
-            }
-
-            var dish = await _dishRepository.UpdateAsync(booking);
-
+            
+            var dish = await _dishRepository.ConvertAlterDishRequest(dishRequest);
             if (dish == null)
             {
-                return BadRequest();
+                return NotFound(new { Error = "One of dish dependencies not found" });
             }
 
-            return NoContent();
+            var updatedDish = await _dishRepository.UpdateAsync(dish);
+
+            return Ok(updatedDish);
         }
 
         // POST: api/Dishes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "RestaurantManager")]
-        public async Task<ActionResult<DishRequest>> PostDish(DishRequest dishRequest)
+        public async Task<IActionResult> PostDish(DishRequest dishRequest)
         {
             var booking = await _dishRepository.ConvertAlterDishRequest(dishRequest);
             if (booking == null)
             {
-                return NotFound();
+                return NotFound(new { Error = "One of dish dependencies not found" });
             }
 
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             if (!await _permissionValidation.isManagerRestaurantOwnerAsync(dishRequest.Restaurant, currentUserEmail))
             {
-                return Unauthorized();
+                return Unauthorized(new { Error = "Given restaurant is not yours" });
             }
 
             var dish = await _dishRepository.CreateAsync(booking);
 
-            if (dish == null)
-            {
-                return BadRequest();
-            }
-
-            return CreatedAtAction("GetDish", new { id = dishRequest.Id }, dishRequest);
+            return CreatedAtAction("GetDish", new { id = dish.Id }, dish);
         }
 
         // DELETE: api/Dishes/5
@@ -126,25 +119,18 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager")]
         public async Task<IActionResult> DeleteDish(string id)
         {
-            if (await _dishRepository.IfExist(id))
+            if (!await _dishRepository.IfExist(id))
             {
-                var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-                if (!await _permissionValidation.isManagerDishOwnerAsync(id, currentUserEmail))
-                {
-                    return Unauthorized();
-                }
-            }
-            else
-            {
-                return NotFound();
+                return NotFound(new { Error = "Dish with given id not found" });
             }
 
+            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            if (!await _permissionValidation.isManagerDishOwnerAsync(id, currentUserEmail))
+            {
+                return Unauthorized(new { Error = "This dish does not belong to your restaurant" });
+            }
+            
             var dish = await _dishRepository.DeleteAsync(id);
-
-            if (dish == null)
-            {
-                return NotFound();
-            }
 
             return NoContent();
         }

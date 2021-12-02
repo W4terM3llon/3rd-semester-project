@@ -17,16 +17,10 @@ namespace RestaurantSystem.Models.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Dish>> GetAllAsync(DishRequest dishQuery)
+        public async Task<IEnumerable<Dish>> GetAllAsync(string restaurantId)
         {
-            var dishCreated = await _context.Dish.Include(dish => dish.DishCategory).Where(dish =>
-                (dish.Id == dishQuery.Id|| dishQuery.Id == null) &&
-                (dish.Name == dishQuery.Name || dishQuery.Name == null) &&
-                (dish.Price == dishQuery.Price || dishQuery.Price == 0) &&
-                (dish.Description == dishQuery.Description || dishQuery.Description == null) &&
-                (dish.DishCategory.Id == dishQuery.DishCategory || dishQuery.DishCategory == null) &&
-                (dish.Restaurant.Id == dishQuery.Restaurant || dishQuery.Restaurant == null) &&
-                (dish.Restaurant.Id == dishQuery.Restaurant || dishQuery.Restaurant == null)
+            var dishCreated = await _context.Dish.Include(dish => dish.DishCategory).Include(dish => dish.Restaurant).Where(dish =>
+                (dish.Restaurant.Id == restaurantId || restaurantId == null)
                 ).ToListAsync();
             return dishCreated;
         }
@@ -35,7 +29,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                var dish = await _context.Dish.Include(dish => dish.DishCategory).FirstOrDefaultAsync(dish => dish.Id == id);
+                var dish = await _context.Dish.Include(dish => dish.DishCategory).Include(dish => dish.Restaurant).FirstOrDefaultAsync(dish => dish.Id == id);
                 return dish;
             }
             else
@@ -81,6 +75,7 @@ namespace RestaurantSystem.Models.Repositories
                 return null;
             }
 
+            dish.Id = new Random().Next(1, 1000).ToString();
             await _context.Dish.AddAsync(dish);
             await _context.SaveChangesAsync();
 
@@ -105,7 +100,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<bool> IfExist(string id)
         {
-            return await _context.Table.AnyAsync(table => table.Id == id);
+            return await _context.Dish.AnyAsync(table => table.Id == id);
         }
 
         public async Task<Dish> ConvertAlterDishRequest(DishRequest request)
@@ -120,7 +115,7 @@ namespace RestaurantSystem.Models.Repositories
 
             var dish = new Dish()
             {
-                Id = new Random().Next(1, 1000).ToString(),
+                Id = request.Id,
                 Name = request.Name,
                 Price = request.Price,
                 Description = request.Description,

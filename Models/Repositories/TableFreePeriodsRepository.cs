@@ -20,11 +20,6 @@ namespace Restaurant_system_new.Models.Repositories
 
         public async Task<IEnumerable> GetAllAsync(string restaurant, DateTime date)
         {
-            if (!await _context.Restaurant.AnyAsync(rest => rest.Id == restaurant))
-            {
-                return null;
-            }
-
             var bookings = await _context.Booking.Include(booking => booking.Restaurant).Include(booking => booking.Table).Where(booking =>
                 (booking.Restaurant.Id == restaurant) && 
                 (booking.Date.Year == date.Year && booking.Date.Month == date.Month && booking.Date.Day == date.Day)

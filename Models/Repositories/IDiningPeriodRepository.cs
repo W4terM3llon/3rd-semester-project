@@ -8,11 +8,13 @@ namespace RestaurantSystem.Models.Repositories
 {
     interface IDiningPeriodRepository
     {
-        public Task<IEnumerable<DiningPeriod>> GetAllAsync();
+        public Task<IEnumerable<DiningPeriod>> GetAllAsync(string restaurantId);
         public Task<DiningPeriod> GetAsync(string id);
         public Task<DiningPeriod> CreateAsync(DiningPeriod diningPeriodRequest);
         public Task<DiningPeriod> UpdateAsync(DiningPeriod diningPeriodRequest);
         public Task<DiningPeriod> DeleteAsync(string id);
         public Task<bool> IfExist(string id);
+        public Task<bool> IfPeriodsOverlap(DiningPeriod diningPeriod);
+        public bool IfDiningTimeCorrent(DiningPeriod diningPeriod);
     }
 }

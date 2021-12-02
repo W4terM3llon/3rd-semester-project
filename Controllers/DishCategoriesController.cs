@@ -46,7 +46,7 @@ namespace RestaurantSystem.Controllers
 
             if (dishCategory == null)
             {
-                return NotFound();
+                return NotFound(new { Error = "Dish with given id not found" });
             }
 
             return Ok(dishCategory);

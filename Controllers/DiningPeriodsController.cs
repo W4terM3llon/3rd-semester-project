@@ -31,9 +31,14 @@ namespace RestaurantSystem.Controllers
         // GET: api/DiningPeriods
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<DiningPeriod>>> GetDiningPeriod()
+        public async Task<ActionResult<IEnumerable<DiningPeriod>>> GetDiningPeriod([FromQuery] string restaurantId, string id)
         {
-            var diningPeriods= await _diningPeriodRepository.GetAllAsync();
+            if (restaurantId == null)
+            {
+                return BadRequest(new { Error = "Restaurant id required" });
+            }
+
+            var diningPeriods= await _diningPeriodRepository.GetAllAsync(restaurantId);
             return Ok(diningPeriods);
         }
 
@@ -43,13 +48,12 @@ namespace RestaurantSystem.Controllers
         public async Task<ActionResult<DiningPeriod>> GetDiningPeriod(string id)
         {
 
-            var diningPeriod = await _diningPeriodRepository.GetAsync(id);
-
-            if (diningPeriod == null)
+            if (!await _diningPeriodRepository.IfExist(id))
             {
-                return NotFound();
+                return NotFound(new { Error = "Dining period with given id not found" });
             }
 
+            var diningPeriod = await _diningPeriodRepository.GetAsync(id);
             return Ok(diningPeriod);
         }
 
@@ -59,39 +63,42 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager")]
         public async Task<IActionResult> PutDiningPeriod(string id, DiningPeriodRequest diningPeriodRequest)
         {
+            if (await _diningPeriodRepository.IfExist(id))
+            {
+                return NotFound(new { Error = "Dining period with given id not found" });
+            }
+
             var oldDiningPeriod = await _diningPeriodRepository.GetAsync(id);
             if (id != diningPeriodRequest.Id || diningPeriodRequest.Restaurant != oldDiningPeriod.Restaurant.Id)
             {
-                return BadRequest();
+                return BadRequest(new { Error = "Id and restaurant can not be changed" });
             }
 
-            if (await _diningPeriodRepository.IfExist(id))
+            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            if (!await _permissionValidation.isManagerDiningPeriodOwnerAsync(id, currentUserEmail))
             {
-                var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-                if (!await _permissionValidation.isManagerDiningPeriodOwnerAsync(id, currentUserEmail))
-                {
-                    return Unauthorized();
-                }
-            }
-            else 
-            {
-                return NotFound();
+                return Unauthorized(new { Error = "This dining period does not belong to your restaurant" });
             }
 
             var diningPeriod = await _diningPeriodRepository.ConvertAlterDiningPeriodRequest(diningPeriodRequest);
             if (diningPeriod == null)
             {
-                return BadRequest();
+                return NotFound(new { Error = "One of dining period dependencies not found" });
+            }
+
+            if (!_diningPeriodRepository.IfDiningTimeCorrent(diningPeriod))
+            {
+                return BadRequest(new { Error = "Incorrect time data" });
+            }
+
+            if (await _diningPeriodRepository.IfPeriodsOverlap(diningPeriod))
+            {
+                return Conflict(new { Error = "Dining period collides with other already existing dining periods" });
             }
 
             var updatedDiningPeriod = await _diningPeriodRepository.UpdateAsync(diningPeriod);
 
-            if (updatedDiningPeriod == null)
-            {
-                return BadRequest();
-            }
-
-            return NoContent();
+            return Ok(updatedDiningPeriod);
         }
 
         // POST: api/DiningPeriods
@@ -103,20 +110,26 @@ namespace RestaurantSystem.Controllers
             var diningPeriod = await _diningPeriodRepository.ConvertAlterDiningPeriodRequest(request);
             if (diningPeriod == null)
             {
-                return BadRequest();
+                return NotFound(new { Error = "One of dining period dependencies not found" });
             }
 
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             if (!await _permissionValidation.isManagerRestaurantOwnerAsync(request.Restaurant, currentUserEmail))
             {
-                return Unauthorized();
+                return Unauthorized(new { Error = "Restaurant with given Id is not yours" });
+            }
+
+            if (!_diningPeriodRepository.IfDiningTimeCorrent(diningPeriod))
+            {
+                return BadRequest(new { Error = "Incorrect time data" });
+            }
+
+            if (await _diningPeriodRepository.IfPeriodsOverlap(diningPeriod))
+            {
+                return Conflict(new { Error = "Dining period collides with other already existing dining periods" });
             }
 
             var createdDiningPeriod = await _diningPeriodRepository.CreateAsync(diningPeriod);
-            if (createdDiningPeriod == null)
-            {
-                return BadRequest();
-            }
 
             return CreatedAtAction("GetDiningPeriod", new { id = diningPeriod.Id }, diningPeriod);
         }
@@ -131,21 +144,15 @@ namespace RestaurantSystem.Controllers
                 var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
                 if (!await _permissionValidation.isManagerDiningPeriodOwnerAsync(id, currentUserEmail))
                 {
-                    return Unauthorized();
+                    return Unauthorized(new { Error = "This dining period does not belong to your restaurant" });
                 }
             }
             else
             {
-                return NotFound();
+                return NotFound(new { Error = "Dining period with given id not found" });
             }
 
             var returnedRestaurant = await _diningPeriodRepository.DeleteAsync(id);
-
-            if (returnedRestaurant == null)
-            {
-                return NotFound();
-            }
-
             return NoContent();
         }
     }

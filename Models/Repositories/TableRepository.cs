@@ -65,6 +65,7 @@ namespace RestaurantSystem.Models.Repositories
                 return null;
             }
 
+            table.Id = new Random().Next(1, 1000).ToString();
             await _context.Table.AddAsync(table);
             await _context.SaveChangesAsync();
             return table;
@@ -112,7 +113,7 @@ namespace RestaurantSystem.Models.Repositories
 
             var table = new Table()
             {
-                Id = new Random().Next(1, 1000).ToString(),
+                Id = request.Id,
                 SeatNumber = request.SeatNumber,
                 Description = request.Description,
                 Restaurant = restaurant

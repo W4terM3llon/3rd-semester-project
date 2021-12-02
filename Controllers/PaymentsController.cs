@@ -11,6 +11,11 @@ using RestaurantSystem.Models.Repositories;
 
 namespace RestaurantSystem.Controllers
 {
+    //there is no validation
+    //payment should be created at the same time when order is created and only its state and data should be changed
+    //delete, post and probably get as a list methods does not make sense
+
+    /*
     [Route("api/[controller]")]
     [ApiController]
     public class PaymentsController : ControllerBase
@@ -92,4 +97,5 @@ namespace RestaurantSystem.Controllers
             return NoContent();
         }
     }
+    */
 }

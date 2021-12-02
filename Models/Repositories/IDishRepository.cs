@@ -8,7 +8,7 @@ namespace RestaurantSystem.Models.Repositories
 {
     interface IDishRepository
     {
-        public Task<IEnumerable<Dish>> GetAllAsync(DishRequest dishQuery);
+        public Task<IEnumerable<Dish>> GetAllAsync(string restaurantId);
         public Task<Dish> GetAsync(string id);
         public Task<Dish> CreateAsync(Dish dish);
         public Task<Dish> UpdateAsync(Dish dish);
