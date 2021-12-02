@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Restaurant system new", "Restaurant system new.csproj", "{1302EC49-7416-44FD-B754-1F2ADB2C2A74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Restaurant system new", "Restaurant system new.csproj", "{1302EC49-7416-44FD-B754-1F2ADB2C2A74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestaurantSystemTests", "..\RestaurantSystemTests\RestaurantSystemTests.csproj", "{CFF3B07E-714D-4016-BFBC-6FE0C2FC80E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{1302EC49-7416-44FD-B754-1F2ADB2C2A74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1302EC49-7416-44FD-B754-1F2ADB2C2A74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1302EC49-7416-44FD-B754-1F2ADB2C2A74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFF3B07E-714D-4016-BFBC-6FE0C2FC80E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFF3B07E-714D-4016-BFBC-6FE0C2FC80E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFF3B07E-714D-4016-BFBC-6FE0C2FC80E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFF3B07E-714D-4016-BFBC-6FE0C2FC80E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

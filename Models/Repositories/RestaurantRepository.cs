@@ -60,8 +60,11 @@ namespace RestaurantSystem.Models.Repositories
             restaurant.Address.Id = new Random().Next(1, 1000).ToString(); //Replace by real id generator
 
             //create EveryDayUseAccount
-            var everyDayUseAccount = new RestaurantEveryDayUseAccount()
+            var everyDayUseAccount = new User()
             {
+                FirstName= "Helper",
+                LastName = "Account",
+                Address = null,
                 Email = everyDayUseAccountEmail,
                 UserName = everyDayUseAccountEmail,
                 SystemId = new Random().Next(1, 1000).ToString(),
@@ -90,7 +93,7 @@ namespace RestaurantSystem.Models.Repositories
                 var everyDayUseAccount = restaurant.EveryDayUseAccount;
                 _context.Restaurant.Remove(restaurant);
                 _context.Address.Remove(address);
-                _context.RestaurantEveryDayUseAccount.Remove(everyDayUseAccount);
+                _context.User.Remove(everyDayUseAccount);
                 await _context.SaveChangesAsync();
                 return restaurant;
             }
@@ -107,7 +110,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Restaurant> ConvertAlterRestaurantRequest(RestaurantRequest request, string currentUserEmail)
         {
-            var manager = await _context.RestaurantManager.FirstOrDefaultAsync(manager => manager.Email == currentUserEmail);
+            var manager = await _context.User.FirstOrDefaultAsync(manager => manager.Email == currentUserEmail);
             var restaurant = new Restaurant()
             {
                 Id = new Random().Next(1, 1000).ToString(),

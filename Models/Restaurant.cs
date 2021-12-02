@@ -28,9 +28,9 @@ namespace RestaurantSystem.Models
         [JsonIgnore]
         public List<Booking> Bookings { get; set; }
         [JsonIgnore]
-        public RestaurantManager Manager { get; set; }
+        public User Manager { get; set; }
         [JsonIgnore]
         [ForeignKey("RestaurantEveryDayUseAccount")]
-        public RestaurantEveryDayUseAccount EveryDayUseAccount { get; set; }
+        public User EveryDayUseAccount { get; set; }
 }
 }

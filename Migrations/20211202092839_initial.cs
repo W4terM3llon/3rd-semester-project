@@ -38,33 +38,6 @@ namespace Restaurant_system_new.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUsers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SystemId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Discount",
                 columns: table => new
                 {
@@ -126,6 +99,42 @@ namespace Restaurant_system_new.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Payment", x => x.DbId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SystemId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AddressDbId = table.Column<int>(type: "int", nullable: true),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_Address_AddressDbId",
+                        column: x => x.AddressDbId,
+                        principalTable: "Address",
+                        principalColumn: "DbId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -235,68 +244,6 @@ namespace Restaurant_system_new.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Customer",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AccountingAddressDbId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Customer", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Customer_Address_AccountingAddressDbId",
-                        column: x => x.AccountingAddressDbId,
-                        principalTable: "Address",
-                        principalColumn: "DbId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Customer_AspNetUsers_Id",
-                        column: x => x.Id,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RestaurantEveryDayUseAccount",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RestaurantEveryDayUseAccount", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RestaurantEveryDayUseAccount_AspNetUsers_Id",
-                        column: x => x.Id,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RestaurantManager",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RestaurantManager", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RestaurantManager_AspNetUsers_Id",
-                        column: x => x.Id,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Restaurant",
                 columns: table => new
                 {
@@ -320,15 +267,15 @@ namespace Restaurant_system_new.Migrations
                         principalColumn: "DbId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Restaurant_RestaurantEveryDayUseAccount_RestaurantEveryDayUseAccount",
-                        column: x => x.RestaurantEveryDayUseAccount,
-                        principalTable: "RestaurantEveryDayUseAccount",
+                        name: "FK_Restaurant_AspNetUsers_ManagerId",
+                        column: x => x.ManagerId,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Restaurant_RestaurantManager_ManagerId",
-                        column: x => x.ManagerId,
-                        principalTable: "RestaurantManager",
+                        name: "FK_Restaurant_AspNetUsers_RestaurantEveryDayUseAccount",
+                        column: x => x.RestaurantEveryDayUseAccount,
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -404,9 +351,9 @@ namespace Restaurant_system_new.Migrations
                 {
                     table.PrimaryKey("PK_Order", x => x.DbId);
                     table.ForeignKey(
-                        name: "FK_Order_Customer_CustomerId",
+                        name: "FK_Order_AspNetUsers_CustomerId",
                         column: x => x.CustomerId,
-                        principalTable: "Customer",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -496,8 +443,7 @@ namespace Restaurant_system_new.Migrations
                     TableDbId = table.Column<int>(type: "int", nullable: true),
                     DiningPeriodDbId = table.Column<int>(type: "int", nullable: true),
                     UserId = table.Column<int>(type: "int", nullable: true),
-                    RestaurantDbId = table.Column<int>(type: "int", nullable: true),
-                    CustomerId = table.Column<int>(type: "int", nullable: true)
+                    RestaurantDbId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -506,12 +452,6 @@ namespace Restaurant_system_new.Migrations
                         name: "FK_Booking_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Booking_Customer_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customer",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -567,16 +507,16 @@ namespace Restaurant_system_new.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_AddressDbId",
+                table: "AspNetUsers",
+                column: "AddressDbId");
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Booking_CustomerId",
-                table: "Booking",
-                column: "CustomerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Booking_DiningPeriodDbId",
@@ -597,11 +537,6 @@ namespace Restaurant_system_new.Migrations
                 name: "IX_Booking_UserId",
                 table: "Booking",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Customer_AccountingAddressDbId",
-                table: "Customer",
-                column: "AccountingAddressDbId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DiningPeriod_RestaurantDbId",
@@ -666,9 +601,7 @@ namespace Restaurant_system_new.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Restaurant_RestaurantEveryDayUseAccount",
                 table: "Restaurant",
-                column: "RestaurantEveryDayUseAccount",
-                unique: true,
-                filter: "[RestaurantEveryDayUseAccount] IS NOT NULL");
+                column: "RestaurantEveryDayUseAccount");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Table_RestaurantDbId",
@@ -718,9 +651,6 @@ namespace Restaurant_system_new.Migrations
                 name: "DishCategory");
 
             migrationBuilder.DropTable(
-                name: "Customer");
-
-            migrationBuilder.DropTable(
                 name: "Discount");
 
             migrationBuilder.DropTable(
@@ -733,16 +663,10 @@ namespace Restaurant_system_new.Migrations
                 name: "Restaurant");
 
             migrationBuilder.DropTable(
-                name: "Address");
-
-            migrationBuilder.DropTable(
-                name: "RestaurantEveryDayUseAccount");
-
-            migrationBuilder.DropTable(
-                name: "RestaurantManager");
-
-            migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Address");
         }
     }
 }

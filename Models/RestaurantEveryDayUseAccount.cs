@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace RestaurantSystem.Models
 {
-    [Table("RestaurantEveryDayUseAccount")]
-    public class RestaurantEveryDayUseAccount : User
+    public class RestaurantEveryDayUseAccounts
     {
         public Restaurant Restaurant { get; set; }
     }

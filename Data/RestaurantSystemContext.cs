@@ -13,9 +13,7 @@ namespace RestaurantSystem.Data
         public RestaurantSystemContext(DbContextOptions<RestaurantSystemContext> options) : base(options) 
         {
         }
-        public virtual DbSet<Customer> Customer { get; set; }
-        public virtual DbSet<RestaurantManager> RestaurantManager { get; set; }
-        public virtual DbSet<RestaurantEveryDayUseAccount> RestaurantEveryDayUseAccount { get; set; }
+        public virtual DbSet<User> User { get; set; }
         public virtual DbSet<Address> Address { get; set; }
         public virtual DbSet<Restaurant> Restaurant { get; set; }
         public virtual DbSet<Booking> Booking { get; set; }

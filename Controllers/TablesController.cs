@@ -31,9 +31,14 @@ namespace RestaurantSystem.Controllers
         // GET: api/Tables
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<Table>>> GetTableAsync([FromQuery] TableRequest tableQuery)
+        public async Task<ActionResult<IEnumerable<Table>>> GetTableAsync([FromQuery] string restaurantId, string id)
         {
-            var restaurants = await _tableRepository.GetAllAsync(tableQuery);
+            if (restaurantId == null)
+            {
+                return BadRequest(new { Error = "Restaurant id required" });
+            }
+
+            var restaurants = await _tableRepository.GetAllAsync(restaurantId);
             return Ok(restaurants);
         }
 
@@ -61,13 +66,13 @@ namespace RestaurantSystem.Controllers
             var oldTable = await _tableRepository.GetAsync(id);
             if (id != tableRequest.Id || tableRequest.Restaurant != oldTable.Restaurant.Id)
             {
-                return BadRequest();
+                return BadRequest(new { Error = "Id and restaurant can not be changed" });
             }
 
             var table = await _tableRepository.ConvertAlterTableRequest(tableRequest);
             if (table == null)
             {
-                return BadRequest();
+                return NotFound(new { Error = "One of table dependencies not found" });
             }
 
             if (await _tableRepository.IfExist(id))
@@ -75,22 +80,17 @@ namespace RestaurantSystem.Controllers
                 var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
                 if (!await _permissionValidation.isManagerTableOwnerAsync(id, currentUserEmail))
                 {
-                    return Unauthorized();
+                    return Unauthorized(new { Error = "This table does not belong to your restaurant" });
                 }
             }
             else
             {
-                return NotFound();
+                return NotFound(new { Error = "Table with given id not found" });
             }
 
             var updated = await _tableRepository.UpdateAsync(table);
 
-            if (updated == null)
-            {
-                return BadRequest();
-            }
-
-            return NoContent();
+            return Ok(updated);
         }
 
         
@@ -104,21 +104,16 @@ namespace RestaurantSystem.Controllers
             var table = await _tableRepository.ConvertAlterTableRequest(tableRequest);
             if (table == null)
             {
-                return NotFound();
+                return NotFound(new { Error = "One of table dependencies not found" });
             }
 
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             if (!await _permissionValidation.isManagerRestaurantOwnerAsync(tableRequest.Restaurant, currentUserEmail))
             {
-                return Unauthorized();
+                return Unauthorized(new { Error = "Restaurant with given Id is not yours" });
             }
 
             var created = await _tableRepository.CreateAsync(table);
-
-            if (created == null) 
-            {
-                return BadRequest();
-            }
 
             return CreatedAtAction("GetTable", new { id = created.Id }, created);
         }
@@ -134,20 +129,15 @@ namespace RestaurantSystem.Controllers
                 var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
                 if (!await _permissionValidation.isManagerTableOwnerAsync(id, currentUserEmail))
                 {
-                    return Unauthorized();
+                    return Unauthorized(new { Error = "This table does not belong to your restaurant" });
                 }
             }
             else
             {
-                return NotFound();
+                return NotFound(new { Error = "Table with given id not found" });
             }
 
             var deleted = await _tableRepository.DeleteAsync(id);
-
-            if (deleted == null)
-            {
-                return NotFound();
-            }
 
             return NoContent();
         }

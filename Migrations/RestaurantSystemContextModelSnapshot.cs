@@ -148,9 +148,6 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("CustomerId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
@@ -170,8 +167,6 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("DBId");
-
-                    b.HasIndex("CustomerId");
 
                     b.HasIndex("DiningPeriodDbId");
 
@@ -448,9 +443,7 @@ namespace Restaurant_system_new.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.HasIndex("RestaurantEveryDayUseAccount")
-                        .IsUnique()
-                        .HasFilter("[RestaurantEveryDayUseAccount] IS NOT NULL");
+                    b.HasIndex("RestaurantEveryDayUseAccount");
 
                     b.ToTable("Restaurant");
                 });
@@ -491,6 +484,9 @@ namespace Restaurant_system_new.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<int?>("AddressDbId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -501,6 +497,12 @@ namespace Restaurant_system_new.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -540,6 +542,8 @@ namespace Restaurant_system_new.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AddressDbId");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -578,44 +582,6 @@ namespace Restaurant_system_new.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles");
-                });
-
-            modelBuilder.Entity("RestaurantSystem.Models.Customer", b =>
-                {
-                    b.HasBaseType("RestaurantSystem.Models.User");
-
-                    b.Property<int?>("AccountingAddressDbId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasIndex("AccountingAddressDbId");
-
-                    b.ToTable("Customer");
-                });
-
-            modelBuilder.Entity("RestaurantSystem.Models.RestaurantEveryDayUseAccount", b =>
-                {
-                    b.HasBaseType("RestaurantSystem.Models.User");
-
-                    b.ToTable("RestaurantEveryDayUseAccount");
-                });
-
-            modelBuilder.Entity("RestaurantSystem.Models.RestaurantManager", b =>
-                {
-                    b.HasBaseType("RestaurantSystem.Models.User");
-
-                    b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("RestaurantManager");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -671,10 +637,6 @@ namespace Restaurant_system_new.Migrations
 
             modelBuilder.Entity("RestaurantSystem.Models.Booking", b =>
                 {
-                    b.HasOne("RestaurantSystem.Models.Customer", null)
-                        .WithMany("Bookings")
-                        .HasForeignKey("CustomerId");
-
                     b.HasOne("RestaurantSystem.Models.DiningPeriod", "DiningPeriod")
                         .WithMany()
                         .HasForeignKey("DiningPeriodDbId");
@@ -726,8 +688,8 @@ namespace Restaurant_system_new.Migrations
 
             modelBuilder.Entity("RestaurantSystem.Models.Order", b =>
                 {
-                    b.HasOne("RestaurantSystem.Models.Customer", "Customer")
-                        .WithMany("Orders")
+                    b.HasOne("RestaurantSystem.Models.User", "Customer")
+                        .WithMany()
                         .HasForeignKey("CustomerId");
 
                     b.HasOne("RestaurantSystem.Models.Discount", "Discount")
@@ -776,13 +738,13 @@ namespace Restaurant_system_new.Migrations
                         .WithMany()
                         .HasForeignKey("AddressDbId");
 
-                    b.HasOne("RestaurantSystem.Models.RestaurantManager", "Manager")
-                        .WithMany("ManagedRestaurants")
+                    b.HasOne("RestaurantSystem.Models.User", "Manager")
+                        .WithMany()
                         .HasForeignKey("ManagerId");
 
-                    b.HasOne("RestaurantSystem.Models.RestaurantEveryDayUseAccount", "EveryDayUseAccount")
-                        .WithOne("Restaurant")
-                        .HasForeignKey("RestaurantSystem.Models.Restaurant", "RestaurantEveryDayUseAccount");
+                    b.HasOne("RestaurantSystem.Models.User", "EveryDayUseAccount")
+                        .WithMany()
+                        .HasForeignKey("RestaurantEveryDayUseAccount");
 
                     b.Navigation("Address");
 
@@ -800,37 +762,13 @@ namespace Restaurant_system_new.Migrations
                     b.Navigation("Restaurant");
                 });
 
-            modelBuilder.Entity("RestaurantSystem.Models.Customer", b =>
+            modelBuilder.Entity("RestaurantSystem.Models.User", b =>
                 {
-                    b.HasOne("RestaurantSystem.Models.Address", "AccountingAddress")
+                    b.HasOne("RestaurantSystem.Models.Address", "Address")
                         .WithMany()
-                        .HasForeignKey("AccountingAddressDbId");
+                        .HasForeignKey("AddressDbId");
 
-                    b.HasOne("RestaurantSystem.Models.User", null)
-                        .WithOne()
-                        .HasForeignKey("RestaurantSystem.Models.Customer", "Id")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-
-                    b.Navigation("AccountingAddress");
-                });
-
-            modelBuilder.Entity("RestaurantSystem.Models.RestaurantEveryDayUseAccount", b =>
-                {
-                    b.HasOne("RestaurantSystem.Models.User", null)
-                        .WithOne()
-                        .HasForeignKey("RestaurantSystem.Models.RestaurantEveryDayUseAccount", "Id")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("RestaurantSystem.Models.RestaurantManager", b =>
-                {
-                    b.HasOne("RestaurantSystem.Models.User", null)
-                        .WithOne()
-                        .HasForeignKey("RestaurantSystem.Models.RestaurantManager", "Id")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
+                    b.Navigation("Address");
                 });
 
             modelBuilder.Entity("RestaurantSystem.Models.Order", b =>
@@ -847,23 +785,6 @@ namespace Restaurant_system_new.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Tables");
-                });
-
-            modelBuilder.Entity("RestaurantSystem.Models.Customer", b =>
-                {
-                    b.Navigation("Bookings");
-
-                    b.Navigation("Orders");
-                });
-
-            modelBuilder.Entity("RestaurantSystem.Models.RestaurantEveryDayUseAccount", b =>
-                {
-                    b.Navigation("Restaurant");
-                });
-
-            modelBuilder.Entity("RestaurantSystem.Models.RestaurantManager", b =>
-                {
-                    b.Navigation("ManagedRestaurants");
                 });
 #pragma warning restore 612, 618
         }

@@ -118,7 +118,7 @@ namespace RestaurantSystem.Controllers
                 return BadRequest();
             }
 
-            return CreatedAtAction("GetDishes", new { id = dishRequest.Id }, dishRequest);
+            return CreatedAtAction("GetDish", new { id = dishRequest.Id }, dishRequest);
         }
 
         // DELETE: api/Dishes/5

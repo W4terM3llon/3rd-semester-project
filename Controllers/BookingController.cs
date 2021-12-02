@@ -31,9 +31,53 @@ namespace RestaurantSystem.Controllers
         // GET: api/Booking
         [HttpGet]
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetBooking([FromQuery] BookingRequest bookingQuery)
+        public async Task<ActionResult<IEnumerable<Booking>>> GetBooking([FromQuery] string restaurantId, [FromQuery] DateTime date, [FromQuery] string userId)
         {
-            var bookings = await _bookingRepository.GetAllAsync(bookingQuery);
+            IEnumerable<Booking> bookings = new List<Booking>();
+
+            //Customer can not retrieve another customers booking
+            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
+            if (userRole == "Customer")
+            {
+                if (userId == null)
+                {
+                    return BadRequest(new { Error = "UserId required" });
+                }
+                else
+                {
+                    if (!await _permissionValidation.isUserTheSameAsync(userId, currentUserEmail))
+                    {
+                        return Unauthorized(new { Error = "Can not retrieve another costomers booking" });
+                    }
+                    else
+                    {
+                        bookings = await _bookingRepository.GetAllAsync(null, DateTime.MinValue, userId);
+                    }
+                }
+            } else if (userRole == "RestaurantManager" || userRole == "RestaurantEveryDayUse") 
+            {
+                if (restaurantId == null || date == DateTime.MinValue)
+                {
+                    return BadRequest(new { Error = "RestaurantId and date required" });
+                }
+                else {
+                    //Manager and RestaurantEveryDayUse can not retrieve another restaurants bookings
+                    if ((userRole == "RestaurantManager" && !await _permissionValidation.isManagerRestaurantOwnerAsync(restaurantId, currentUserEmail)) ||
+                        (userRole == "RestaurantEveryDayUse" && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(restaurantId, currentUserEmail)))
+                    {
+
+                        return Unauthorized(new { Error = "Can not retrieve bookings of another restaurant" });
+                    }
+                    else
+                    {
+                        bookings = await _bookingRepository.GetAllAsync(restaurantId, date, null);
+                    }
+                }
+            }
+
+            
+
             return Ok(bookings);
         }
 
@@ -43,10 +87,25 @@ namespace RestaurantSystem.Controllers
         public async Task<ActionResult<Booking>> GetBooking(string id)
         {
             var booking = await _bookingRepository.GetAsync(id);
-
             if (booking == null)
             {
                 return NotFound();
+            }
+
+            IEnumerable<Booking> bookings = new List<Booking>();
+
+            //Customer can not retrieve another customers booking
+            //Manager and RestaurantEveryDayUse can not retrieve another restaurants bookings
+            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
+            if ((userRole == "Customer" && !await _permissionValidation.isUserTheSameAsync(booking.User.SystemId, currentUserEmail)) ||
+                (userRole == "RestaurantManager" && !await _permissionValidation.isManagerRestaurantOwnerAsync(booking.Restaurant.Id, currentUserEmail)) ||
+                (userRole == "RestaurantEveryDayUse") && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(booking.Restaurant.Id, currentUserEmail))
+            {
+                return Unauthorized(new
+                {
+                    Error = "Can not retrieve booking of another user"
+                });
             }
 
             return Ok(booking);
@@ -55,99 +114,70 @@ namespace RestaurantSystem.Controllers
         // PUT: api/Booking/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "RestaurantManager, Customer")]
         public async Task<IActionResult> PutBooking(string id, BookingRequest bookingRequest)
         {
-            var oldBooking = await _bookingRepository.GetAsync(id);
-            if (id != bookingRequest.Id || bookingRequest.Restaurant != oldBooking.Restaurant.Id || bookingRequest.User != oldBooking.User.SystemId)
+            if (!await _bookingRepository.IfExist(id))
             {
-                return BadRequest();
+                return NotFound(new { Error = "Booking not found" });
+            }
+
+            var oldBooking = await _bookingRepository.GetAsync(id);
+            if (id != bookingRequest.Id || bookingRequest.Restaurant != oldBooking.Restaurant.Id || bookingRequest.User != oldBooking.User.SystemId) // not allowed to be changed
+            {
+                return BadRequest(new { Error = "Id, restaurant, User can not be changed" });
             }
 
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
 
-            if (userRole == "Customer")
+            if (!await _permissionValidation.isUserTheSameAsync(bookingRequest.User, currentUserEmail))
             {
-                bookingRequest.User = currentUserEmail;
+                return Unauthorized(new { Error = "Can not change booking of another user" });
             }
 
             var booking = await _bookingRepository.ConvertAlterBookingRequest(bookingRequest);
             if (booking == null)
             {
-                return BadRequest();
+                return NotFound(new { Error = "One of booking dependencies not found" });
             }
 
-
-            if (await _bookingRepository.IfExist(id))
+            if (!await _bookingRepository.IfTimeAvailable(booking))
             {
-                if (userRole == "Customer")
-                {
-                    if (!await _permissionValidation.isCustomerBookingOwnerAsync(id, currentUserEmail))
-                    {
-                        return Unauthorized();
-                    }
-                }
-                else if (userRole == "RestaurantManager" || userRole == "RestaurantEveryDayUse")
-                {
-                    if (!await _permissionValidation.isManagerBookingOwnerAsync(id, currentUserEmail))
-                    {
-                        return Unauthorized();
-                    }
-                }
+                return Conflict(new { Error = "Booking collides with other bookings in the system" });
             }
-            else
-            {
-                return NotFound();
-            }
-
 
             var updated = await _bookingRepository.UpdateAsync(booking);
 
-
-            if (updated == null)
-            {
-                return BadRequest();
-            }
-
-
-            return NoContent();
+            return Ok(updated);
         }
 
         // POST: api/Booking
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize(Roles = "Customer")]
+        [Authorize(Roles = "RestaurantManager, Customer")]
         public async Task<ActionResult<BookingRequest>> PostBooking(BookingRequest bookingRequest)
         {
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
 
-            if (userRole == "Customer")
+            if (!await _permissionValidation.isUserTheSameAsync(bookingRequest.User, currentUserEmail))
             {
-                bookingRequest.User = currentUserEmail;
+                return Unauthorized(new { Error = "Can make a booking for another user" });
             }
 
             var booking = await _bookingRepository.ConvertAlterBookingRequest(bookingRequest);
             if (booking == null)
             {
-                return BadRequest();
+                return NotFound(new { Error = "One of booking dependencies not found" });
             }
 
-            if (userRole == "RestaurantManager" || userRole == "RestaurantEveryDayUse")
+            if (!await _bookingRepository.IfTimeAvailable(booking))
             {
-                if (!await _permissionValidation.isManagerRestaurantOwnerAsync(bookingRequest.Restaurant, currentUserEmail))
-                {
-                    return Unauthorized();
-                }
+                return Conflict(new { Error = "Booking collides with other bookings in the system" });
             }
 
             var created = await _bookingRepository.CreateAsync(booking);
-
-            if(created == null)
-            {
-                return BadRequest();
-            }
 
             return CreatedAtAction("GetBooking", new { id = bookingRequest.Id }, bookingRequest);
         }
@@ -160,34 +190,19 @@ namespace RestaurantSystem.Controllers
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
 
-            if (await _bookingRepository.IfExist(id))
+            if (!await _bookingRepository.IfExist(id))
             {
-                if (userRole == "Customer")
-                {
-                    if (!await _permissionValidation.isCustomerBookingOwnerAsync(id, currentUserEmail))
-                    {
-                        return Unauthorized();
-                    }
-                }
-                else if (userRole == "RestaurantManager" || userRole == "RestaurantEveryDayUse")
-                {
-                    if (!await _permissionValidation.isManagerBookingOwnerAsync(id, currentUserEmail))
-                    {
-                        return Unauthorized();
-                    }
-                }
-            }
-            else
-            {
-                return NotFound();
+                return NotFound(new { Error = "Booking not found" });
             }
 
-            var booking = await _bookingRepository.DeleteAsync(id);
+            var booking = await _bookingRepository.GetAsync(id);
 
-            if (booking == null)
+            if (!await _permissionValidation.isUserTheSameAsync(booking.User.SystemId, currentUserEmail))
             {
-                return NotFound();
+                return Unauthorized(new { Error = "Can not delete another user's booking" });
             }
+
+            await _bookingRepository.DeleteAsync(id);
 
             return NoContent();
         }

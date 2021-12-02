@@ -20,13 +20,10 @@ namespace RestaurantSystem.Models.Repositories
         {
             _context = context;
         }
-        public async Task<IEnumerable<Table>> GetAllAsync(TableRequest tableQuery)
+        public async Task<IEnumerable<Table>> GetAllAsync(string restaurantId)
         {
             var tables = await _context.Table.Include(table => table.Restaurant).Where(table=>
-            (table.Id==tableQuery.Id || tableQuery.Id == null) &&
-            (table.SeatNumber == tableQuery.SeatNumber || tableQuery.SeatNumber == null) &&
-            (table.Description == tableQuery.Description || tableQuery.Description == null) &&
-            (table.Restaurant.Id == tableQuery.Restaurant || tableQuery.Restaurant == null)
+            (table.Restaurant.Id == restaurantId || restaurantId == null)
             ).ToListAsync();
             return tables;
         }
@@ -34,7 +31,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                var table = await _context.Table.FirstOrDefaultAsync(table => table.Id == id);
+                var table = await _context.Table.Include(table => table.Restaurant).FirstOrDefaultAsync(table => table.Id == id);
                 return table;
             }
             else

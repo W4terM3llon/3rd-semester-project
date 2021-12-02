@@ -31,7 +31,7 @@ namespace RestaurantSystem.Controllers
         {
             this.userManager = userManager;
             _configuration = configuration;
-            _tokenService = new TokenService(_configuration);
+            _tokenService = new TokenService(configuration);
 
         }
 
@@ -39,7 +39,7 @@ namespace RestaurantSystem.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] Login model)
         {
-            var user = await userManager.FindByNameAsync(model.Email); //Email is the username too
+            var user = await userManager.FindByEmailAsync(model.Email); //Email is the username too
             if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
             {
                 var userRoles = await userManager.GetRolesAsync(user);
@@ -66,7 +66,7 @@ namespace RestaurantSystem.Controllers
                     //refreshToken = refreshToken
                 });
             }
-            return Unauthorized();
+            return Unauthorized(new {Error="Wrong email or password" } );
         }
 
         [HttpPost]
@@ -75,7 +75,7 @@ namespace RestaurantSystem.Controllers
         {
             var userExists = await userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status400BadRequest, new { Status = "Error", Message = "User already exists!" });
+                return BadRequest(new { Status = "Error", Message = "User already exists!" });
 
             if (model.Email == "" || model.FirstName == "" || model.LastName == "" || model.AccountingAddress.Street == "" || model.AccountingAddress.Appartment == "" || model.PhoneNumber == "") { 
                 return BadRequest(new { Error = "Empty fields not allowed"});
@@ -87,14 +87,14 @@ namespace RestaurantSystem.Controllers
                 Appartment = model.AccountingAddress.Appartment
             };
 
-            User user = new Customer()
+            User user = new User()
             {
                 SystemId = new Random().Next(1, 1000).ToString(), //Replace by real id generator
                 Email = model.Email,
                 UserName = model.Email,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
-                AccountingAddress = address,
+                Address = address,
                 PhoneNumber = model.PhoneNumber,
                 SecurityStamp = Guid.NewGuid().ToString(),
             };
@@ -105,11 +105,11 @@ namespace RestaurantSystem.Controllers
                 var enumerator = errors.GetEnumerator();
                 enumerator.MoveNext();
                 var message = string.Join(", ", enumerator.Current.Description);
-                return StatusCode(StatusCodes.Status400BadRequest, new { Status = "Error", Message = message });
+                return BadRequest(new { Status = "Error", Message = message });
             }
             await userManager.AddToRoleAsync(user, "Customer");
 
-            return Ok(new { Status = "Success", Message = "User created successfully!" });
+            return CreatedAtAction("Login", new { id = user.SystemId }, model);
         }
 
         //Implement refresh token later

@@ -18,7 +18,7 @@ namespace RestaurantSystem.Models
         public Discount Discount { get; set; }
         public List<OrderLine> OrderLines { get; set; }
         public OrderStage OrderStage { get; set; }
-        public Customer Customer { get; set; }
+        public User Customer { get; set; }
         public Restaurant Restaurant { get; set; }
 
     }

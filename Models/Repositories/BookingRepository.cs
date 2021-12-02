@@ -18,22 +18,19 @@ namespace RestaurantSystem.Models.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Booking>> GetAllAsync(BookingRequest bookingQuery)
+        public async Task<IEnumerable<Booking>> GetAllAsync(string restaurantId, DateTime date, string userId)
         {
-            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).Include(booking => booking.Table).Where(booking =>
-
-            (booking.Id == bookingQuery.Id || bookingQuery.Id == null) &&
-            ((booking.Date.Year == bookingQuery.Date.Year && booking.Date.Month == booking.Date.Month && booking.Date.Day == booking.Date.Day) || bookingQuery.Date == DateTime.MinValue) &&
-            (booking.Table.Id == bookingQuery.Table || bookingQuery.Table == null) &&
-            (booking.DiningPeriod.Id == bookingQuery.DiningPeriod || bookingQuery.Restaurant == null) &&
-            (booking.User.SystemId == bookingQuery.User || bookingQuery.User == null)
+            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).Include(booking => booking.Restaurant).Include(booking => booking.Table).Where(booking =>
+            (booking.Restaurant.Id == restaurantId || restaurantId == null) &&
+            (booking.User.SystemId == userId || userId == null) &&
+            ((booking.Date.Year == date.Year && booking.Date.Month == date.Month && booking.Date.Day == date.Day) || date == DateTime.MinValue)
             ).ToListAsync();
 
         }
 
         public async Task<Booking> GetAsync(string id)
         {
-            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).Include(booking => booking.Table).FirstOrDefaultAsync(booking => booking.Id == id);
+            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).Include(booking => booking.Table).Include(booking => booking.Restaurant).FirstOrDefaultAsync(booking => booking.Id == id);
         }
 
         public async Task<Booking> UpdateAsync(Booking booking)
@@ -61,6 +58,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfTimeAvailable(booking))
             {
+                booking.Id = new Random().Next(1, 1000).ToString();
                 await _context.Booking.AddAsync(booking);
                 await _context.SaveChangesAsync();
                 return booking;
@@ -91,7 +89,7 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.Booking.AnyAsync(booking => booking.Id == id);
         }
 
-        private async Task<bool> IfTimeAvailable(Booking bookingPretender)
+        public async Task<bool> IfTimeAvailable(Booking bookingPretender)
         {
             if (await _context.Booking.AnyAsync(booking => booking.Date == bookingPretender.Date && booking.Table == bookingPretender.Table && booking.DiningPeriod == bookingPretender.DiningPeriod))
             {
@@ -107,7 +105,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
             var table = await _context.Table.FirstOrDefaultAsync(table => table.Id == request.Table);
-            var user = await _context.Customer.FirstOrDefaultAsync(user => user.SystemId == request.User);
+            var user = await _context.User.FirstOrDefaultAsync(user => user.SystemId == request.User);
             var diningPeriod = await _context.DiningPeriod.FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == request.DiningPeriod);
             var date = new DateTime(request.Date.Year, request.Date.Month, request.Date.Day);
 
@@ -118,7 +116,7 @@ namespace RestaurantSystem.Models.Repositories
 
             var booking = new Booking()
             {
-                Id = new Random().Next(1, 1000).ToString(),
+                Id = request.Id,
                 Table = table,
                 User =  user,
                 DiningPeriod = diningPeriod,

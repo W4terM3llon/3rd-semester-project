@@ -110,7 +110,8 @@ namespace RestaurantSystem
                     }
                 });
 
-                services.AddSingleton<IConfiguration>(Configuration);
+                services.AddTransient<ITokenService, TokenService>();
+                services.AddScoped<IPermissionValidation, PermissionValidation>();
 
             });
         }

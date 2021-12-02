@@ -6,9 +6,9 @@ using RestaurantSystem.Models.Requests;
 
 namespace RestaurantSystem.Models.Repositories
 {
-    interface IOrderRepository
+    public interface IOrderRepository
     {
-        public Task<IEnumerable<Order>> GetAllAsync();
+        public Task<IEnumerable<Order>> GetAllAsync(string restaurantId, DateTime date, string userId);
         public Task<Order> GetAsync(string id);
         public Task<Order> CreateAsync(Order order);
         public Task<Order> UpdateAsync(Order order);

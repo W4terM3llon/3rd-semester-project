@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace RestaurantSystem.Services
 {
-    public class PermissionValidation
+    public class PermissionValidation : IPermissionValidation
     {
         private readonly RestaurantSystemContext _context;
         private readonly UserManager<User> _userManager;
@@ -23,10 +23,34 @@ namespace RestaurantSystem.Services
         public async Task<bool> isManagerRestaurantOwnerAsync(string restaurantId, string currentUserEmail)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == restaurantId);
+            if (restaurant == null) 
+            {
+                return false;
+            }
 
             var currentUser = await _userManager.FindByEmailAsync(currentUserEmail);
             var manager = restaurant.Manager;
             if (manager.SystemId != currentUser.SystemId)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public async Task<bool> isEveryDayUseAccountRestaurantsOwnershipAsync(string restaurantId, string currentUserEmail)
+        {
+            var restaurant = await _context.Restaurant.Include(restaurant => restaurant.EveryDayUseAccount).FirstOrDefaultAsync(restaurant => restaurant.Id == restaurantId);
+            if (restaurant == null)
+            {
+                return false;
+            }
+
+            var currentUser = await _userManager.FindByEmailAsync(currentUserEmail);
+            var everyDayUseAccount = restaurant.EveryDayUseAccount;
+            if (everyDayUseAccount.SystemId != currentUser.SystemId)
             {
                 return false;
             }
@@ -84,7 +108,7 @@ namespace RestaurantSystem.Services
 
         public async Task<bool> isUserTheSameAsync(string userId, string currentUserEmail)
         {
-            return await _context.Customer.AnyAsync(user=> user.Email == currentUserEmail && user.SystemId == userId);
+            return await _context.User.AnyAsync(user=> user.Email == currentUserEmail && user.SystemId == userId);
         }
     }
 }

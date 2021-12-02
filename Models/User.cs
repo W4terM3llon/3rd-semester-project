@@ -12,5 +12,8 @@ namespace RestaurantSystem.Models
     public class User : IdentityUser<int>
     {
         public string SystemId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public Address Address { get; set; }
     }
 }

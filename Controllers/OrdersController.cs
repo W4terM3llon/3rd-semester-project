@@ -19,29 +19,32 @@ namespace RestaurantSystem.Controllers
     [ApiController]
     public class OrdersController : ControllerBase
     {
-        private readonly IOrderRepository orderRepository;
-        private readonly PermissionValidation _permissionValidation;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IPermissionValidation _permissionValidation;
 
-        public OrdersController(RestaurantSystemContext context, UserManager<User> userManager)
+        public OrdersController(IOrderRepository orderRepository, IPermissionValidation permissionValidation)
         {
-            orderRepository = new OrderRepository(context);
-            _permissionValidation = new PermissionValidation(context, userManager);
+            _orderRepository = orderRepository;
+            _permissionValidation = permissionValidation;
         }
 
         // GET: api/Orders
         [HttpGet]
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrder()
+        public async Task<IActionResult> GetOrder([FromQuery] string restaurantId, [FromQuery] DateTime date, [FromQuery] string userId)
         {
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
 
-            if (userRole == "Customer")
+            if ((userRole == "Customer" && !await _permissionValidation.isUserTheSameAsync(userId, currentUserEmail)) ||
+                (userRole == "RestaurantManager"  && !await _permissionValidation.isManagerRestaurantOwnerAsync(restaurantId, currentUserEmail)) ||
+                ( userRole == "RestaurantEveryDayUse") && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(restaurantId, currentUserEmail))
             {
-                //add filter to show only orders for this customer
+                
+                BadRequest();
             }
 
-            var orders = await orderRepository.GetAllAsync();
+            var orders = await _orderRepository.GetAllAsync(restaurantId, date, userId);
             return Ok(orders);
         }
 
@@ -50,7 +53,7 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
         public async Task<ActionResult<Order>> GetOrder(string id)
         {
-            var order = await orderRepository.GetAsync(id);
+            var order = await _orderRepository.GetAsync(id);
 
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
@@ -74,7 +77,7 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
         public async Task<IActionResult> PutOrder(string id, OrderRequest request)
         {
-            var oldOrder = await orderRepository.GetAsync(id);
+            var oldOrder = await _orderRepository.GetAsync(id);
             if (id != request.Id || oldOrder.Restaurant.Id != request.Restaurant)
             {
                 return BadRequest();
@@ -88,13 +91,13 @@ namespace RestaurantSystem.Controllers
                 request.Customer = currentUserEmail;
             }
 
-            var order = await orderRepository.ConvertAlterOrderRequest(request);
+            var order = await _orderRepository.ConvertAlterOrderRequest(request);
             if (order == null)
             {
                 return BadRequest();
             }
 
-            if (await orderRepository.IfExist(id))
+            if (await _orderRepository.IfExist(id))
             {
                 if (userRole == "Customer")
                 {
@@ -116,7 +119,7 @@ namespace RestaurantSystem.Controllers
                 return NotFound();
             }
 
-            var orderSaved = await orderRepository.UpdateAsync(order);
+            var orderSaved = await _orderRepository.UpdateAsync(order);
 
             if (orderSaved == null)
             {
@@ -140,7 +143,7 @@ namespace RestaurantSystem.Controllers
                 orderRequest.Customer = currentUserEmail;
             }
 
-            var order = await orderRepository.ConvertAlterOrderRequest(orderRequest);
+            var order = await _orderRepository.ConvertAlterOrderRequest(orderRequest);
             if (order == null)
             {
                 return BadRequest();
@@ -153,7 +156,7 @@ namespace RestaurantSystem.Controllers
                     return Unauthorized();
                 }
             }
-            var saved = await orderRepository.CreateAsync(order);
+            var saved = await _orderRepository.CreateAsync(order);
 
             if (saved == null)
             {
@@ -168,7 +171,7 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
         public async Task<IActionResult> DeleteOrder(string id)
         {
-            var returnedOrder = await orderRepository.DeleteAsync(id);
+            var returnedOrder = await _orderRepository.DeleteAsync(id);
 
             if (returnedOrder == null)
             {

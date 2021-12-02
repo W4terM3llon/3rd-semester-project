@@ -8,7 +8,7 @@ namespace RestaurantSystem.Models.Repositories
 {
     interface ITableRepository
     {
-        public Task<IEnumerable<Table>> GetAllAsync(TableRequest tableRequest);
+        public Task<IEnumerable<Table>> GetAllAsync(string restaurantId);
         public Task<Table> GetAsync(string id);
         public Task<Table> CreateAsync(Table table);
         public Task<Table> UpdateAsync(Table table);
