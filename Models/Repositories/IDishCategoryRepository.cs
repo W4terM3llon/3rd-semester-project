@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RestaurantSystem.Models.Repositories
 {
-    interface IDishCategoryRepository
+    public interface IDishCategoryRepository
     {
         public Task<IEnumerable<DishCategory>> GetAllAsync();
         public Task<DishCategory> GetAsync(string id);

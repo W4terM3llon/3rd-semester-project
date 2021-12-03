@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Http;
 using RestaurantSystem.Models;
 using Microsoft.AspNetCore.Identity;
 using RestaurantSystem.Services;
+using RestaurantSystem.Models.Repositories;
 
 namespace RestaurantSystem
 {
@@ -35,6 +36,19 @@ namespace RestaurantSystem
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IPermissionValidation, PermissionValidation>();
+
+            services.AddScoped<IBookingRepository, BookingRepository>();
+            services.AddScoped<IDiningPeriodRepository, DiningPeriodRepository>();
+            services.AddScoped<IDishCategoryRepository, DishCategoryRepository>();
+            services.AddScoped<IDishRepository, DishRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+            services.AddScoped<ITableRepository, TableRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(
@@ -109,9 +123,6 @@ namespace RestaurantSystem
                         new string[] { }
                     }
                 });
-
-                services.AddTransient<ITokenService, TokenService>();
-                services.AddScoped<IPermissionValidation, PermissionValidation>();
 
             });
         }

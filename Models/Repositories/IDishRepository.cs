@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RestaurantSystem.Models.Repositories
 {
-    interface IDishRepository
+    public interface IDishRepository
     {
         public Task<IEnumerable<Dish>> GetAllAsync(string restaurantId);
         public Task<Dish> GetAsync(string id);
@@ -14,6 +14,6 @@ namespace RestaurantSystem.Models.Repositories
         public Task<Dish> UpdateAsync(Dish dish);
         public Task<Dish> DeleteAsync(string id);
         public Task<bool> IfExist(string id);
-        public Task<Dish> ConvertAlterDishRequest(DishRequest request);
+        public Task<Dish> ConvertAlterDishRequest(DishRequest request, string id);
     }
 }

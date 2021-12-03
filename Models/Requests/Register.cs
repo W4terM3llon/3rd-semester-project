@@ -9,7 +9,6 @@ namespace RestaurantSystem.Models
 {
     public class Register
     {
-        public string SystemId { get; set; }
         [Required(ErrorMessage = "Email field is required")]
         public string Email { get; set; }
         [Required(ErrorMessage = "Password field is required")]

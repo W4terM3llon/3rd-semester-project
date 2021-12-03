@@ -7,7 +7,6 @@ namespace RestaurantSystem.Models.Requests
 {
     public class BookingRequest
     {
-        public string Id { get; set; }
         public DateTime Date { get; set; }
         public string Table { get; set; }
         public string DiningPeriod { get; set; }

@@ -20,12 +20,12 @@ namespace RestaurantSystem.Controllers
     public class DishesController : ControllerBase
     {
         private readonly IDishRepository _dishRepository;
-        private readonly PermissionValidation _permissionValidation;
+        private readonly IPermissionValidation _permissionValidation;
 
-        public DishesController(RestaurantSystemContext context, UserManager<User> userManager)
+        public DishesController(IDishRepository dishRepository, IPermissionValidation permissionValidation)
         {
-            _dishRepository = new DishRepository(context);
-            _permissionValidation = new PermissionValidation(context, userManager);
+            _dishRepository = dishRepository;
+            _permissionValidation = permissionValidation;
         }
 
         // GET: api/Dishes
@@ -69,9 +69,9 @@ namespace RestaurantSystem.Controllers
             }
 
             var oldDish = await _dishRepository.GetAsync(id);
-            if (id != dishRequest.Id || oldDish.Restaurant.Id != dishRequest.Restaurant)
+            if (oldDish.Restaurant.Id != dishRequest.Restaurant)
             {
-                return BadRequest(new { Error = "Id and restaurant can not be changed" });
+                return BadRequest(new { Error = "Restaurant can not be changed" });
             }
 
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
@@ -80,7 +80,7 @@ namespace RestaurantSystem.Controllers
                 return Unauthorized(new { Error = "This dish does not belong to your restaurant" });
             }
             
-            var dish = await _dishRepository.ConvertAlterDishRequest(dishRequest);
+            var dish = await _dishRepository.ConvertAlterDishRequest(dishRequest, id);
             if (dish == null)
             {
                 return NotFound(new { Error = "One of dish dependencies not found" });
@@ -97,7 +97,7 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager")]
         public async Task<IActionResult> PostDish(DishRequest dishRequest)
         {
-            var booking = await _dishRepository.ConvertAlterDishRequest(dishRequest);
+            var booking = await _dishRepository.ConvertAlterDishRequest(dishRequest, null);
             if (booking == null)
             {
                 return NotFound(new { Error = "One of dish dependencies not found" });

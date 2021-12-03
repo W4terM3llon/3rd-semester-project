@@ -20,12 +20,12 @@ namespace RestaurantSystem.Controllers
     public class DishCategoriesController : ControllerBase
     {
         private readonly IDishCategoryRepository _dishCategoryRepository;
-        private readonly PermissionValidation _permissionValidation;
+        private readonly IPermissionValidation _permissionValidation;
 
-        public DishCategoriesController(RestaurantSystemContext context, UserManager<User> userManager)
+        public DishCategoriesController(IDishCategoryRepository dishCategoryRepository, IPermissionValidation permissionValidation)
         {
-            _dishCategoryRepository = new DishCategoryRepository(context);
-            _permissionValidation = new PermissionValidation(context, userManager);
+            _dishCategoryRepository = dishCategoryRepository;
+            _permissionValidation = permissionValidation;
         }
 
 

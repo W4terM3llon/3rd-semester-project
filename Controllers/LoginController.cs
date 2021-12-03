@@ -23,15 +23,15 @@ namespace RestaurantSystem.Controllers
     [AllowAnonymous]
     public class LoginController : ControllerBase
     {
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
 
-        public LoginController(UserManager<User> userManager, IConfiguration configuration)
+        public LoginController(UserManager<User> userManager, IConfiguration configuration, ITokenService tokenService)
         {
-            this.userManager = userManager;
+            _userManager = userManager;
             _configuration = configuration;
-            _tokenService = new TokenService(configuration);
+            _tokenService = tokenService;
 
         }
 
@@ -39,10 +39,10 @@ namespace RestaurantSystem.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] Login model)
         {
-            var user = await userManager.FindByEmailAsync(model.Email); //Email is the username too
-            if (user != null && await userManager.CheckPasswordAsync(user, model.Password))
+            var user = await _userManager.FindByEmailAsync(model.Email); //Email is the username too
+            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                var userRoles = await userManager.GetRolesAsync(user);
+                var userRoles = await _userManager.GetRolesAsync(user);
 
                 var authClaims = new List<Claim>
                 {
@@ -73,7 +73,7 @@ namespace RestaurantSystem.Controllers
         [Route("register")]
         public async Task<IActionResult> Register([FromBody] Register model)
         {
-            var userExists = await userManager.FindByEmailAsync(model.Email);
+            var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
                 return BadRequest(new { Status = "Error", Message = "User already exists!" });
 
@@ -83,6 +83,7 @@ namespace RestaurantSystem.Controllers
 
             var address = new Address()
             {
+                Id = new Random().Next(1, 1000).ToString(), //Replace by real id generator
                 Street = model.AccountingAddress.Street,
                 Appartment = model.AccountingAddress.Appartment
             };
@@ -98,7 +99,7 @@ namespace RestaurantSystem.Controllers
                 PhoneNumber = model.PhoneNumber,
                 SecurityStamp = Guid.NewGuid().ToString(),
             };
-            var result = await userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
                 var errors = result.Errors;
@@ -107,7 +108,7 @@ namespace RestaurantSystem.Controllers
                 var message = string.Join(", ", enumerator.Current.Description);
                 return BadRequest(new { Status = "Error", Message = message });
             }
-            await userManager.AddToRoleAsync(user, "Customer");
+            await _userManager.AddToRoleAsync(user, "Customer");
 
             return CreatedAtAction("Login", new { id = user.SystemId }, model);
         }

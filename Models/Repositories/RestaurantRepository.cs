@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace RestaurantSystem.Models.Repositories
 {
-    class RestaurantRepository : IRestaurantRepositoty
+    class RestaurantRepository : IRestaurantRepository
     {
         private readonly RestaurantSystemContext _context;
         private readonly UserManager<User> _userManager;
@@ -54,10 +54,8 @@ namespace RestaurantSystem.Models.Repositories
 
         }
 
-        public async Task<Restaurant> CreateAsync(Restaurant restaurant, string everyDayUseAccountEmail)
+        public async Task<Restaurant> CreateAsync(Restaurant restaurant, string everyDayUseAccountEmail, string everyDayUseAccountPassword)
         {
-            restaurant.Id = new Random().Next(1, 1000).ToString(); //Replace by real id generator
-            restaurant.Address.Id = new Random().Next(1, 1000).ToString(); //Replace by real id generator
 
             //create EveryDayUseAccount
             var everyDayUseAccount = new User()
@@ -70,7 +68,7 @@ namespace RestaurantSystem.Models.Repositories
                 SystemId = new Random().Next(1, 1000).ToString(),
                 SecurityStamp = Guid.NewGuid().ToString(),
             };
-            var result = await _userManager.CreateAsync(everyDayUseAccount, "123!@#aAA");
+            var result = await _userManager.CreateAsync(everyDayUseAccount, everyDayUseAccountPassword);
             if (!result.Succeeded)
             {
                 return null;
@@ -108,19 +106,20 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.Restaurant.AnyAsync(Restaurant => Restaurant.Id == id);
         }
 
-        public async Task<Restaurant> ConvertAlterRestaurantRequest(RestaurantRequest request, string currentUserEmail)
+        public async Task<Restaurant> ConvertAlterRestaurantRequest(RestaurantRequest request, string currentUserEmail, string id)
         {
             var manager = await _context.User.FirstOrDefaultAsync(manager => manager.Email == currentUserEmail);
             var restaurant = new Restaurant()
             {
-                Id = request.Id,
+                Id = id != null ? id : new Random().Next(1, 1000).ToString(),
                 Name = request.Name,
                 IsTableBookingEnabled = request.IsTableBookingEnabled,
                 IsDeliveryAvailable = request.IsDeliveryAvailable,
                 Address = new Address 
                 {
-                       Street = request.Address.Street,
-                       Appartment = request.Address.Appartment
+                    Id = id != null ? (await _context.Restaurant.Include(restaurant => restaurant.Address).FirstOrDefaultAsync(restaurant => restaurant.Id == id)).Address.Id : new Random().Next(1, 1000).ToString(),
+                    Street = request.Address.Street,
+                    Appartment = request.Address.Appartment
                 },
                 Manager = manager
             };

@@ -65,7 +65,6 @@ namespace RestaurantSystem.Models.Repositories
                 return null;
             }
 
-            table.Id = new Random().Next(1, 1000).ToString();
             await _context.Table.AddAsync(table);
             await _context.SaveChangesAsync();
             return table;
@@ -103,7 +102,7 @@ namespace RestaurantSystem.Models.Repositories
             return true;
         }
 
-        public async Task<Table> ConvertAlterTableRequest(TableRequest request)
+        public async Task<Table> ConvertAlterTableRequest(TableRequest request, string id)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
             if (restaurant == null)
@@ -113,7 +112,7 @@ namespace RestaurantSystem.Models.Repositories
 
             var table = new Table()
             {
-                Id = request.Id,
+                Id = id != null ? id : new Random().Next(1, 1000).ToString(),
                 SeatNumber = request.SeatNumber,
                 Description = request.Description,
                 Restaurant = restaurant

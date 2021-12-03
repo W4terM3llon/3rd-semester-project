@@ -7,7 +7,6 @@ namespace RestaurantSystem.Models.Requests
 {
     public class DishCategoryRequest
     {
-        public string Id { get; set; }
         public string Name { get; set; }
         public string Restaurant { get; set; }
     }

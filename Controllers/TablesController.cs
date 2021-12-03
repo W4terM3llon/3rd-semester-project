@@ -19,13 +19,13 @@ namespace RestaurantSystem.Controllers
     [ApiController]
     public class TablesController : ControllerBase
     {
-        private readonly TableRepository _tableRepository;
-        private readonly PermissionValidation _permissionValidation;
+        private readonly ITableRepository _tableRepository;
+        private readonly IPermissionValidation _permissionValidation;
 
-        public TablesController(RestaurantSystemContext context, UserManager<User> userManager)
+        public TablesController(ITableRepository tableRepository, IPermissionValidation permissionValidation)
         {
-            _tableRepository = new TableRepository(context);
-            _permissionValidation = new PermissionValidation(context, userManager);
+            _tableRepository = tableRepository;
+            _permissionValidation = permissionValidation;
         }
 
         // GET: api/Tables
@@ -68,9 +68,9 @@ namespace RestaurantSystem.Controllers
             }
 
             var oldTable = await _tableRepository.GetAsync(id);
-            if (id != tableRequest.Id || tableRequest.Restaurant != oldTable.Restaurant.Id)
+            if (tableRequest.Restaurant != oldTable.Restaurant.Id)
             {
-                return BadRequest(new { Error = "Id and restaurant can not be changed" });
+                return BadRequest(new { Error = "Restaurant can not be changed" });
             }
 
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
@@ -79,7 +79,7 @@ namespace RestaurantSystem.Controllers
                 return Unauthorized(new { Error = "This table does not belong to your restaurant" });
             }
 
-            var table = await _tableRepository.ConvertAlterTableRequest(tableRequest);
+            var table = await _tableRepository.ConvertAlterTableRequest(tableRequest, id);
             if (table == null)
             {
                 return NotFound(new { Error = "One of table dependencies not found" });
@@ -98,7 +98,7 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager")]
         public async Task<ActionResult<Table>> PostTableAsync(TableRequest tableRequest)
         {
-            var table = await _tableRepository.ConvertAlterTableRequest(tableRequest);
+            var table = await _tableRepository.ConvertAlterTableRequest(tableRequest, null);
             if (table == null)
             {
                 return NotFound(new { Error = "One of table dependencies not found" });

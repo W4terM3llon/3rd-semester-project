@@ -75,7 +75,6 @@ namespace RestaurantSystem.Models.Repositories
                 return null;
             }
 
-            dish.Id = new Random().Next(1, 1000).ToString();
             await _context.Dish.AddAsync(dish);
             await _context.SaveChangesAsync();
 
@@ -103,7 +102,7 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.Dish.AnyAsync(table => table.Id == id);
         }
 
-        public async Task<Dish> ConvertAlterDishRequest(DishRequest request)
+        public async Task<Dish> ConvertAlterDishRequest(DishRequest request, string id)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
             var dishCategory = await _context.DishCategory.FirstOrDefaultAsync(dishCategory => dishCategory.Id == request.DishCategory);
@@ -115,7 +114,7 @@ namespace RestaurantSystem.Models.Repositories
 
             var dish = new Dish()
             {
-                Id = request.Id,
+                Id = id != null ? id : new Random().Next(1, 1000).ToString(),
                 Name = request.Name,
                 Price = request.Price,
                 Description = request.Description,

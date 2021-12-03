@@ -17,5 +17,8 @@ namespace RestaurantSystem.Services
         public Task<bool> isManagerOrderOwnerAsync(string orderId, string currentUserEmail);
         public Task<bool> isCustomerOrderOwnerAsync(string orderId, string currentUserEmail);
         public Task<bool> isUserTheSameAsync(string userId, string currentUserEmail);
+        public Task<bool> isDishRestaurantOwnershipAsync(string dishId, string restaurantId);
+        public Task<bool> isTableRestaurantOwnershipAsync(string tableId, string restaurantId);
+        public Task<bool> isDiningPeriodRestaurantOwnershipAsync(string diningPeriodId, string restaurantId);
     }
 }

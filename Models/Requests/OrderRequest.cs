@@ -7,8 +7,7 @@ namespace RestaurantSystem.Models.Requests
 {
     public class OrderRequest
     {
-        public string Id { get; set; }
-        public string Discount { get; set; }
+        //public string Discount { get; set; }
         public List<OrderLineRequest> OrderLines { get; set; }
         public string Customer { get; set; }
         public string Restaurant { get; set; }

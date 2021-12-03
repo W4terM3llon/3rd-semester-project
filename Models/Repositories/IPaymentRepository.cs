@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace RestaurantSystem.Models.Repositories
 {
-    interface IPaymentRepository
+    public interface IPaymentRepository
     {
         public Task<IEnumerable<Payment>> GetAllAsync();
         public Task<Payment> GetAsync(string id);

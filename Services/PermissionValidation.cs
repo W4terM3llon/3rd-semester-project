@@ -110,5 +110,20 @@ namespace RestaurantSystem.Services
         {
             return await _context.User.AnyAsync(user=> user.Email == currentUserEmail && user.SystemId == userId);
         }
+
+        public async Task<bool> isDishRestaurantOwnershipAsync(string dishId, string restaurantId)
+        {
+            return await _context.Dish.Include(dish => dish.Restaurant).AnyAsync(dish => dish.Restaurant.Id == restaurantId && dish.Id == dishId);
+        }
+
+        public async Task<bool> isTableRestaurantOwnershipAsync(string tableId, string restaurantId)
+        {
+            return await _context.Table.Include(table => table.Restaurant).AnyAsync(table => table.Restaurant.Id == restaurantId && table.Id == tableId) ;
+        }
+
+        public async Task<bool> isDiningPeriodRestaurantOwnershipAsync(string diningPeriodId, string restaurantId)
+        {
+            return await _context.DiningPeriod.Include(dp => dp.Restaurant).AnyAsync(dp => dp.Restaurant.Id == restaurantId && dp.Id == diningPeriodId);
+        }
     }
 }

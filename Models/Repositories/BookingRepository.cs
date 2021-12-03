@@ -58,7 +58,6 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfTimeAvailable(booking))
             {
-                booking.Id = new Random().Next(1, 1000).ToString();
                 await _context.Booking.AddAsync(booking);
                 await _context.SaveChangesAsync();
                 return booking;
@@ -91,7 +90,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<bool> IfTimeAvailable(Booking bookingPretender)
         {
-            if (await _context.Booking.AnyAsync(booking => booking.Date == bookingPretender.Date && booking.Table == bookingPretender.Table && booking.DiningPeriod == bookingPretender.DiningPeriod))
+            if (await _context.Booking.AnyAsync(booking => booking.Date == bookingPretender.Date && booking.Table == bookingPretender.Table && booking.DiningPeriod == bookingPretender.DiningPeriod && booking.Id != bookingPretender.Id))
             {
                 return false;
             }
@@ -101,7 +100,7 @@ namespace RestaurantSystem.Models.Repositories
             }
         }
 
-        public async Task<Booking> ConvertAlterBookingRequest(BookingRequest request)
+        public async Task<Booking> ConvertAlterBookingRequest(BookingRequest request, string id)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
             var table = await _context.Table.FirstOrDefaultAsync(table => table.Id == request.Table);
@@ -116,7 +115,7 @@ namespace RestaurantSystem.Models.Repositories
 
             var booking = new Booking()
             {
-                Id = request.Id,
+                Id = id != null ? id : new Random().Next(1, 1000).ToString(),
                 Table = table,
                 User =  user,
                 DiningPeriod = diningPeriod,

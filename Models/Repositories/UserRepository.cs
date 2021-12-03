@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Restaurant_system_new.Models.Requests;
 using RestaurantSystem.Data;
 using System;
 using System.Collections;
@@ -33,18 +34,16 @@ namespace RestaurantSystem.Models.Repositories
             return user;
         }
 
-        public async Task<User> UpdateAsync(Register register)
+        public async Task<User> UpdateAsync(User userData)
         {
-            if (await IfExist(register.SystemId))
+            if (await IfExist(userData.SystemId))
             {
-                User user = await GetAsync(register.SystemId);
-                user.Email = register.Email;
-                user.UserName = register.Email;
-                user.FirstName = register.FirstName;
-                user.LastName = register.LastName;
-                user.Address.Street = register.AccountingAddress.Street;
-                user.Address.Appartment = register.AccountingAddress.Appartment;
-                user.PhoneNumber = register.PhoneNumber;
+                User user = await GetAsync(userData.SystemId);
+                user.FirstName = userData.FirstName;
+                user.LastName = userData.LastName;
+                user.Address.Street = userData.Address.Street;
+                user.Address.Appartment = userData.Address.Appartment;
+                user.PhoneNumber = userData.PhoneNumber;
 
                 await _userManager.UpdateAsync(user);
                 await _context.SaveChangesAsync();
@@ -73,9 +72,26 @@ namespace RestaurantSystem.Models.Repositories
             }
         }
 
-        private async Task<bool> IfExist(string id) 
+        public async Task<bool> IfExist(string id)
         {
             return await _context.User.AnyAsync(user => user.SystemId == id);
+        }
+
+        public async Task<User> ConvertAlterUserRequest(UserRequest request, string id)
+        {
+            var user = new User()
+            {
+                SystemId = id != null ? id : new Random().Next(1, 1000).ToString(),
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                Address = new Address()
+                {
+                    Street = request.AccountingAddress.Street,
+                    Appartment = request.AccountingAddress.Appartment
+                }
+            };
+
+            return user;
         }
     }
 }

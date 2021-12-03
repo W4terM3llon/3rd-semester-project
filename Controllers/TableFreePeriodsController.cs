@@ -17,9 +17,9 @@ namespace Restaurant_system_new.Controllers
     {
         private readonly ITableFreePeriodsRepository _tableFreePeriodsRepository;
 
-        public TableFreePeriodsController(RestaurantSystemContext context)
+        public TableFreePeriodsController(ITableFreePeriodsRepository tableFreePeriodsRepository)
         {
-            _tableFreePeriodsRepository = new TableFreePeriodsRepository(context);
+            _tableFreePeriodsRepository = tableFreePeriodsRepository;
         }
 
         // GET: api/Dishes

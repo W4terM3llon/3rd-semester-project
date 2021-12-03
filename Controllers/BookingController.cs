@@ -19,13 +19,13 @@ namespace RestaurantSystem.Controllers
     [ApiController]
     public class BookingController : ControllerBase
     {
-        private readonly BookingRepository _bookingRepository;
-        private readonly PermissionValidation _permissionValidation;
+        private readonly IBookingRepository _bookingRepository;
+        private readonly IPermissionValidation _permissionValidation;
 
-        public BookingController(RestaurantSystemContext context, UserManager<User> userManager)
+        public BookingController(IBookingRepository bookingRepository, IPermissionValidation permissionValidation)
         {
-            _bookingRepository = new BookingRepository(context);
-            _permissionValidation = new PermissionValidation(context, userManager);
+            _bookingRepository = bookingRepository;
+            _permissionValidation = permissionValidation;
         }
 
         // GET: api/Booking
@@ -35,7 +35,6 @@ namespace RestaurantSystem.Controllers
         {
             IEnumerable<Booking> bookings = new List<Booking>();
 
-            //Customer can not retrieve another customers booking
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
             if (userRole == "Customer")
@@ -62,7 +61,6 @@ namespace RestaurantSystem.Controllers
                     return BadRequest(new { Error = "RestaurantId and date required" });
                 }
                 else {
-                    //Manager and RestaurantEveryDayUse can not retrieve another restaurants bookings
                     if ((userRole == "RestaurantManager" && !await _permissionValidation.isManagerRestaurantOwnerAsync(restaurantId, currentUserEmail)) ||
                         (userRole == "RestaurantEveryDayUse" && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(restaurantId, currentUserEmail)))
                     {
@@ -86,26 +84,30 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
         public async Task<ActionResult<Booking>> GetBooking(string id)
         {
-            var booking = await _bookingRepository.GetAsync(id);
-            if (booking == null)
+            if (!await _bookingRepository.IfExist(id))
             {
-                return NotFound();
+                return NotFound(new { Error = "Booking not found" });
             }
 
-            IEnumerable<Booking> bookings = new List<Booking>();
+            var booking = await _bookingRepository.GetAsync(id);
 
-            //Customer can not retrieve another customers booking
-            //Manager and RestaurantEveryDayUse can not retrieve another restaurants bookings
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
-            if ((userRole == "Customer" && !await _permissionValidation.isUserTheSameAsync(booking.User.SystemId, currentUserEmail)) ||
-                (userRole == "RestaurantManager" && !await _permissionValidation.isManagerRestaurantOwnerAsync(booking.Restaurant.Id, currentUserEmail)) ||
-                (userRole == "RestaurantEveryDayUse") && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(booking.Restaurant.Id, currentUserEmail))
+            if (userRole == "Customer")
             {
-                return Unauthorized(new
-                {
-                    Error = "Can not retrieve booking of another user"
-                });
+                if (!await _permissionValidation.isUserTheSameAsync(id, currentUserEmail))
+                    {
+                        return Unauthorized(new { Error = "Can not retrieve another costomers booking" });
+                    }
+            }
+            else if (userRole == "RestaurantManager" || userRole == "RestaurantEveryDayUse")
+            {
+                    if ((userRole == "RestaurantManager" && !await _permissionValidation.isManagerRestaurantOwnerAsync(booking.Restaurant.Id, currentUserEmail)) ||
+                        (userRole == "RestaurantEveryDayUse" && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(booking.Restaurant.Id, currentUserEmail)))
+                    {
+
+                        return Unauthorized(new { Error = "Can not retrieve bookings of another restaurant" });
+                    }
             }
 
             return Ok(booking);
@@ -123,9 +125,9 @@ namespace RestaurantSystem.Controllers
             }
 
             var oldBooking = await _bookingRepository.GetAsync(id);
-            if (id != bookingRequest.Id || bookingRequest.Restaurant != oldBooking.Restaurant.Id || bookingRequest.User != oldBooking.User.SystemId) // not allowed to be changed
+            if (bookingRequest.Restaurant != oldBooking.Restaurant.Id || bookingRequest.User != oldBooking.User.SystemId) // not allowed to be changed
             {
-                return BadRequest(new { Error = "Id, restaurant, User can not be changed" });
+                return BadRequest(new { Error = "Restaurant, User can not be changed" });
             }
 
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
@@ -136,10 +138,20 @@ namespace RestaurantSystem.Controllers
                 return Unauthorized(new { Error = "Can not change booking of another user" });
             }
 
-            var booking = await _bookingRepository.ConvertAlterBookingRequest(bookingRequest);
+            var booking = await _bookingRepository.ConvertAlterBookingRequest(bookingRequest, id);
             if (booking == null)
             {
                 return NotFound(new { Error = "One of booking dependencies not found" });
+            }
+
+            if (!await _permissionValidation.isTableRestaurantOwnershipAsync(bookingRequest.Table, bookingRequest.Restaurant))
+            {
+                return BadRequest(new { Error = "Chosen table does not belong to the chosen restaurant" });
+            }
+
+            if (!await _permissionValidation.isDiningPeriodRestaurantOwnershipAsync(bookingRequest.DiningPeriod, bookingRequest.Restaurant))
+            {
+                return BadRequest(new { Error = "Chosen dining period does not belong to the chosen restaurant" });
             }
 
             if (!await _bookingRepository.IfTimeAvailable(booking))
@@ -163,13 +175,23 @@ namespace RestaurantSystem.Controllers
 
             if (!await _permissionValidation.isUserTheSameAsync(bookingRequest.User, currentUserEmail))
             {
-                return Unauthorized(new { Error = "Can make a booking for another user" });
+                return Unauthorized(new { Error = "Can not make a booking for another user" });
             }
 
-            var booking = await _bookingRepository.ConvertAlterBookingRequest(bookingRequest);
+            var booking = await _bookingRepository.ConvertAlterBookingRequest(bookingRequest, null);
             if (booking == null)
             {
                 return NotFound(new { Error = "One of booking dependencies not found" });
+            }
+
+            if (!await _permissionValidation.isTableRestaurantOwnershipAsync(bookingRequest.Table, bookingRequest.Restaurant))
+            {
+                return BadRequest(new { Error = "Chosen table does not belong to the chosen restaurant" });
+            }
+
+            if (!await _permissionValidation.isDiningPeriodRestaurantOwnershipAsync(bookingRequest.DiningPeriod, bookingRequest.Restaurant))
+            {
+                return BadRequest(new { Error = "Chosen dining period does not belong to the chosen restaurant" });
             }
 
             if (!await _bookingRepository.IfTimeAvailable(booking))
@@ -179,7 +201,7 @@ namespace RestaurantSystem.Controllers
 
             var created = await _bookingRepository.CreateAsync(booking);
 
-            return CreatedAtAction("GetBooking", new { id = bookingRequest.Id }, bookingRequest);
+            return CreatedAtAction("GetBooking", new { id = created.Id }, created);
         }
 
         // DELETE: api/Booking/5

@@ -19,13 +19,13 @@ namespace RestaurantSystem.Controllers
     [ApiController]
     public class DiningPeriodsController : ControllerBase
     {
-        private readonly DiningPeriodRepository _diningPeriodRepository;
-        private readonly PermissionValidation _permissionValidation;
+        private readonly IDiningPeriodRepository _diningPeriodRepository;
+        private readonly IPermissionValidation _permissionValidation;
 
-        public DiningPeriodsController(RestaurantSystemContext context, UserManager<User> userManager)
+        public DiningPeriodsController(IDiningPeriodRepository diningPeriodRepository, IPermissionValidation permissionValidation)
         {
-            _diningPeriodRepository = new DiningPeriodRepository(context);
-            _permissionValidation = new PermissionValidation(context, userManager);
+            _diningPeriodRepository = diningPeriodRepository;
+            _permissionValidation = permissionValidation;
         }
 
         // GET: api/DiningPeriods
@@ -69,9 +69,9 @@ namespace RestaurantSystem.Controllers
             }
 
             var oldDiningPeriod = await _diningPeriodRepository.GetAsync(id);
-            if (id != diningPeriodRequest.Id || diningPeriodRequest.Restaurant != oldDiningPeriod.Restaurant.Id)
+            if (diningPeriodRequest.Restaurant != oldDiningPeriod.Restaurant.Id)
             {
-                return BadRequest(new { Error = "Id and restaurant can not be changed" });
+                return BadRequest(new { Error = "Restaurant can not be changed" });
             }
 
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
@@ -80,7 +80,7 @@ namespace RestaurantSystem.Controllers
                 return Unauthorized(new { Error = "This dining period does not belong to your restaurant" });
             }
 
-            var diningPeriod = await _diningPeriodRepository.ConvertAlterDiningPeriodRequest(diningPeriodRequest);
+            var diningPeriod = await _diningPeriodRepository.ConvertAlterDiningPeriodRequest(diningPeriodRequest, id);
             if (diningPeriod == null)
             {
                 return NotFound(new { Error = "One of dining period dependencies not found" });
@@ -107,7 +107,7 @@ namespace RestaurantSystem.Controllers
         [Authorize(Roles = "RestaurantManager")]
         public async Task<ActionResult<DiningPeriod>> PostDiningPeriod(DiningPeriodRequest request)
         {
-            var diningPeriod = await _diningPeriodRepository.ConvertAlterDiningPeriodRequest(request);
+            var diningPeriod = await _diningPeriodRepository.ConvertAlterDiningPeriodRequest(request, null);
             if (diningPeriod == null)
             {
                 return NotFound(new { Error = "One of dining period dependencies not found" });

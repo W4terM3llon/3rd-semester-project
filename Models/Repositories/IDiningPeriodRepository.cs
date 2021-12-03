@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RestaurantSystem.Models.Repositories
 {
-    interface IDiningPeriodRepository
+    public interface IDiningPeriodRepository
     {
         public Task<IEnumerable<DiningPeriod>> GetAllAsync(string restaurantId);
         public Task<DiningPeriod> GetAsync(string id);
@@ -16,5 +16,6 @@ namespace RestaurantSystem.Models.Repositories
         public Task<bool> IfExist(string id);
         public Task<bool> IfPeriodsOverlap(DiningPeriod diningPeriod);
         public bool IfDiningTimeCorrent(DiningPeriod diningPeriod);
+        public Task<DiningPeriod> ConvertAlterDiningPeriodRequest(DiningPeriodRequest request, string id);
     }
 }

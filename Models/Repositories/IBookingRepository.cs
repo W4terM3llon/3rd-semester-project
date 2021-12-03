@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RestaurantSystem.Models.Repositories
 {
-    interface IBookingRepository
+    public interface IBookingRepository
     {
         public Task<IEnumerable<Booking>> GetAllAsync(string restaurantId, DateTime date, string userId);
         public Task<Booking> GetAsync(string id);
@@ -14,7 +14,7 @@ namespace RestaurantSystem.Models.Repositories
         public Task<Booking> UpdateAsync(Booking bookingRequest);
         public Task<Booking> DeleteAsync(string id);
         public Task<bool> IfExist(string id);
-        public Task<Booking> ConvertAlterBookingRequest(BookingRequest request);
+        public Task<Booking> ConvertAlterBookingRequest(BookingRequest request, string id);
         public Task<bool> IfTimeAvailable(Booking bookingPretender);
     }
 }

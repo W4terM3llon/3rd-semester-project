@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Restaurant_system_new.Models.Repositories
 {
-    interface ITableFreePeriodsRepository
+    public interface ITableFreePeriodsRepository
     {
         public Task<IEnumerable> GetAllAsync(string restaurant, DateTime date);
     }

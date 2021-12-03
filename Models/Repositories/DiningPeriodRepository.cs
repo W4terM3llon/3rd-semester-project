@@ -57,7 +57,6 @@ namespace RestaurantSystem.Models.Repositories
             {
                 return null;
             }
-            diningPeriod.Id = new Random().Next(1, 1000).ToString();
             await _context.DiningPeriod.AddAsync(diningPeriod);
             await _context.SaveChangesAsync();
             return diningPeriod;
@@ -123,7 +122,7 @@ namespace RestaurantSystem.Models.Repositories
             }
         }
 
-        public async Task<DiningPeriod> ConvertAlterDiningPeriodRequest(DiningPeriodRequest request)
+        public async Task<DiningPeriod> ConvertAlterDiningPeriodRequest(DiningPeriodRequest request, string id)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
             if (restaurant == null)
@@ -133,7 +132,7 @@ namespace RestaurantSystem.Models.Repositories
 
             var diningPeriod = new DiningPeriod()
             {
-                Id = request.Id,
+                Id = id != null ? id : new Random().Next(1, 1000).ToString(),
                 Name = request.Name,
                 TimeStartMinutes = request.TimeStartMinutes,
                 DurationMinutes = request.DurationMinutes,

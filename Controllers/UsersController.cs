@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Restaurant_system_new.Models.Requests;
 using RestaurantSystem.Data;
 using RestaurantSystem.Models;
 using RestaurantSystem.Models.Repositories;
@@ -19,13 +20,13 @@ namespace RestaurantSystem.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly UserRepository userRepository;
-        private readonly PermissionValidation _permissionValidation;
+        private readonly IUserRepository _userRepository;
+        private readonly IPermissionValidation _permissionValidation;
 
-        public UsersController(RestaurantSystemContext context, UserManager<User> userManager)
+        public UsersController(IUserRepository userRepository, IPermissionValidation permissionValidation)
         {
-            this.userRepository = new UserRepository(context, userManager);
-            _permissionValidation = new PermissionValidation(context, userManager);
+            _userRepository = userRepository;
+            _permissionValidation = permissionValidation;
         }
 
         // GET: api/Users
@@ -39,14 +40,20 @@ namespace RestaurantSystem.Controllers
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        [Authorize(Roles = "RestaurantManager, RestaurantEveryDayUse")]
+        [Authorize(Roles = "RestaurantManager, RestaurantEveryDayUse, Customer")]
         public async Task<ActionResult<User>> GetUserAsync(string id)
         {
-            var user = await this.userRepository.GetAsync(id);
-
-            if (user == null)
+            if (!await _userRepository.IfExist(id))
             {
-                return NotFound();
+                return NotFound(new { Error = "User not found" });
+            }
+            var user = await _userRepository.GetAsync(id);
+
+            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
+            if (!await _permissionValidation.isUserTheSameAsync(id, currentUserEmail))
+            {
+                return Unauthorized(new { Error = "Can not retrieve another users data" });
             }
 
             return Ok(user);
@@ -56,46 +63,44 @@ namespace RestaurantSystem.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "Customer, RestaurantManager, RestaurantEveryDayUse")]
-        public async Task<ActionResult> PutUserAsync(string id, Register register)
+        public async Task<ActionResult> PutUserAsync(string id, UserRequest request)
         {
-            if (id != register.SystemId)
+            if (!await _userRepository.IfExist(id))
             {
-                return BadRequest();
+                return NotFound(new { Error = "User not found" });
             }
 
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            if (! await _permissionValidation.isUserTheSameAsync(id, currentUserEmail))
+            if (!await _permissionValidation.isUserTheSameAsync(id, currentUserEmail))
             {
-                return Unauthorized();
+                return Unauthorized(new { Error = "Can not change another users data" });
             }
 
-            var returnedUser = await this.userRepository.UpdateAsync(register);
-            
-            if (returnedUser == null)
-            {
-                return NotFound();
-            }
+            var user = await _userRepository.ConvertAlterUserRequest(request, id);
 
-            return NoContent();
+            var updated = await _userRepository.UpdateAsync(user);
+
+            return Ok(updated);
         }
+
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Customer")]
         public async Task<IActionResult> DeleteUser(string id)
         {
+            if (!await _userRepository.IfExist(id))
+            {
+                return NotFound(new { Error = "User not found" });
+            }
+
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             if (!await _permissionValidation.isUserTheSameAsync(id, currentUserEmail))
             {
-                return Unauthorized();
+                return Unauthorized(new { Error = "Can not delete another users data" });
             }
 
-            var returnedUser = await this.userRepository.DeleteAsync(id);
-            
-            if (returnedUser == null)
-            {
-                return NotFound();
-            }
+            await _userRepository.DeleteAsync(id);
 
             return NoContent();
         }
