@@ -1,0 +1,41 @@
+D:\Pro\Cs Projects\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.exe
+D:\Pro\Cs Projects\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.deps.json
+D:\Pro\Cs Projects\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.runtimeconfig.json
+D:\Pro\Cs Projects\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.runtimeconfig.dev.json
+D:\Pro\Cs Projects\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.dll
+D:\Pro\Cs Projects\DesktopClient\bin\Debug\net5.0-windows\ref\DesktopClient.dll
+D:\Pro\Cs Projects\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.pdb
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.csproj.AssemblyReference.cache
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.Login.resources
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.csproj.GenerateResource.cache
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.GeneratedMSBuildEditorConfig.editorconfig
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.AssemblyInfoInputs.cache
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.AssemblyInfo.cs
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.csproj.CoreCompileInputs.cache
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.dll
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\ref\DesktopClient.dll
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.pdb
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.genruntimeconfig.cache
+D:\Pro\Cs Projects\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.Register.resources
+D:\Pro\RestaurantSystem\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.exe
+D:\Pro\RestaurantSystem\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.deps.json
+D:\Pro\RestaurantSystem\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.runtimeconfig.json
+D:\Pro\RestaurantSystem\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.runtimeconfig.dev.json
+D:\Pro\RestaurantSystem\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.dll
+D:\Pro\RestaurantSystem\DesktopClient\bin\Debug\net5.0-windows\ref\DesktopClient.dll
+D:\Pro\RestaurantSystem\DesktopClient\bin\Debug\net5.0-windows\DesktopClient.pdb
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.csproj.AssemblyReference.cache
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.csproj.GenerateResource.cache
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.GeneratedMSBuildEditorConfig.editorconfig
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.AssemblyInfoInputs.cache
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.AssemblyInfo.cs
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.csproj.CoreCompileInputs.cache
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.dll
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\ref\DesktopClient.dll
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.pdb
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.genruntimeconfig.cache
+D:\Pro\RestaurantSystem\DesktopClient\bin\Debug\net5.0-windows\RestSharp.dll
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.RegisterForm.resources
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.csproj.CopyComplete
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.LoginForm.resources
+D:\Pro\RestaurantSystem\DesktopClient\obj\Debug\net5.0-windows\DesktopClient.HomeForm.resources
