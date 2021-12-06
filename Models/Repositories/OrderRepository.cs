@@ -20,7 +20,7 @@ namespace RestaurantSystem.Models.Repositories
         public async Task<IEnumerable<Order>> GetAllAsync(string restaurantId, DateTime date, string userId)
         {
             return await _context.Order/*.Include(order => order.Discount).Include(order => order.Payment).
-                Include(order => order.OrderStage)*/.Include(order => order.OrderLines).Include(order => order.Restaurant).Include(order => order.Customer).Where(order=>
+                Include(order => order.OrderStage)*/.Include(order => order.OrderLines).ThenInclude(ol => ol.Dish).Include(order => order.Restaurant).Include(order => order.Customer).Where(order=>
                     (order.Restaurant.Id == restaurantId || restaurantId == null) &&
                     ((order.Date.Year == date.Year && order.Date.Month == date.Month && order.Date.Day == date.Day) || date == DateTime.MinValue) &&
                     (order.Customer.SystemId == userId || userId == null)

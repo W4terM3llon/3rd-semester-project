@@ -46,6 +46,7 @@ namespace RestaurantSystem.Controllers
 
                 var authClaims = new List<Claim>
                 {
+                    new Claim(ClaimTypes.Actor, user.SystemId),
                     new Claim(ClaimTypes.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
@@ -62,7 +63,7 @@ namespace RestaurantSystem.Controllers
 
                 return Ok(new
                 {
-                    token = accessToken,
+                    token = accessToken
                     //refreshToken = refreshToken
                 });
             }
@@ -77,15 +78,15 @@ namespace RestaurantSystem.Controllers
             if (userExists != null)
                 return BadRequest(new { Status = "Error", Message = "User already exists!" });
 
-            if (model.Email == "" || model.FirstName == "" || model.LastName == "" || model.AccountingAddress.Street == "" || model.AccountingAddress.Appartment == "" || model.PhoneNumber == "") { 
+            if (model.Email == "" || model.FirstName == "" || model.LastName == "" || model.Address.Street == "" || model.Address.Appartment == "" || model.PhoneNumber == "") { 
                 return BadRequest(new { Error = "Empty fields not allowed"});
             }
 
             var address = new Address()
             {
                 Id = new Random().Next(1, 1000).ToString(), //Replace by real id generator
-                Street = model.AccountingAddress.Street,
-                Appartment = model.AccountingAddress.Appartment
+                Street = model.Address.Street,
+                Appartment = model.Address.Appartment
             };
 
             User user = new User()
@@ -110,7 +111,7 @@ namespace RestaurantSystem.Controllers
             }
             await _userManager.AddToRoleAsync(user, "Customer");
 
-            return CreatedAtAction("Login", new { id = user.SystemId }, model);
+            return CreatedAtAction("Login", new { id = user.SystemId }, new { Success="User registered" });
         }
 
         //Implement refresh token later

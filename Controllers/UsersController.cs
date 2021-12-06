@@ -29,14 +29,15 @@ namespace RestaurantSystem.Controllers
             _permissionValidation = permissionValidation;
         }
 
-        // GET: api/Users
-        //[HttpGet]
-        //[Authorize(Roles = "RestaurantManager")]
-        //public async Task<ActionResult<IEnumerable>> GetUsersAsync()
-        //{
-        //    var users = await this.userRepository.GetAllAsync();
-        //    return Ok(users);
-        //}
+        //GET: api/Users
+        [HttpGet]
+        [Authorize(Roles = "RestaurantManager, RestaurantEveryDayUse, Customer")]
+        public async Task<ActionResult<User>> GetUsersAsync()
+        {
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+            var user = await _userRepository.GetAsync(currentUserSystemId);
+            return Ok(user);
+        }
 
         // GET: api/Users/5
         [HttpGet("{id}")]

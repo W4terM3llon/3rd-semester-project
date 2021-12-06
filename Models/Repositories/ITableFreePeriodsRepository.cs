@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Restaurant_system_new.Models.Repositories
+namespace RestaurantSystem.Models.Repositories
 {
     public interface ITableFreePeriodsRepository
     {

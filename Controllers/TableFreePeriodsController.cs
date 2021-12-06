@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Restaurant_system_new.Models.Repositories;
 using RestaurantSystem.Data;
 using RestaurantSystem.Models.Repositories;
 using System;
@@ -9,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Restaurant_system_new.Controllers
+namespace RestaurantSystem.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -25,13 +24,13 @@ namespace Restaurant_system_new.Controllers
         // GET: api/Dishes
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable>> GetDish([FromQuery] string restaurant, [FromQuery] DateTime date)
+        public async Task<ActionResult<IEnumerable>> GetDish([FromQuery] string restaurantId, [FromQuery] DateTime date)
         {
-            if (restaurant == null || date == DateTime.MinValue) {
+            if (restaurantId == null || date == DateTime.MinValue) {
                 return BadRequest(new { Error = "Restaurant and date are required" });
             }
 
-            var dishes = await _tableFreePeriodsRepository.GetAllAsync(restaurant, date);
+            var dishes = await _tableFreePeriodsRepository.GetAllAsync(restaurantId, date);
             return Ok(dishes);
         }
     }

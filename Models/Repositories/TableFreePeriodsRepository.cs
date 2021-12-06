@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Restaurant_system_new.Models.Repositories
+namespace RestaurantSystem.Models.Repositories
 {
     public class TableFreePeriodsRepository : ITableFreePeriodsRepository
     {
@@ -28,18 +28,28 @@ namespace Restaurant_system_new.Models.Repositories
             var tables = await _context.Table.Include(table => table.Restaurant).Where(table => table.Restaurant.Id == restaurant).ToListAsync();
             var diningPeriods = await _context.DiningPeriod.Include(diningPeriod => diningPeriod.Restaurant).Where(diningPeriod => diningPeriod.Restaurant.Id == restaurant).ToListAsync();
 
-            Dictionary<string, DiningPeriod> tableBookedPeriods = new Dictionary<string, DiningPeriod>();
+            Dictionary<string, List<DiningPeriod>> tableBookedPeriods = new Dictionary<string, List<DiningPeriod>>();
             foreach (var booking in bookings)
             {
-                tableBookedPeriods.Add(booking.Table.Id, booking.DiningPeriod);
+                if (tableBookedPeriods.ContainsKey(booking.Table.Id))
+                {
+                    tableBookedPeriods[booking.Table.Id].Add(booking.DiningPeriod);
+                }
+                else 
+                {
+                    tableBookedPeriods.Add(booking.Table.Id, new List<DiningPeriod>() { booking.DiningPeriod });
+                }
             }
 
             Dictionary<string, List<DiningPeriod>> tableFreePeriods = new Dictionary<string, List<DiningPeriod>>();
             foreach (var table in tables) {
-                var freeDiningPeriods = diningPeriods;
+                var freeDiningPeriods = new List<DiningPeriod>(diningPeriods);
                 if (tableBookedPeriods.ContainsKey(table.Id))
                 {
-                    freeDiningPeriods.Remove(tableBookedPeriods[table.Id]);
+                    foreach (var period in tableBookedPeriods[table.Id])
+                    {
+                        freeDiningPeriods.Remove(period);
+                    }
                 }
                 tableFreePeriods.Add(table.Id, freeDiningPeriods);
             }

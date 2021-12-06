@@ -31,7 +31,7 @@ namespace RestaurantSystem.Controllers
         // GET: api/Orders
         [HttpGet]
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<IActionResult> GetOrder([FromQuery] string restaurantId, [FromQuery] DateTime date, [FromQuery] string userId)
+        public async Task<ActionResult<List<Order>>> GetOrder([FromQuery] string restaurantId, [FromQuery] DateTime date, [FromQuery] string userId)
         {
             IEnumerable<Order> orders = new List<Order>();
 
