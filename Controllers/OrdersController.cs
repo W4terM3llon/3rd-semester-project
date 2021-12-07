@@ -21,10 +21,12 @@ namespace RestaurantSystem.Controllers
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IPermissionValidation _permissionValidation;
+        private readonly IOrderStageRepository _orderStageRepository;
 
-        public OrdersController(IOrderRepository orderRepository, IPermissionValidation permissionValidation)
+        public OrdersController(IOrderRepository orderRepository, IOrderStageRepository orderStageRepository, IPermissionValidation permissionValidation)
         {
             _orderRepository = orderRepository;
+            _orderStageRepository = orderStageRepository;
             _permissionValidation = permissionValidation;
         }
 
@@ -115,65 +117,38 @@ namespace RestaurantSystem.Controllers
             return Ok(order);
         }
 
-        /*
+        
         // PUT: api/Orders/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<IActionResult> PutOrder(string id, OrderRequest request)
+        public async Task<IActionResult> PatchOrder(string id, string orderStageId)
         {
-            var oldOrder = await _orderRepository.GetAsync(id);
-            if (id != request.Id || oldOrder.Restaurant.Id != request.Restaurant)
-            {
-                return BadRequest();
-            }
-
+            
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
 
-            if (userRole == "Customer")
+            if (!await _orderRepository.IfExist(id))
             {
-                request.Customer = currentUserEmail;
+                return NotFound(new { Error = "Order with given id not found" });
+            }
+            var oldOrder = await _orderRepository.GetAsync(id);
+
+            if (!await _orderStageRepository.IfExist(id))
+            {
+                return NotFound(new { Error = "Order stage with given id not found" });
             }
 
-            var order = await _orderRepository.ConvertAlterOrderRequest(request);
-            if (order == null)
+            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(oldOrder.Restaurant.Id, currentUserEmail) && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(oldOrder.Restaurant.Id, currentUserEmail))
             {
-                return BadRequest();
+                return Unauthorized(new { Error = "Can not make an order for another user" });
             }
 
-            if (await _orderRepository.IfExist(id))
-            {
-                if (userRole == "Customer")
-                {
-                    if (!await _permissionValidation.isCustomerOrderOwnerAsync(id, currentUserEmail))
-                    {
-                        return Unauthorized();
-                    }
-                }
-                else if (userRole == "RestaurantManager" || userRole == "RestaurantEveryDayUse")
-                {
-                    if (!await _permissionValidation.isManagerOrderOwnerAsync(id, currentUserEmail))
-                    {
-                        return Unauthorized();
-                    }
-                }
-            }
-            else
-            {
-                return NotFound();
-            }
-
-            var orderSaved = await _orderRepository.UpdateAsync(order);
-
-            if (orderSaved == null)
-            {
-                return BadRequest();
-            }
+            var orderSaved = await _orderRepository.PatchAsync(id, orderStageId);
 
             return NoContent();
         }
-        */
+        
 
         // POST: api/Orders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -211,6 +186,11 @@ namespace RestaurantSystem.Controllers
             if (!_orderRepository.ifOrderlinesQuantityQuantityCorrect(orderRequest.OrderLines))
             {
                 return BadRequest(new { Error = "Quantity should alway be between 1 and 99" });
+            }
+
+            if (!await _orderStageRepository.IfExist("1"))
+            {
+                return NotFound(new { Error = "Beginning order stage with id 1 is required in the databse" });
             }
 
             var saved = await _orderRepository.CreateAsync(order);

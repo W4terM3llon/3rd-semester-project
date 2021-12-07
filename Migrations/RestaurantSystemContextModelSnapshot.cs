@@ -312,12 +312,17 @@ namespace Restaurant_system_new.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("OrderStageDbId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("RestaurantDbId")
                         .HasColumnType("int");
 
                     b.HasKey("DbId");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("OrderStageDbId");
 
                     b.HasIndex("RestaurantDbId");
 
@@ -677,11 +682,17 @@ namespace Restaurant_system_new.Migrations
                         .WithMany()
                         .HasForeignKey("CustomerId");
 
+                    b.HasOne("RestaurantSystem.Models.OrderStage", "OrderStage")
+                        .WithMany()
+                        .HasForeignKey("OrderStageDbId");
+
                     b.HasOne("RestaurantSystem.Models.Restaurant", "Restaurant")
                         .WithMany("Orders")
                         .HasForeignKey("RestaurantDbId");
 
                     b.Navigation("Customer");
+
+                    b.Navigation("OrderStage");
 
                     b.Navigation("Restaurant");
                 });

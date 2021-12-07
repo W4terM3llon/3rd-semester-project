@@ -45,6 +45,7 @@ namespace RestaurantSystem
             services.AddScoped<IDishCategoryRepository, DishCategoryRepository>();
             services.AddScoped<IDishRepository, DishRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IOrderStageRepository, OrderStageRepository>();
             services.AddScoped<IRestaurantRepository, RestaurantRepository>();
             services.AddScoped<ITableFreePeriodsRepository, TableFreePeriodsRepository>();
             services.AddScoped<ITableRepository, TableRepository>();

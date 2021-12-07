@@ -20,7 +20,7 @@ namespace RestaurantSystem.Models.Repositories
         public async Task<IEnumerable<Order>> GetAllAsync(string restaurantId, DateTime date, string userId)
         {
             return await _context.Order/*.Include(order => order.Discount).Include(order => order.Payment).
-                Include(order => order.OrderStage)*/.Include(order => order.OrderLines).ThenInclude(ol => ol.Dish).Include(order => order.Restaurant).Include(order => order.Customer).Where(order=>
+                Include(order => order.OrderStage)*/.Include(order => order.OrderLines).ThenInclude(ol => ol.Dish).Include(order => order.Restaurant).Include(order => order.Customer).Include(order => order.OrderStage).Where(order=>
                     (order.Restaurant.Id == restaurantId || restaurantId == null) &&
                     ((order.Date.Year == date.Year && order.Date.Month == date.Month && order.Date.Day == date.Day) || date == DateTime.MinValue) &&
                     (order.Customer.SystemId == userId || userId == null)
@@ -29,12 +29,18 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Order> GetAsync(string id)
         {
-            var order = await _context.Order/*.Include(order => order.Discount).Include(order => order.Payment).Include(order => order.OrderStage)*/.Include(order => order.OrderLines).Include(order => order.Restaurant).Include(order => order.Customer).FirstOrDefaultAsync(order => order.Id == id);
+            var order = await _context.Order/*.Include(order => order.Discount).Include(order => order.Payment).Include(order => order.OrderStage)*/.Include(order => order.OrderLines).Include(order => order.Restaurant).Include(order => order.Customer).Include(order => order.OrderStage).FirstOrDefaultAsync(order => order.Id == id);
             return order;
         }
 
         public async Task<Order> CreateAsync(Order order)
         {
+
+            var orderStagePersistance = await _context.OrderStage.FirstOrDefaultAsync(os => os.Id == "1"); // Sets order status to processing !! CREATE IN DB
+            if (orderStagePersistance == null){
+                return null;
+            }
+            order.OrderStage = orderStagePersistance;
             await _context.Order.AddAsync(order);
             await _context.SaveChangesAsync();
             return order;
@@ -55,18 +61,16 @@ namespace RestaurantSystem.Models.Repositories
                 return null;
             }
         }
-        /*
-        public async Task<Order> UpdateAsync(Order order)
+        
+       
+
+        public async Task<Order> PatchAsync(string orderId, string orderStageId)
         {
-            if (await IfExist(order.Id))
+            if (await IfExist(orderId))
             {
                 var orderPersistance = await _context.Order.FirstOrDefaultAsync(order => order.Id == order.Id);
-
-                orderPersistance.Date = order.Date;
-                //orderPersistance.Payment = order.Payment;
-                //orderPersistance.Discount = order.Discount;
-                orderPersistance.OrderLines = order.OrderLines;
-                orderPersistance.OrderStage = order.OrderStage;
+                var orderStagePersistance = await _context.OrderStage.FirstOrDefaultAsync(os => os.Id == orderStageId);
+                orderPersistance.OrderStage = orderStagePersistance;
 
                 await _context.SaveChangesAsync();
                 return orderPersistance;
@@ -76,7 +80,7 @@ namespace RestaurantSystem.Models.Repositories
                 return null;
             }
         }
-        */
+
 
         public async Task<bool> IfExist(string id)
         {
@@ -170,6 +174,11 @@ namespace RestaurantSystem.Models.Repositories
 
             };
             return order;
+        }
+
+        public Task<Order> UpdateAsync(Order order)
+        {
+            throw new NotImplementedException();
         }
     }
 }

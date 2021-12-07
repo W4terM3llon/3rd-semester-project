@@ -11,11 +11,13 @@ namespace RestaurantSystem.Models.Repositories
         public Task<IEnumerable<Order>> GetAllAsync(string restaurantId, DateTime date, string userId);
         public Task<Order> GetAsync(string id);
         public Task<Order> CreateAsync(Order order);
-        //public Task<Order> UpdateAsync(Order order);
+        public Task<Order> UpdateAsync(Order order);
+        public Task<Order> PatchAsync(string orderId, string orderStageId);
         public Task<Order> DeleteAsync(string id);
         public Task<bool> IfExist(string id);
         public bool ifOrderlinesUnique(List<OrderLineRequest> orderLines);
         public bool ifOrderlinesQuantityQuantityCorrect(List<OrderLineRequest> orderLines);
         public Task<Order> ConvertAlterOrderRequest(OrderRequest request, string id);
+        
     }
 }
