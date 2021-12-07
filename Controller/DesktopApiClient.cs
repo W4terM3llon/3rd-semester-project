@@ -46,8 +46,8 @@ namespace DesktopClient.Controller
                 lastName = user.LastName,
                 accountingAddress = new 
                 {
-                    street = user.AccountingAddress.Street,
-                    appartment = user.AccountingAddress.Appartment
+                    street = user.Address.Street,
+                    appartment = user.Address.Appartment
                 }
             };
             request.AddJsonBody(body);

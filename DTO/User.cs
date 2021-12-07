@@ -13,6 +13,6 @@ namespace DesktopClient.DTO
         public string PhoneNumber { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public AccountingAddress AccountingAddress { get; set; }
+        public Address Address { get; set; }
     }
 }

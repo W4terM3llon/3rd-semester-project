@@ -107,7 +107,7 @@ namespace DesktopClient
             if (pswdText.Text.Equals(pswdRepeatText.Text))
             {
                
-                AccountingAddress address = new AccountingAddress();
+                Address address = new Address();
                 address.Appartment = appartText.Text;
                 address.Street = streetText.Text;
                 User user = new User();
@@ -116,7 +116,7 @@ namespace DesktopClient
                 user.PhoneNumber = pnText.Text;
                 user.FirstName = fnText.Text;
                 user.LastName = lnText.Text;
-                user.AccountingAddress = address;
+                user.Address = address;
                 int responseCode = dataAccess.Register(user);
                 if (responseCode == 201)
                 {
