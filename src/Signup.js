@@ -15,9 +15,6 @@ import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Signup() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   const [showSignUpError, setShowSignUpError] = useState(false);
   const [showSuccessfullSignUp, setShowSuccessfullSignUp] = useState(false);
 
@@ -42,7 +39,7 @@ export default function Signup() {
         phoneNumber: signUpPhoneNumber,
         email: signUpEmail,
         password: signUpPassword,
-        accountingAddress: {
+        address: {
           street: signUpStreet,
           appartment: signUpAppartment,
         },
@@ -77,6 +74,7 @@ export default function Signup() {
     <Container className="d-flex justify-content-center align-items-center mt-5">
       <Col xs={12} md={8} xl={4}>
         <Row>
+          <h5 className="text-center">Personal information</h5>
           <Form onSubmit={onFormSubmit}>
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>

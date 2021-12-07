@@ -6,6 +6,10 @@ import Signup from "./Signup";
 import Restaurants from "./Restaurants";
 import RestaurantDetails from "./RestaurantDetails"
 import BookingConfirmation from "./BookingConfirmation";
+import MyAccount from "./MyAccount";
+import MyBookings from "./MyBookings";
+import MyOrders from "./MyOrders";
+import Cart from "./Cart";
 
 function App() {
   return (
@@ -17,8 +21,12 @@ function App() {
             <Route exact path="/home" element={<Restaurants />} />
             <Route exact path="/restaurant-details" element={<RestaurantDetails />} />
             <Route exact path="/booking-confirmation" element={<BookingConfirmation />} />
+            <Route exact path="/cart" element={<Cart />} />
+            <Route exact path="/my-order-history" element={<MyOrders />} />
+            <Route exact path="/my-booking-history" element={<MyBookings />} />
+            <Route exact path="/my-Account" element={<MyAccount />} />
             <Route exact path="/login" element={<Login />} />
-            <Route exact path="/signup" element={<Signup />} />
+            <Route exact path="/sign-up" element={<Signup />} />
           </Routes>
         </Container>
       </Router>

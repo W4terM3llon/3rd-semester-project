@@ -10,8 +10,9 @@ import {
   Alert,
 } from "react-bootstrap";
 import configData from "./config.json";
-import { JwtTokenContext } from "./AppContext";
+import { JwtTokenContext, UserContext } from "./AppContext";
 import { useContext, useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Login() {
   const { jwtTokenState } = useContext(JwtTokenContext);
@@ -51,11 +52,11 @@ export default function Login() {
           setEmail("");
           setPassword("");
           setShowLoginError(false);
-          setShowLoginSuccess(true)
+          setShowLoginSuccess(true);
         } else {
-          setJwtToken("");
+          setJwtToken('');
           setShowLoginError(true);
-          setShowLoginSuccess(false)
+          setShowLoginSuccess(false);
         }
       })
       .catch((err) => {});
@@ -94,9 +95,11 @@ export default function Login() {
         </Row>
         <Row>
           <Col>
-            <Button type="submit" variant="success" className="w-100">
-              Sign up
-            </Button>
+            <Link to="/sign-up">
+              <Button type="submit" variant="success" className="w-100">
+                Sign up
+              </Button>
+            </Link>
           </Col>
         </Row>
         <Row>

@@ -3,32 +3,26 @@ import { Card, Col, Container, Form, Row, Tab } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import {
   BookingContext,
-  ChosenRestaurantDishesContext,
-  ChosenRestaurantIdContext,
-  ChosenRestaurantTablesContext,
+  ChosenRestaurantContext,
   RestaurantsContext,
 } from "./AppContext";
 import Dish from "./Dish";
 import Table from "./Table";
 
 export default function Restaurants() {
-  const { chosenRestaurantDishesState } = useContext(
-    ChosenRestaurantDishesContext
-  );
-  const { chosenRestaurantTablesState } = useContext(
-    ChosenRestaurantTablesContext
+  const { chosenRestaurantDishesState, chosenRestaurantTablesState, chosenRestaurantIdState } = useContext(
+    ChosenRestaurantContext
   );
   const { availableRestaurantsState } = useContext(RestaurantsContext);
-  const { chosenRestaurantIdState } = useContext(ChosenRestaurantIdContext);
   const { bookingDateState } = useContext(BookingContext);
 
+  const [availableRestaurants, setAvailableRestaurants] = availableRestaurantsState;
+  const [chosenRestaurantId, setChosenRestaurantId] = chosenRestaurantIdState;
   const [chosenRestaurantDishes, setChosenRestaurantDishes] =
     chosenRestaurantDishesState;
   const [chosenRestaurantTables, setChosenRestaurantTables] =
     chosenRestaurantTablesState;
-  const [availableRestaurants, setAvailableRestaurants] =
-    availableRestaurantsState;
-  const [chosenRestaurantId, setChosenRestaurantId] = chosenRestaurantIdState;
+
   const [bookingDate, setBookingDate] = bookingDateState;
 
   const [restaurantDetails, setRestaurantDetails] = useState({});
@@ -49,7 +43,7 @@ export default function Restaurants() {
     } else {
       setRestaurantDetails({});
     }
-  }, [availableRestaurants]);
+  }, []);
 
   useEffect(() => {
     var dishesByCategoryTemp = {};
@@ -68,6 +62,7 @@ export default function Restaurants() {
 
   useEffect(() => {
     var tablesBySeatNumberTemp = {};
+    console.log(chosenRestaurantTables)
     chosenRestaurantTables.map((table) => {
       if (table.seatNumber.toString() in tablesBySeatNumberTemp) {
         tablesBySeatNumberTemp[table.seatNumber.toString()].push(table);
@@ -81,6 +76,10 @@ export default function Restaurants() {
     setTablesToShow(chosenRestaurantTables);
   }, [chosenRestaurantTables]);
 
+  useEffect(() => {
+    
+  }, [chosenRestaurantTables]);
+
   function dishFilterClicked(dish) {
     setDishesToShow(
       chosenRestaurantDishes.filter((dh) => dh.dishCategory.name == dish[0])
@@ -90,6 +89,7 @@ export default function Restaurants() {
   }
 
   function tableFilterClicked(table) {
+    console.log(table[0])
     setTablesToShow(
       chosenRestaurantTables.filter((tb) => tb.seatNumber == table[0])
     );
@@ -114,6 +114,8 @@ export default function Restaurants() {
                       value={bookingDate}
                       onChange={(e) => {
                         setBookingDate(e.target.value);
+                        setShowTables(true);
+                        setShowDishes(false);
                       }}
                     />
                   </Form.Group>
@@ -169,7 +171,7 @@ export default function Restaurants() {
                 <Col>
                   <span
                     onClick={() => {
-                      setTablesToShow(chosenRestaurantTables);
+                      setDishesToShow(chosenRestaurantDishes);
                       setShowTables(false);
                       setShowDishes(true);
                     }}

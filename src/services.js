@@ -7,11 +7,22 @@ export function setJWT(token){
 
 export function getJWT(){
     var jwt = getCookie('JWT')
-    if(jwt){
-        return jwt
-    }else{
-        return null
-    }
+    return jwt
+}
+
+export function setUserIdCookie(id){
+  var expireInMinutes = 60 * 9
+  var expiryDate = new Date(new Date().getTime() + expireInMinutes*60000);
+  document.cookie = `userId=${id}; expires=${expiryDate.toUTCString()}; path=/`
+}
+
+export function getUserIdCookie(){
+  var jwt = getCookie('userId')
+  if(jwt){
+      return jwt
+  }else{
+      return null
+  }
 }
 
 function setCookie(cname, cvalue, exdays) {

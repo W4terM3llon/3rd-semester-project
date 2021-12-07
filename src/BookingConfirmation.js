@@ -8,23 +8,45 @@ import {
   Alert,
   Row,
 } from "react-bootstrap";
-import { BookingContext, JwtTokenContext } from "./AppContext";
+import { Link } from "react-router-dom";
+import {
+  BookingContext,
+  ChosenRestaurantContext,
+  JwtTokenContext,
+  UserContext,
+} from "./AppContext";
 import configData from "./config.json";
 
 export default function BookingConfirmation() {
+  const { jwtTokenState } = useContext(JwtTokenContext);
+  const { userIdState } = useContext(UserContext);
   const { bookingTableState, bookingTimePeriodState, bookingDateState } =
     useContext(BookingContext);
-  const { jwtTokenState } = useContext(JwtTokenContext);
+  const { fetchTablesFreePeriods, chosenRestaurantTablesState } = useContext(
+    ChosenRestaurantContext
+  );
 
   const [jwtToken, setJwtToken] = jwtTokenState;
+  const [userId, setUserId] = userIdState;
+
   const [bookingDate, setBookingDate] = bookingDateState;
   const [bookingTable, setBookingTable] = bookingTableState;
   const [bookingTimePeriod, setBookingTimePeriod] = bookingTimePeriodState;
 
+  const [chosenRestaurantTables, setChosenRestaurantTables] =
+    chosenRestaurantTablesState;
+
+  const [showNotLoggedin, setShowNotLoggedin] = useState(jwtToken == "");
   const [showBookingError, setShowBookingError] = useState(false);
   const [showBookingSuccess, setShowBookingSuccess] = useState(false);
 
   function confirmBooking() {
+    if (bookingDate || bookingTable || bookingTimePeriod || userId) {
+      setShowBookingError(true);
+      setShowBookingSuccess(false);
+      return;
+    }
+
     fetch(`${configData.SERVER_URL}api/Booking/`, {
       method: "POST",
       headers: {
@@ -35,7 +57,7 @@ export default function BookingConfirmation() {
         date: bookingDate,
         table: bookingTable.id,
         diningPeriod: bookingTimePeriod.id,
-        user: "104",
+        user: userId,
         restaurant: bookingTable.restaurant.id,
       }),
     })
@@ -46,11 +68,17 @@ export default function BookingConfirmation() {
             .then((data) =>
               resolve({ ok: response.ok, status: response.status, body: data })
             )
-            .catch((err) => {setShowBookingError(true)})
+            .catch((err) => {
+              setShowBookingError(true);
+            })
         );
       })
       .then((data) => {
         if (data.ok) {
+          setBookingDate(new Date().toISOString().split("T")[0]);
+          setBookingTable("");
+          setBookingTimePeriod("");
+          fetchTablesFreePeriods(chosenRestaurantTables);
           setShowBookingError(false);
           setShowBookingSuccess(true);
         } else {
@@ -65,21 +93,55 @@ export default function BookingConfirmation() {
     <Container className="d-flex justify-content-center align-items-center mt-5">
       <Col xs={12} md={8} xl={4}>
         <Row>
+          <Alert
+            variant="warning"
+            className="mt-2"
+            show={showNotLoggedin}
+          >
+            <Alert.Heading>Please login to make a booking</Alert.Heading>
+            <p>
+              Proceed to <Link to="/login">login</Link> or{" "}
+              <Link to="/signup">sign-up</Link> page
+            </p>
+          </Alert>
+        </Row>
+        <Row>
           <Card className="p-3">
-            <Card.Title className="text-center">Confirm your booking</Card.Title>
+            <Card.Title className="text-center">
+              Confirm your booking
+            </Card.Title>
             <ListGroup>
               <ListGroup.Item>Date: {bookingDate}</ListGroup.Item>
               <ListGroup.Item>
-                Time: {bookingTimePeriod.timeStartMinutes}
+                Time:{" "}
+                {bookingTimePeriod.timeStartMinutes ? (
+                  bookingTimePeriod.timeStartMinutes
+                ) : (
+                  <span className="text-danger">*Choose time period</span>
+                )}
               </ListGroup.Item>
               <ListGroup.Item>
-                Restaurant: {bookingTable.restaurant.name}
+                Restaurant:{" "}
+                {bookingTable.restaurant ? (
+                  bookingTable.restaurant.name
+                ) : (
+                  <span className="text-danger">
+                    *Choose restaurant's table
+                  </span>
+                )}
               </ListGroup.Item>
               <ListGroup.Item>
-                Table seats: {bookingTable.seatNumber}
+                Table seats:{" "}
+                {bookingTable.restaurant ? (
+                  bookingTable.seatNumber
+                ) : (
+                  <span className="text-danger">*Choose table</span>
+                )}
               </ListGroup.Item>
             </ListGroup>
-            <Button onClick={confirmBooking} className="mt-2">Confirm</Button>
+            <Button onClick={confirmBooking} className="mt-2" disabled={jwtToken === ""}>
+              Confirm
+            </Button>
           </Card>
         </Row>
         <Row>

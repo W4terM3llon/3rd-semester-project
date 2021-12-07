@@ -1,11 +1,11 @@
 import { useContext } from "react";
 import { Card, Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { ChosenRestaurantIdContext, RestaurantsContext } from "./AppContext";
+import { ChosenRestaurantContext, RestaurantsContext } from "./AppContext";
 
 export default function Restaurants() {
   const { availableRestaurantsState } = useContext(RestaurantsContext);
-  const { chosenRestaurantIdState } = useContext(ChosenRestaurantIdContext);
+  const { chosenRestaurantIdState } = useContext(ChosenRestaurantContext);
 
   const [availableRestaurants, setAvailableRestaurants] =
     availableRestaurantsState;

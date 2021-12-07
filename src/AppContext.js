@@ -1,33 +1,250 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import { getJWT, setJWT } from "./services";
 import configData from "./config.json";
 
 export const JwtTokenContext = React.createContext();
+export const UserContext = React.createContext();
 export const RestaurantsContext = React.createContext();
 export const DishCategoriesContext = React.createContext();
-export const ChosenRestaurantIdContext = React.createContext();
-export const ChosenRestaurantDishesContext = React.createContext();
-export const ChosenRestaurantTablesContext = React.createContext();
+export const ChosenRestaurantContext = React.createContext();
 export const BookingContext = React.createContext();
 export const OrderContext = React.createContext();
 
 export default function AppContext({ children }) {
   const [jwtToken, setJwtToken] = useState(getJWT());
+
+  const [userId, setUserId] = useState("");
+  const [userFirstName, setUserFirstName] = useState("");
+  const [userLastName, setUserLastName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [userPhoneNumber, setUserPhoneNumber] = useState("");
+  const [userAddressStreet, setUserAddressStreet] = useState("");
+  const [userAddressAppartment, setUserAddressAppartment] = useState("");
+
   const [availableRestaurants, setAvailableRestaurants] = useState([]);
   const [dishCategories, setDishCategories] = useState([]);
+
   const [chosenRestaurantId, setChosenRestaurantId] = useState(-1);
   const [chosenRestaurantDishes, setChosenRestaurantDishes] = useState([]);
   const [chosenRestaurantTables, setChosenRestaurantTables] = useState([]);
+
   const [bookingDate, setBookingDate] = useState(
     new Date().toISOString().split("T")[0]
   );
   const [bookingTable, setBookingTable] = useState({});
   const [bookingTimePeriod, setBookingTimePeriod] = useState({});
-  const [order, setOrder] = useState({});
+
+  const [orderLines, setOrderLines] = useState([])
+
+  const [bookingHistory, setBookingHistory] = useState([]);
+  const [orderHistory, setOrderHistory] = useState([]);
+
+  /*console.log(orderLinesState);
+  function orderLineReducer(state, action) {
+    switch (action.type) {
+      case "add":
+        return {
+          orderLines: [
+            ...state.orderLines,
+            { dish: action.dish, quantity: action.quantity },
+          ],
+        };
+      case "increase":
+        let orderlinesIncrease = [...state.orderLines];
+        orderlinesIncrease.filter(
+          (orderLine) => orderLine.dish.id == action.dish.id
+        )[0].quantity += 1;
+        console.log(
+          orderlinesIncrease.filter(
+            (orderLine) => orderLine.dish.id == action.dish.id
+          )[0].quantity,
+          action.quantity
+        );
+        return { orderLines: orderlinesIncrease };
+      case "remove":
+        return {
+          orderLines: state.orderLines.filter(
+            (orderLine) => orderLine.dishId != action.orderLine.dishId
+          ),
+        };
+      case "decrease":
+        let orderlinesDecrease = [...state.orderLines];
+        orderlinesDecrease.filter(
+          (orderLine) => orderLine.dish.id == action.dish.id
+        ).quantity -= action.quantity;
+        return { orderLines: orderlinesDecrease };
+      default:
+        throw new Error();
+    }
+  }*/
+
+  useEffect(() => {
+    if (jwtToken) {
+      setJWT(jwtToken);
+    } else {
+      setJWT("");
+    }
+
+    if (jwtToken != "") {
+      fetch(`${configData.SERVER_URL}api/Users`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      })
+        .then((response) => {
+          return new Promise((resolve) =>
+            response
+              .json()
+              .then((data) =>
+                resolve({
+                  ok: response.ok,
+                  status: response.status,
+                  body: data,
+                })
+              )
+              .catch((err) => {})
+          );
+        })
+        .then((data) => {
+          if (data.ok) {
+            setUserId(data.body.systemId);
+            setUserFirstName(data.body.firstName);
+            setUserLastName(data.body.lastName);
+            setUserEmail(data.body.email);
+            setUserPhoneNumber(data.body.phoneNumber);
+            setUserAddressStreet(data.body.address.street);
+            setUserAddressAppartment(data.body.address.appartment);
+          } else {
+            setUserId("");
+            setUserFirstName("");
+            setUserLastName("");
+            setUserEmail("");
+            setUserPhoneNumber("");
+            setUserAddressStreet("");
+            setUserAddressAppartment("");
+          }
+        })
+        .catch((err) => {});
+    }
+  }, [jwtToken]);
+
+  function fetchOrderHistory(){
+    fetch(`${configData.SERVER_URL}api/Orders?userId=${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    })
+      .then((response) => {
+        return new Promise((resolve) =>
+          response
+            .json()
+            .then((data) =>
+              resolve({
+                ok: response.ok,
+                status: response.status,
+                body: data,
+              })
+            )
+            .catch((err) => {})
+        );
+      })
+      .then((data) => {
+        if (data.ok) {
+          setOrderHistory(data.body);
+        } else {
+          setOrderHistory([]);
+        }
+      })
+      .catch((err) => {});
+  }
+
+  useEffect(() => {
+    if (userId != "") {
+      fetch(`${configData.SERVER_URL}api/Booking?userId=${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      })
+        .then((response) => {
+          return new Promise((resolve) =>
+            response
+              .json()
+              .then((data) =>
+                resolve({
+                  ok: response.ok,
+                  status: response.status,
+                  body: data,
+                })
+              )
+              .catch((err) => {})
+          );
+        })
+        .then((data) => {
+          if (data.ok) {
+            setBookingHistory(data.body);
+          } else {
+            setBookingHistory([]);
+          }
+        })
+        .catch((err) => {});
+
+        fetchOrderHistory()
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId != "") {
+      fetch(`${configData.SERVER_URL}api/Users/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      })
+        .then((response) => {
+          return new Promise((resolve) =>
+            response
+              .json()
+              .then((data) =>
+                resolve({
+                  ok: response.ok,
+                  status: response.status,
+                  body: data,
+                })
+              )
+              .catch((err) => {})
+          );
+        })
+        .then((data) => {
+          if (data.ok) {
+            setUserFirstName(data.body.firstName);
+            setUserLastName(data.body.lastName);
+            setUserEmail(data.body.email);
+            setUserPhoneNumber(data.body.phoneNumber);
+            setUserAddressStreet(data.body.address.street);
+            setUserAddressAppartment(data.body.address.appartment);
+          } else {
+            setUserFirstName(data.body.firstName);
+            setUserLastName(data.body.lastName);
+            setUserEmail(data.body.email);
+            setUserPhoneNumber(data.body.phoneNumber);
+            setUserAddressStreet(data.body.address.street);
+            setUserAddressAppartment(data.body.address.appartment);
+          }
+        })
+        .catch((err) => {});
+    }
+  }, [userId]);
 
   function fetchTablesFreePeriods(currentTables) {
     fetch(
-      `${configData.SERVER_URL}api/TableFreePeriods?Restaurant=${chosenRestaurantId}&date=${bookingDate}`,
+      `${configData.SERVER_URL}api/TableFreePeriods?RestaurantId=${chosenRestaurantId}&date=${bookingDate}`,
       {
         method: "GET",
       }
@@ -49,7 +266,7 @@ export default function AppContext({ children }) {
           tables.forEach((table) => {
             table["diningPeriods"] = data.body[table.id.toString()];
           });
-          console.log(tables)
+          console.log(tables);
           setChosenRestaurantTables(tables);
         } else {
           console.log("could not fetch tables free periods");
@@ -58,13 +275,13 @@ export default function AppContext({ children }) {
       .catch((err) => {});
   }
 
-  useEffect(() => {
-    setJWT(setJWT(jwtToken));
-  }, [jwtToken]);
+  useEffect(()=>{
+    fetchTablesFreePeriods(chosenRestaurantTables)
+  }, [bookingDate])
 
   useEffect(() => {
     fetch(
-      `${configData.SERVER_URL}api/Dishes?Restaurant=${chosenRestaurantId}`,
+      `${configData.SERVER_URL}api/Dishes?RestaurantId=${chosenRestaurantId}`,
       {
         method: "GET",
       }
@@ -87,40 +304,35 @@ export default function AppContext({ children }) {
       })
       .catch((err) => {});
 
-    if (
-      availableRestaurants.filter(
-        (restaurant) => restaurant.isTableBookingEnabled
-      )
-    ) {
-      fetch(
-        `${configData.SERVER_URL}api/Tables?Restaurant=${chosenRestaurantId}`,
-        {
-          method: "GET",
+    fetch(
+      `${configData.SERVER_URL}api/Tables?RestaurantId=${chosenRestaurantId}`,
+      {
+        method: "GET",
+      }
+    )
+      .then((response) => {
+        return new Promise((resolve) =>
+          response.json().then((data) =>
+            resolve({
+              ok: response.ok,
+              status: response.status,
+              body: data,
+            })
+          )
+        );
+      })
+      .then((data) => {
+        if (data.ok) {
+          fetchTablesFreePeriods(data.body);
+        } else {
+          console.log("could not fetch restaurant tables");
         }
-      )
-        .then((response) => {
-          return new Promise((resolve) =>
-            response.json().then((data) =>
-              resolve({
-                ok: response.ok,
-                status: response.status,
-                body: data,
-              })
-            )
-          );
-        })
-        .then((data) => {
-          if (data.ok) {
-            fetchTablesFreePeriods(data.body);
-          } else {
-            console.log("could not fetch restaurant tables");
-          }
-        })
-        .catch((err) => {});
-    }
+      })
+      .catch((err) => {});
   }, [chosenRestaurantId]);
 
   useEffect(() => {
+    //fetch all restaurants
     fetch(`${configData.SERVER_URL}api/Restaurant/`, {
       method: "GET",
     })
@@ -141,70 +353,116 @@ export default function AppContext({ children }) {
         }
       })
       .catch((err) => {});
+
+    //fetch all dish categories
+    fetch(`${configData.SERVER_URL}api/DishCategories`, {
+      method: "GET",
+    })
+      .then((response) => {
+        return new Promise((resolve) =>
+          response
+            .json()
+            .then((data) =>
+              resolve({ ok: response.ok, status: response.status, body: data })
+            )
+        );
+      })
+      .then((data) => {
+        if (data.ok) {
+          console.log(data.body);
+          setDishCategories(data.body);
+        } else {
+          console.log("could not fetch dish categories");
+        }
+      })
+      .catch((err) => {});
   }, []);
+
+  function logOutUser() {
+    setJwtToken("");
+    setUserId("");
+    setUserFirstName("");
+    setUserLastName("");
+    setUserEmail("");
+    setUserPhoneNumber("");
+    setUserAddressStreet("");
+    setUserAddressAppartment("");
+  }
 
   return (
     <JwtTokenContext.Provider
       value={{ jwtTokenState: [jwtToken, setJwtToken] }}
     >
-      <RestaurantsContext.Provider
+      <UserContext.Provider
         value={{
-          availableRestaurantsState: [
-            availableRestaurants,
-            setAvailableRestaurants,
+          userIdState: [userId, setUserId],
+          userFirstNameState: [userFirstName, setUserFirstName],
+          userLastNameState: [userLastName, setUserLastName],
+          userEmailState: [userEmail, setUserEmail],
+          userPhoneNumberState: [userPhoneNumber, setUserPhoneNumber],
+          userAddressStreetState: [userAddressStreet, setUserAddressStreet],
+          userAddressAppartmentState: [
+            userAddressAppartment,
+            setUserAddressAppartment,
           ],
+          logOutUser: logOutUser,
         }}
       >
-        <DishCategoriesContext.Provider
+        <RestaurantsContext.Provider
           value={{
-            dishCategoriesState: [dishCategories, setDishCategories],
+            availableRestaurantsState: [
+              availableRestaurants,
+              setAvailableRestaurants,
+            ],
           }}
         >
-          <ChosenRestaurantIdContext.Provider
+          <DishCategoriesContext.Provider
             value={{
-              chosenRestaurantIdState: [
-                chosenRestaurantId,
-                setChosenRestaurantId,
-              ],
+              dishCategoriesState: [dishCategories, setDishCategories],
             }}
           >
-            <ChosenRestaurantDishesContext.Provider
+            <ChosenRestaurantContext.Provider
               value={{
+                chosenRestaurantIdState: [
+                  chosenRestaurantId,
+                  setChosenRestaurantId,
+                ],
                 chosenRestaurantDishesState: [
                   chosenRestaurantDishes,
                   setChosenRestaurantDishes,
                 ],
+                chosenRestaurantTablesState: [
+                  chosenRestaurantTables,
+                  setChosenRestaurantTables,
+                ],
+                fetchTablesFreePeriods: fetchTablesFreePeriods,
               }}
             >
-              <ChosenRestaurantTablesContext.Provider
+              <OrderContext.Provider
                 value={{
-                  chosenRestaurantTablesState: [
-                    chosenRestaurantTables,
-                    setChosenRestaurantTables,
-                  ],
+                  orderLinesState: [orderLines, setOrderLines],
+                  orderHistoryState: [orderHistory, setOrderHistory],
+                  fetchOrderHistory: fetchOrderHistory
                 }}
               >
-                <OrderContext.Provider
-                  value={{ orderState: [order, setOrder] }}
+                <BookingContext.Provider
+                  value={{
+                    bookingDateState: [bookingDate, setBookingDate],
+                    bookingTableState: [bookingTable, setBookingTable],
+                    bookingTimePeriodState: [
+                      bookingTimePeriod,
+                      setBookingTimePeriod,
+                    ],
+                    bookingHistoryState: [bookingHistory, setBookingHistory],
+                  }}
                 >
-                  <BookingContext.Provider
-                    value={{
-                      bookingDateState: [bookingDate, setBookingDate],
-                      bookingTableState: [bookingTable, setBookingTable],
-                      bookingTimePeriodState: [
-                        bookingTimePeriod,
-                        setBookingTimePeriod,
-                      ],
-                    }}
-                  >
-                    {children}
-                  </BookingContext.Provider>
-                </OrderContext.Provider>
-              </ChosenRestaurantTablesContext.Provider>
-            </ChosenRestaurantDishesContext.Provider>
-          </ChosenRestaurantIdContext.Provider>
-        </DishCategoriesContext.Provider>
-      </RestaurantsContext.Provider>
+                  {children}
+                </BookingContext.Provider>
+              </OrderContext.Provider>
+            </ChosenRestaurantContext.Provider>
+          </DishCategoriesContext.Provider>
+        </RestaurantsContext.Provider>
+      </UserContext.Provider>
     </JwtTokenContext.Provider>
   );
 }
