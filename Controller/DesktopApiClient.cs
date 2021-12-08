@@ -44,7 +44,7 @@ namespace DesktopClient.Controller
                 phoneNumber = user.PhoneNumber, 
                 firstName = user.FirstName,
                 lastName = user.LastName,
-                accountingAddress = new 
+                address = new 
                 {
                     street = user.Address.Street,
                     appartment = user.Address.Appartment
