@@ -3,6 +3,7 @@ using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,7 +20,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<IEnumerable<Dish>> GetAllAsync(string restaurantId)
         {
-            var dishCreated = await _context.Dish.Include(dish => dish.DishCategory).Include(dish => dish.Restaurant).Where(dish =>
+            var dishCreated = await _context.Dish.Include(dish => dish.DishCategory).Include(dish => dish.Restaurant).ThenInclude(restaurant => restaurant.Address).Where(dish =>
                 (dish.Restaurant.Id == restaurantId || restaurantId == null)
                 ).ToListAsync();
             return dishCreated;
@@ -29,7 +30,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                var dish = await _context.Dish.Include(dish => dish.DishCategory).Include(dish => dish.Restaurant).FirstOrDefaultAsync(dish => dish.Id == id);
+                var dish = await _context.Dish.Include(dish => dish.DishCategory).Include(dish => dish.Restaurant).ThenInclude(restaurant => restaurant.Address).FirstOrDefaultAsync(dish => dish.Id == id);
                 return dish;
             }
             else
@@ -41,23 +42,35 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(dishRequest.Id))
             {
-                var restaurant = await _context.Restaurant.FirstOrDefaultAsync(restaurant => restaurant.Id == dishRequest.Restaurant.Id);
-                var dishCategory = await _context.DishCategory.FirstOrDefaultAsync(dishCategory => dishCategory.Id == dishRequest.DishCategory.Id);
-
-                if (restaurant == null || dishCategory == null)
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
                 {
-                    return null;
+                    try
+                    {
+                        var restaurant = await _context.Restaurant.FirstOrDefaultAsync(restaurant => restaurant.Id == dishRequest.Restaurant.Id);
+                        var dishCategory = await _context.DishCategory.FirstOrDefaultAsync(dishCategory => dishCategory.Id == dishRequest.DishCategory.Id);
+
+                        if (restaurant == null || dishCategory == null)
+                        {
+                            return null;
+                        }
+
+                        var dish = await _context.Dish.FirstOrDefaultAsync(dish => dish.Id == dishRequest.Id);
+
+                        dish.Name = dishRequest.Name;
+                        dish.Price = dishRequest.Price;
+                        dish.Description = dishRequest.Description;
+                        dish.DishCategory = dishCategory;
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return dishRequest;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
                 }
-
-                var dish = await _context.Dish.FirstOrDefaultAsync(dish => dish.Id == dishRequest.Id);
-
-                dish.Name = dishRequest.Name;
-                dish.Price = dishRequest.Price;
-                dish.Description = dishRequest.Description;
-                dish.DishCategory = dishCategory;
-
-                await _context.SaveChangesAsync();
-                return dishRequest;
             }
             else
             {
@@ -67,29 +80,54 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Dish> CreateAsync(Dish dish)
         {
-            var restaurant = await _context.Restaurant.FirstOrDefaultAsync(restaurant => restaurant.Id == dish.Restaurant.Id);
-            var dishCategory = await _context.DishCategory.FirstOrDefaultAsync(dishCategory => dishCategory.Id == dish.DishCategory.Id);
-
-            if (restaurant == null || dishCategory == null)
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
             {
-                return null;
+                try
+                {
+                    var restaurant = await _context.Restaurant.FirstOrDefaultAsync(restaurant => restaurant.Id == dish.Restaurant.Id);
+                    var dishCategory = await _context.DishCategory.FirstOrDefaultAsync(dishCategory => dishCategory.Id == dish.DishCategory.Id);
+
+                    if (restaurant == null || dishCategory == null)
+                    {
+                        return null;
+                    }
+
+                    await _context.Dish.AddAsync(dish);
+                    await _context.SaveChangesAsync();
+                    transaction.Commit();
+
+                    return dish;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return null;
+                }
             }
-
-            await _context.Dish.AddAsync(dish);
-            await _context.SaveChangesAsync();
-
-            return dish;
         }
 
         public async Task<Dish> DeleteAsync(string id)
         {
             if (await IfExist(id))
             {
-                var dishContext = await GetAsync(id);
-                var dish = await _context.Dish.FirstOrDefaultAsync(dish => dish.Id == id);
-                _context.Dish.Remove(dish);
-                await _context.SaveChangesAsync();
-                return dishContext;
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var dishContext = await GetAsync(id);
+                        var dish = await _context.Dish.FirstOrDefaultAsync(dish => dish.Id == id);
+                        _context.Dish.Remove(dish);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return dishContext;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -102,7 +140,7 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.Dish.AnyAsync(table => table.Id == id);
         }
 
-        public async Task<Dish> ConvertAlterDishRequest(DishRequest request, string id)
+        public async Task<Dish> ConvertAlterDishRequest(DishRequestDTO request, string id)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
             var dishCategory = await _context.DishCategory.FirstOrDefaultAsync(dishCategory => dishCategory.Id == request.DishCategory);

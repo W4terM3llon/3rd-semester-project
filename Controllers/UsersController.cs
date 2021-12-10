@@ -32,17 +32,17 @@ namespace RestaurantSystem.Controllers
         //GET: api/Users
         [HttpGet]
         [Authorize(Roles = "RestaurantManager, RestaurantEveryDayUse, Customer")]
-        public async Task<ActionResult<User>> GetUsersAsync()
+        public async Task<ActionResult<UserResponseDTO>> GetUsersAsync()
         {
             var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
             var user = await _userRepository.GetAsync(currentUserSystemId);
-            return Ok(user);
+            return Ok((UserResponseDTO)user);
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
         [Authorize(Roles = "RestaurantManager, RestaurantEveryDayUse, Customer")]
-        public async Task<ActionResult<User>> GetUserAsync(string id)
+        public async Task<ActionResult<UserResponseDTO>> GetUserAsync(string id)
         {
             if (!await _userRepository.IfExist(id))
             {
@@ -57,14 +57,14 @@ namespace RestaurantSystem.Controllers
                 return Unauthorized(new { Error = "Can not retrieve another users data" });
             }
 
-            return Ok(user);
+            return Ok((UserResponseDTO)user);
         }
 
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "Customer, RestaurantManager, RestaurantEveryDayUse")]
-        public async Task<ActionResult> PutUserAsync(string id, UserRequest request)
+        public async Task<ActionResult<UserResponseDTO>> PutUserAsync(string id, UserRequestDTO request)
         {
             if (!await _userRepository.IfExist(id))
             {
@@ -81,7 +81,7 @@ namespace RestaurantSystem.Controllers
 
             var updated = await _userRepository.UpdateAsync(user);
 
-            return Ok(updated);
+            return Ok((UserResponseDTO)updated);
         }
 
 

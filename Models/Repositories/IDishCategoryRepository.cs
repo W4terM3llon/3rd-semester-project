@@ -14,6 +14,6 @@ namespace RestaurantSystem.Models.Repositories
         //public Task<DishCategory> UpdateAsync(DishCategory dishCategory);
         //public Task<DishCategory> DeleteAsync(string id);
         public Task<bool> IfExist(string id);
-        public Task<DishCategory> ConvertAlterDishRequest(DishCategoryRequest request);
+        public Task<DishCategory> ConvertAlterDishRequest(DishCategoryRequestDTO request);
     }
 }

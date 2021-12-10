@@ -88,7 +88,7 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.DishCategory.AnyAsync(dishCategory => dishCategory.Id == id);
         }
 
-        public async Task<DishCategory> ConvertAlterDishRequest(DishCategoryRequest request)
+        public async Task<DishCategory> ConvertAlterDishRequest(DishCategoryRequestDTO request)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
 

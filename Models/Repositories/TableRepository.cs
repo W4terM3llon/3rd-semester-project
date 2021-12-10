@@ -5,6 +5,7 @@ using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace RestaurantSystem.Models.Repositories
         }
         public async Task<IEnumerable<Table>> GetAllAsync(string restaurantId)
         {
-            var tables = await _context.Table.Include(table => table.Restaurant).Where(table=>
+            var tables = await _context.Table.Include(table => table.Restaurant).ThenInclude(restaurant => restaurant.Address).Where(table=>
             (table.Restaurant.Id == restaurantId || restaurantId == null)
             ).ToListAsync();
             return tables;
@@ -31,7 +32,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                var table = await _context.Table.Include(table => table.Restaurant).FirstOrDefaultAsync(table => table.Id == id);
+                var table = await _context.Table.Include(table => table.Restaurant).ThenInclude(restaurant => restaurant.Address).FirstOrDefaultAsync(table => table.Id == id);
                 return table;
             }
             else
@@ -43,13 +44,25 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(table.Id))
             {
-                var contextTable = await _context.Table.FirstOrDefaultAsync(table => table.Id== table.Id);
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var contextTable = await _context.Table.FirstOrDefaultAsync(table => table.Id == table.Id);
 
-                contextTable.SeatNumber = table.SeatNumber;
-                contextTable.Description = table.Description;
+                        contextTable.SeatNumber = table.SeatNumber;
+                        contextTable.Description = table.Description;
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
 
-                await _context.SaveChangesAsync();
-                return contextTable;
+                        return contextTable;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -65,20 +78,46 @@ namespace RestaurantSystem.Models.Repositories
                 return null;
             }
 
-            await _context.Table.AddAsync(table);
-            await _context.SaveChangesAsync();
-            return table;
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+            {
+                try
+                {
+                    await _context.Table.AddAsync(table);
+                    await _context.SaveChangesAsync();
+                    transaction.Commit();
+
+                    return table;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return null;
+                }
+            }
         }
 
         public async Task<Table> DeleteAsync(string id)
         {
             if (await IfExist(id))
             {
-                var table = await _context.Table.Include(table => table.Restaurant).FirstOrDefaultAsync(table => table.Id == id);
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var table = await _context.Table.Include(table => table.Restaurant).FirstOrDefaultAsync(table => table.Id == id);
 
-                _context.Table.Remove(table);
-                await _context.SaveChangesAsync();
-                return table;
+                        _context.Table.Remove(table);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return table;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -102,7 +141,7 @@ namespace RestaurantSystem.Models.Repositories
             return true;
         }
 
-        public async Task<Table> ConvertAlterTableRequest(TableRequest request, string id)
+        public async Task<Table> ConvertAlterTableRequest(TableRequestDTO request, string id)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
             if (restaurant == null)

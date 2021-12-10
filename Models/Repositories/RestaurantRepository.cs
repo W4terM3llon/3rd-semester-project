@@ -5,6 +5,7 @@ using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -38,14 +39,27 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(newRestaurantData.Id))
             {
-                var contextRestaurant = await GetAsync(newRestaurantData.Id);
-                contextRestaurant.Name = newRestaurantData.Name;
-                contextRestaurant.IsTableBookingEnabled = newRestaurantData.IsTableBookingEnabled;
-                contextRestaurant.IsDeliveryAvailable = newRestaurantData.IsDeliveryAvailable;
-                contextRestaurant.Address.Street = newRestaurantData.Address.Street;
-                contextRestaurant.Address.Appartment = newRestaurantData.Address.Appartment;
-                await _context.SaveChangesAsync();
-                return newRestaurantData;
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var contextRestaurant = await GetAsync(newRestaurantData.Id);
+                        contextRestaurant.Name = newRestaurantData.Name;
+                        contextRestaurant.IsTableBookingEnabled = newRestaurantData.IsTableBookingEnabled;
+                        contextRestaurant.IsDeliveryAvailable = newRestaurantData.IsDeliveryAvailable;
+                        contextRestaurant.Address.Street = newRestaurantData.Address.Street;
+                        contextRestaurant.Address.Appartment = newRestaurantData.Address.Appartment;
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return newRestaurantData;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -56,44 +70,69 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Restaurant> CreateAsync(Restaurant restaurant, string everyDayUseAccountEmail, string everyDayUseAccountPassword)
         {
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+            {
+                try
+                {
+                    //create EveryDayUseAccount
+                    var everyDayUseAccount = new User()
+                    {
+                        FirstName = "Helper",
+                        LastName = "Account",
+                        Address = null,
+                        Email = everyDayUseAccountEmail,
+                        UserName = everyDayUseAccountEmail,
+                        SystemId = new Random().Next(1, 1000).ToString(),
+                        SecurityStamp = Guid.NewGuid().ToString(),
+                    };
+                    var result = await _userManager.CreateAsync(everyDayUseAccount, everyDayUseAccountPassword);
+                    if (!result.Succeeded)
+                    {
+                        return null;
+                    }
+                    await _userManager.AddToRoleAsync(everyDayUseAccount, "RestaurantEveryDayUse");
 
-            //create EveryDayUseAccount
-            var everyDayUseAccount = new User()
-            {
-                FirstName= "Helper",
-                LastName = "Account",
-                Address = null,
-                Email = everyDayUseAccountEmail,
-                UserName = everyDayUseAccountEmail,
-                SystemId = new Random().Next(1, 1000).ToString(),
-                SecurityStamp = Guid.NewGuid().ToString(),
-            };
-            var result = await _userManager.CreateAsync(everyDayUseAccount, everyDayUseAccountPassword);
-            if (!result.Succeeded)
-            {
-                return null;
+                    restaurant.EveryDayUseAccount = everyDayUseAccount;
+
+                    await _context.Restaurant.AddAsync(restaurant);
+                    await _context.SaveChangesAsync();
+                    transaction.Commit();
+
+                    return restaurant;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return null;
+                }
             }
-            await _userManager.AddToRoleAsync(everyDayUseAccount, "RestaurantEveryDayUse");
-
-            restaurant.EveryDayUseAccount = everyDayUseAccount;
-
-            await _context.Restaurant.AddAsync(restaurant);
-            await _context.SaveChangesAsync();
-            return restaurant;
         }
 
         public async Task<Restaurant> DeleteAsync(string id)
         {
             if (await IfExist(id))
             {
-                var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Address).Include(restaurant => restaurant.EveryDayUseAccount).FirstOrDefaultAsync(restaurant => restaurant.Id == id);
-                var address = restaurant.Address;
-                var everyDayUseAccount = restaurant.EveryDayUseAccount;
-                _context.Restaurant.Remove(restaurant);
-                _context.Address.Remove(address);
-                _context.User.Remove(everyDayUseAccount);
-                await _context.SaveChangesAsync();
-                return restaurant;
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Address).Include(restaurant => restaurant.EveryDayUseAccount).FirstOrDefaultAsync(restaurant => restaurant.Id == id);
+                        var address = restaurant.Address;
+                        var everyDayUseAccount = restaurant.EveryDayUseAccount;
+                        _context.Restaurant.Remove(restaurant);
+                        _context.Address.Remove(address);
+                        _context.User.Remove(everyDayUseAccount);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return restaurant;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -106,7 +145,7 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.Restaurant.AnyAsync(Restaurant => Restaurant.Id == id);
         }
 
-        public async Task<Restaurant> ConvertAlterRestaurantRequest(RestaurantRequest request, string currentUserEmail, string id)
+        public async Task<Restaurant> ConvertAlterRestaurantRequest(RestaurantRequestDTO request, string currentUserEmail, string id)
         {
             var manager = await _context.User.FirstOrDefaultAsync(manager => manager.Email == currentUserEmail);
             var restaurant = new Restaurant()

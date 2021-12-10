@@ -33,7 +33,7 @@ namespace RestaurantSystem.Controllers
         // GET: api/Orders
         [HttpGet]
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<ActionResult<List<Order>>> GetOrder([FromQuery] string restaurantId, [FromQuery] DateTime date, [FromQuery] string userId)
+        public async Task<ActionResult<List<OrderResponseDTO>>> GetOrder([FromQuery] string restaurantId, [FromQuery] DateTime date, [FromQuery] string userId)
         {
             IEnumerable<Order> orders = new List<Order>();
 
@@ -80,13 +80,13 @@ namespace RestaurantSystem.Controllers
                 }
             }
 
-            return Ok(orders);
+            return Ok(orders.Select(b => (OrderResponseDTO)b).ToList());
         }
 
         // GET: api/Orders/5
         [HttpGet("{id}")]
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<ActionResult<Order>> GetOrder(string id)
+        public async Task<ActionResult<OrderResponseDTO>> GetOrder(string id)
         {
             if (!await _orderRepository.IfExist(id))
             {
@@ -114,7 +114,7 @@ namespace RestaurantSystem.Controllers
                 }
             }
 
-            return Ok(order);
+            return Ok((OrderResponseDTO)order);
         }
 
         
@@ -122,7 +122,7 @@ namespace RestaurantSystem.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPatch("{id}")]
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<IActionResult> PatchOrder(string id, string orderStageId)
+        public async Task<ActionResult<OrderResponseDTO>> PatchOrder(string id, string orderStageId)
         {
             
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
@@ -146,7 +146,7 @@ namespace RestaurantSystem.Controllers
 
             var orderSaved = await _orderRepository.PatchAsync(id, orderStageId);
 
-            return NoContent();
+            return Ok((OrderResponseDTO)orderSaved);
         }
         
 
@@ -154,7 +154,7 @@ namespace RestaurantSystem.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "RestaurantManager, Customer")]
-        public async Task<ActionResult<Order>> PostOrder(OrderRequest orderRequest)
+        public async Task<ActionResult<OrderResponseDTO>> PostOrder(OrderRequestDTO orderRequest)
         {
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
@@ -195,7 +195,7 @@ namespace RestaurantSystem.Controllers
 
             var saved = await _orderRepository.CreateAsync(order);
 
-            return CreatedAtAction("GetOrder", new { id = saved.Id }, saved);
+            return CreatedAtAction("GetOrder", new { id = saved.Id }, (OrderResponseDTO)saved);
         }
 
         // DELETE: api/Orders/5

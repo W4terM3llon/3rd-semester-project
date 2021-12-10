@@ -16,6 +16,6 @@ namespace RestaurantSystem.Models.Repositories
         public Task<bool> IfExist(string id);
         public Task<bool> IfPeriodsOverlap(DiningPeriod diningPeriod);
         public bool IfDiningTimeCorrent(DiningPeriod diningPeriod);
-        public Task<DiningPeriod> ConvertAlterDiningPeriodRequest(DiningPeriodRequest request, string id);
+        public Task<DiningPeriod> ConvertAlterDiningPeriodRequest(DiningPeriodRequestDTO request, string id);
     }
 }

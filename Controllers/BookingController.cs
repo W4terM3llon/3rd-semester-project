@@ -31,7 +31,7 @@ namespace RestaurantSystem.Controllers
         // GET: api/Booking
         [HttpGet]
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetBooking([FromQuery] string restaurantId, [FromQuery] DateTime date, [FromQuery] string userId)
+        public async Task<ActionResult<IEnumerable<BookingResponseDTO>>> GetBooking([FromQuery] string restaurantId, [FromQuery] DateTime date, [FromQuery] string userId)
         {
             IEnumerable<Booking> bookings = new List<Booking>();
 
@@ -76,13 +76,13 @@ namespace RestaurantSystem.Controllers
 
             
 
-            return Ok(bookings);
+            return Ok(bookings.Select(b => (BookingResponseDTO)b).ToList());
         }
 
         // GET: api/Booking/5
         [HttpGet("{id}")]
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<ActionResult<Booking>> GetBooking(string id)
+        public async Task<ActionResult<BookingResponseDTO>> GetBooking(string id)
         {
             if (!await _bookingRepository.IfExist(id))
             {
@@ -95,7 +95,7 @@ namespace RestaurantSystem.Controllers
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
             if (userRole == "Customer")
             {
-                if (!await _permissionValidation.isUserTheSameAsync(id, currentUserEmail))
+                if (!await _permissionValidation.isUserTheSameAsync(booking.User.SystemId, currentUserEmail))
                     {
                         return Unauthorized(new { Error = "Can not retrieve another costomers booking" });
                     }
@@ -110,14 +110,14 @@ namespace RestaurantSystem.Controllers
                     }
             }
 
-            return Ok(booking);
+            return Ok((BookingResponseDTO)booking);
         }
 
         // PUT: api/Booking/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "RestaurantManager, Customer")]
-        public async Task<IActionResult> PutBooking(string id, BookingRequest bookingRequest)
+        public async Task<ActionResult<BookingResponseDTO>> PutBooking(string id, BookingRequestDTO bookingRequest)
         {
             if (!await _bookingRepository.IfExist(id))
             {
@@ -161,14 +161,14 @@ namespace RestaurantSystem.Controllers
 
             var updated = await _bookingRepository.UpdateAsync(booking);
 
-            return Ok(updated);
+            return Ok((BookingResponseDTO)updated);
         }
 
         // POST: api/Booking
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "RestaurantManager, Customer")]
-        public async Task<ActionResult<BookingRequest>> PostBooking(BookingRequest bookingRequest)
+        public async Task<ActionResult<BookingResponseDTO>> PostBooking(BookingRequestDTO bookingRequest)
         {
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
@@ -194,14 +194,14 @@ namespace RestaurantSystem.Controllers
                 return BadRequest(new { Error = "Chosen dining period does not belong to the chosen restaurant" });
             }
 
-            if (!await _bookingRepository.IfTimeAvailable(booking))
-            {
-                return Conflict(new { Error = "Booking collides with other bookings in the system" });
-            }
+            //if (!await _bookingRepository.IfTimeAvailable(booking))
+            //{
+            //    return Conflict(new { Error = "Booking collides with other bookings in the system" });
+            //}
 
             var created = await _bookingRepository.CreateAsync(booking);
 
-            return CreatedAtAction("GetBooking", new { id = created.Id }, created);
+            return CreatedAtAction("GetBooking", new { id = created.Id }, (BookingResponseDTO)created);
         }
 
         // DELETE: api/Booking/5

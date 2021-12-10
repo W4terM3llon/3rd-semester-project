@@ -30,8 +30,8 @@ namespace RestaurantSystem.Controllers
                 return BadRequest(new { Error = "Restaurant and date are required" });
             }
 
-            var dishes = await _tableFreePeriodsRepository.GetAllAsync(restaurantId, date);
-            return Ok(dishes);
+            var tableFreePeriods = await _tableFreePeriodsRepository.GetAllAsync(restaurantId, date);
+            return Ok(tableFreePeriods);
         }
     }
 }

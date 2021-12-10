@@ -31,7 +31,7 @@ namespace RestaurantSystem.Controllers
         // GET: api/DiningPeriods
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<DiningPeriod>>> GetDiningPeriod([FromQuery] string restaurantId, string id)
+        public async Task<ActionResult<IEnumerable<DiningPeriodResponseDTO>>> GetDiningPeriod([FromQuery] string restaurantId, string id)
         {
             if (restaurantId == null)
             {
@@ -39,13 +39,13 @@ namespace RestaurantSystem.Controllers
             }
 
             var diningPeriods= await _diningPeriodRepository.GetAllAsync(restaurantId);
-            return Ok(diningPeriods);
+            return Ok(diningPeriods.Select(b => (DiningPeriodResponseDTO)b).ToList());
         }
 
         // GET: api/DiningPeriods/5
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<ActionResult<DiningPeriod>> GetDiningPeriod(string id)
+        public async Task<ActionResult<DiningPeriodResponseDTO>> GetDiningPeriod(string id)
         {
 
             if (!await _diningPeriodRepository.IfExist(id))
@@ -54,14 +54,14 @@ namespace RestaurantSystem.Controllers
             }
 
             var diningPeriod = await _diningPeriodRepository.GetAsync(id);
-            return Ok(diningPeriod);
+            return Ok((DiningPeriodResponseDTO)diningPeriod);
         }
 
         // PUT: api/DiningPeriods/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "RestaurantManager")]
-        public async Task<IActionResult> PutDiningPeriod(string id, DiningPeriodRequest diningPeriodRequest)
+        public async Task<ActionResult<DiningPeriodResponseDTO>> PutDiningPeriod(string id, DiningPeriodRequestDTO diningPeriodRequest)
         {
             if (await _diningPeriodRepository.IfExist(id))
             {
@@ -98,14 +98,14 @@ namespace RestaurantSystem.Controllers
 
             var updatedDiningPeriod = await _diningPeriodRepository.UpdateAsync(diningPeriod);
 
-            return Ok(updatedDiningPeriod);
+            return Ok((DiningPeriodResponseDTO)updatedDiningPeriod);
         }
 
         // POST: api/DiningPeriods
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "RestaurantManager")]
-        public async Task<ActionResult<DiningPeriod>> PostDiningPeriod(DiningPeriodRequest request)
+        public async Task<ActionResult<DiningPeriodResponseDTO>> PostDiningPeriod(DiningPeriodRequestDTO request)
         {
             var diningPeriod = await _diningPeriodRepository.ConvertAlterDiningPeriodRequest(request, null);
             if (diningPeriod == null)
@@ -131,7 +131,7 @@ namespace RestaurantSystem.Controllers
 
             var createdDiningPeriod = await _diningPeriodRepository.CreateAsync(diningPeriod);
 
-            return CreatedAtAction("GetDiningPeriod", new { id = diningPeriod.Id }, diningPeriod);
+            return CreatedAtAction("GetDiningPeriod", new { id = diningPeriod.Id }, (DiningPeriodResponseDTO)diningPeriod);
         }
 
         // DELETE: api/DiningPeriods/5

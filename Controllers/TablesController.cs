@@ -31,36 +31,36 @@ namespace RestaurantSystem.Controllers
         // GET: api/Tables
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<Table>>> GetTableAsync([FromQuery] string restaurantId, string id)
+        public async Task<ActionResult<IEnumerable<TableResponseDTO>>> GetTableAsync([FromQuery] string restaurantId, string id)
         {
             if (restaurantId == null)
             {
                 return BadRequest(new { Error = "Restaurant id required" });
             }
 
-            var restaurants = await _tableRepository.GetAllAsync(restaurantId);
-            return Ok(restaurants);
+            var tables = await _tableRepository.GetAllAsync(restaurantId);
+            return Ok(tables.Select(b => (TableResponseDTO)b).ToList());
         }
 
         // GET: api/Tables/5
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<ActionResult<Table>> GetTableAsync(string id)
+        public async Task<ActionResult<TableResponseDTO>> GetTableAsync(string id)
         {
             if (!await _tableRepository.IfExist(id))
             {
                 return NotFound(new { Error = "Table with given id not found" });
             }
 
-            var restaurant = await _tableRepository.GetAsync(id);
-            return Ok(restaurant);
+            var table = await _tableRepository.GetAsync(id);
+            return Ok((TableResponseDTO)table);
         }
 
         // PUT: api/Tables/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "RestaurantManager")]
-        public async Task<IActionResult> PutTableAsync(string id, TableRequest tableRequest)
+        public async Task<ActionResult<TableResponseDTO>> PutTableAsync(string id, TableRequestDTO tableRequest)
         {
             if (await _tableRepository.IfExist(id))
             {
@@ -87,7 +87,7 @@ namespace RestaurantSystem.Controllers
 
             var updated = await _tableRepository.UpdateAsync(table);
 
-            return Ok(updated);
+            return Ok((TableResponseDTO)updated);
         }
 
         
@@ -96,7 +96,7 @@ namespace RestaurantSystem.Controllers
         
         [HttpPost]
         [Authorize(Roles = "RestaurantManager")]
-        public async Task<ActionResult<Table>> PostTableAsync(TableRequest tableRequest)
+        public async Task<ActionResult<TableResponseDTO>> PostTableAsync(TableRequestDTO tableRequest)
         {
             var table = await _tableRepository.ConvertAlterTableRequest(tableRequest, null);
             if (table == null)
@@ -112,7 +112,7 @@ namespace RestaurantSystem.Controllers
 
             var created = await _tableRepository.CreateAsync(table);
 
-            return CreatedAtAction("GetTable", new { id = created.Id }, created);
+            return CreatedAtAction("GetTable", new { id = created.Id }, (TableResponseDTO)created);
         }
         
 

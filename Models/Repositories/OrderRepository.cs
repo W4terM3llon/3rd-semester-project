@@ -3,6 +3,7 @@ using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -35,26 +36,52 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Order> CreateAsync(Order order)
         {
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+            {
+                try
+                {
+                    var orderStagePersistance = await _context.OrderStage.FirstOrDefaultAsync(os => os.Id == "1"); // Sets order status to processing !! CREATE IN DB
+                    if (orderStagePersistance == null)
+                    {
+                        return null;
+                    }
+                    order.OrderStage = orderStagePersistance;
+                    await _context.Order.AddAsync(order);
+                    await _context.SaveChangesAsync();
+                    transaction.Commit();
 
-            var orderStagePersistance = await _context.OrderStage.FirstOrDefaultAsync(os => os.Id == "1"); // Sets order status to processing !! CREATE IN DB
-            if (orderStagePersistance == null){
-                return null;
+                    return order;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return null;
+                }
             }
-            order.OrderStage = orderStagePersistance;
-            await _context.Order.AddAsync(order);
-            await _context.SaveChangesAsync();
-            return order;
         }
 
         public async Task<Order> DeleteAsync(string id)
         {
             if (await IfExist(id))
             {
-                var orderContext = await GetAsync(id);
-                var order = await _context.Order.FirstOrDefaultAsync(order => order.Id == id);
-                _context.Order.Remove(order);
-                await _context.SaveChangesAsync();
-                return orderContext;
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var orderContext = await GetAsync(id);
+                        var order = await _context.Order.FirstOrDefaultAsync(order => order.Id == id);
+                        _context.Order.Remove(order);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return orderContext;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -68,12 +95,25 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(orderId))
             {
-                var orderPersistance = await _context.Order.FirstOrDefaultAsync(order => order.Id == order.Id);
-                var orderStagePersistance = await _context.OrderStage.FirstOrDefaultAsync(os => os.Id == orderStageId);
-                orderPersistance.OrderStage = orderStagePersistance;
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var orderPersistance = await _context.Order.FirstOrDefaultAsync(order => order.Id == order.Id);
+                        var orderStagePersistance = await _context.OrderStage.FirstOrDefaultAsync(os => os.Id == orderStageId);
+                        orderPersistance.OrderStage = orderStagePersistance;
 
-                await _context.SaveChangesAsync();
-                return orderPersistance;
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return orderPersistance;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -87,7 +127,7 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.Order.AnyAsync(order => order.Id == id);
         }
 
-        public bool ifOrderlinesUnique(List<OrderLineRequest> orderLines)
+        public bool ifOrderlinesUnique(List<OrderLineRequestDTO> orderLines)
         {
             List<string> dishes = new List<string>();
             foreach (var orderLine in orderLines)
@@ -105,7 +145,7 @@ namespace RestaurantSystem.Models.Repositories
             return true;
         }
 
-        public bool ifOrderlinesQuantityQuantityCorrect(List<OrderLineRequest> orderLines)
+        public bool ifOrderlinesQuantityQuantityCorrect(List<OrderLineRequestDTO> orderLines)
         {
             foreach (var orderLine in orderLines)
             {
@@ -118,7 +158,7 @@ namespace RestaurantSystem.Models.Repositories
             return true;
         }
 
-        public async Task<Order> ConvertAlterOrderRequest(OrderRequest request, string id)
+        public async Task<Order> ConvertAlterOrderRequest(OrderRequestDTO request, string id)
         {
             //var discount = await _context.Discount.FirstOrDefaultAsync(discount => discount.Id == request.Discount);
             var customer = await _context.User.FirstOrDefaultAsync(customer => customer.SystemId == request.Customer);

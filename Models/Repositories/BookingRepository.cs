@@ -3,6 +3,7 @@ using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<IEnumerable<Booking>> GetAllAsync(string restaurantId, DateTime date, string userId)
         {
-            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).Include(booking => booking.Restaurant).Include(booking => booking.Table).Where(booking =>
+            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).ThenInclude(user => user.Address).Include(booking => booking.DiningPeriod).Include(booking => booking.Restaurant).ThenInclude(restaurant => restaurant.Address).Where(booking =>
             (booking.Restaurant.Id == restaurantId || restaurantId == null) &&
             (booking.User.SystemId == userId || userId == null) &&
             ((booking.Date.Year == date.Year && booking.Date.Month == date.Month && booking.Date.Day == date.Day) || date == DateTime.MinValue)
@@ -30,22 +31,35 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Booking> GetAsync(string id)
         {
-            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).Include(booking => booking.DiningPeriod).Include(booking => booking.Table).Include(booking => booking.Restaurant).FirstOrDefaultAsync(booking => booking.Id == id);
+            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).ThenInclude(user => user.Address).Include(booking => booking.DiningPeriod).Include(booking => booking.Restaurant).ThenInclude(restaurant => restaurant.Address).FirstOrDefaultAsync(booking => booking.Id == id);
         }
 
         public async Task<Booking> UpdateAsync(Booking booking)
         {
             if (await IfExist(booking.Id) && await IfTimeAvailable(booking))
             {
-                var date = new DateTime(booking.Date.Year, booking.Date.Month, booking.Date.Day);
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var date = new DateTime(booking.Date.Year, booking.Date.Month, booking.Date.Day);
 
-                var contextBooking = await GetAsync(booking.Id);
-                contextBooking.Date = date;
-                contextBooking.DiningPeriod = booking.DiningPeriod;
-                contextBooking.Table = booking.Table;
+                        var contextBooking = await GetAsync(booking.Id);
+                        contextBooking.Date = date;
+                        contextBooking.DiningPeriod = booking.DiningPeriod;
+                        contextBooking.Table = booking.Table;
 
-                await _context.SaveChangesAsync();
-                return booking;
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return booking;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -58,9 +72,22 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfTimeAvailable(booking))
             {
-                await _context.Booking.AddAsync(booking);
-                await _context.SaveChangesAsync();
-                return booking;
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        await _context.Booking.AddAsync(booking);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return booking;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -72,10 +99,23 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                var booking = await GetAsync(id);
-                _context.Booking.Remove(booking);
-                await _context.SaveChangesAsync();
-                return booking;
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var booking = await GetAsync(id);
+                        _context.Booking.Remove(booking);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return booking;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -90,7 +130,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<bool> IfTimeAvailable(Booking bookingPretender)
         {
-            if (await _context.Booking.AnyAsync(booking => booking.Date == bookingPretender.Date && booking.Table == bookingPretender.Table && booking.DiningPeriod == bookingPretender.DiningPeriod && booking.Id != bookingPretender.Id))
+            if (await _context.Booking.AnyAsync(booking => booking.Date == bookingPretender.Date && booking.Table == bookingPretender.Table && booking.DiningPeriod == bookingPretender.DiningPeriod))
             {
                 return false;
             }
@@ -100,7 +140,7 @@ namespace RestaurantSystem.Models.Repositories
             }
         }
 
-        public async Task<Booking> ConvertAlterBookingRequest(BookingRequest request, string id)
+        public async Task<Booking> ConvertAlterBookingRequest(BookingRequestDTO request, string id)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
             var table = await _context.Table.FirstOrDefaultAsync(table => table.Id == request.Table);

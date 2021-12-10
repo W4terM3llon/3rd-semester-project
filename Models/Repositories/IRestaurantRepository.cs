@@ -14,6 +14,6 @@ namespace RestaurantSystem.Models.Repositories
         public Task<Restaurant> UpdateAsync(Restaurant user);
         public Task<Restaurant> DeleteAsync(string id);
         public Task<bool> IfExist(string id);
-        public Task<Restaurant> ConvertAlterRestaurantRequest(RestaurantRequest request, string currentUserEmail, string id);
+        public Task<Restaurant> ConvertAlterRestaurantRequest(RestaurantRequestDTO request, string currentUserEmail, string id);
     }
 }

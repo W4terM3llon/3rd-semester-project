@@ -3,6 +3,7 @@ using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -32,17 +33,30 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(newDiscountData.Id))
             {
-                var contextDiscount = await GetAsync(newDiscountData.Id);
-                contextDiscount.Code = newDiscountData.Code;
-                contextDiscount.Type = newDiscountData.Type;
-                contextDiscount.Value = newDiscountData.Value;
-                contextDiscount.StartDate = newDiscountData.StartDate;
-                contextDiscount.ExpiryDate = newDiscountData.ExpiryDate;
-                contextDiscount.ExpiryDate = newDiscountData.ExpiryDate;
-                contextDiscount.isDisposable = newDiscountData.isDisposable;
-                // contextDiscount.Order.Payment = newDiscountData.Order.Payment;
-                await _context.SaveChangesAsync();
-                return newDiscountData;
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var contextDiscount = await GetAsync(newDiscountData.Id);
+                        contextDiscount.Code = newDiscountData.Code;
+                        contextDiscount.Type = newDiscountData.Type;
+                        contextDiscount.Value = newDiscountData.Value;
+                        contextDiscount.StartDate = newDiscountData.StartDate;
+                        contextDiscount.ExpiryDate = newDiscountData.ExpiryDate;
+                        contextDiscount.ExpiryDate = newDiscountData.ExpiryDate;
+                        contextDiscount.isDisposable = newDiscountData.isDisposable;
+                        // contextDiscount.Order.Payment = newDiscountData.Order.Payment;
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return newDiscountData;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -52,18 +66,44 @@ namespace RestaurantSystem.Models.Repositories
         }
         public async Task<Discount> CreateAsync(Discount discount)
         {
-            await _context.Discount.AddAsync(discount);
-            await _context.SaveChangesAsync();
-            return discount;
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+            {
+                try
+                {
+                    await _context.Discount.AddAsync(discount);
+                    await _context.SaveChangesAsync();
+                    transaction.Commit();
+
+                    return discount;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return null;
+                }
+            }
         }
         public async Task<Discount> DeleteAsync(string id)
         {
             if (await IfExist(id))
             {
-                var discount = await GetAsync(id);
-                _context.Discount.Remove(discount);
-                await _context.SaveChangesAsync();
-                return discount;
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var discount = await GetAsync(id);
+                        _context.Discount.Remove(discount);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return discount;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {

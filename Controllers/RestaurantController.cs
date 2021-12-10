@@ -31,16 +31,16 @@ namespace RestaurantSystem.Controllers
         // GET: api/Restaurants
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<Restaurant>>> GetRestaurantsAsync()
+        public async Task<ActionResult<IEnumerable<RestaurantResponseDTO>>> GetRestaurantsAsync()
         {
             var restaurants = await _restaurantRepository.GetAllAsync();
-            return Ok(restaurants);
+            return Ok(restaurants.Select(b => (RestaurantResponseDTO)b).ToList());
         }
 
         // GET: api/Restaurants/5
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<ActionResult<Restaurant>> GetRestaurantAsync(string id)
+        public async Task<ActionResult<RestaurantResponseDTO>> GetRestaurantAsync(string id)
         {
             if (!await _restaurantRepository.IfExist(id))
             {
@@ -48,14 +48,14 @@ namespace RestaurantSystem.Controllers
             }
 
             var restaurant = await _restaurantRepository.GetAsync(id);
-            return Ok(restaurant);
+            return Ok((RestaurantResponseDTO)restaurant);
         }
 
         // PUT: api/Restaurants/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "RestaurantManager")]
-        public async Task<ActionResult> PutRestaurantAsync(string id, RestaurantRequest request)
+        public async Task<ActionResult<RestaurantResponseDTO>> PutRestaurantAsync(string id, RestaurantRequestDTO request)
         {
             if (!await _restaurantRepository.IfExist(id))
             {
@@ -71,14 +71,14 @@ namespace RestaurantSystem.Controllers
             var restaurant = await _restaurantRepository.ConvertAlterRestaurantRequest(request, currentUserEmail, id);
             var returnedRestaurant = await _restaurantRepository.UpdateAsync(restaurant);
 
-            return Ok(returnedRestaurant);
+            return Ok((RestaurantResponseDTO)returnedRestaurant);
         }
 
         // POST: api/Restaurants
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "RestaurantManager")]
-        public async Task<ActionResult<Restaurant>> PostRestaurantAsync(RestaurantRequest request)
+        public async Task<ActionResult<RestaurantResponseDTO>> PostRestaurantAsync(RestaurantRequestDTO request)
         {
             var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
             var restaurant = await _restaurantRepository.ConvertAlterRestaurantRequest(request, currentUserEmail, null);
@@ -89,7 +89,7 @@ namespace RestaurantSystem.Controllers
                 return BadRequest(new { Error = "Could not create restaurant, email and password for every day use account may already exist are incorrect" });
             }
 
-            return CreatedAtAction("GetRestaurant", new { id = created.Id }, created);
+            return CreatedAtAction("GetRestaurant", new { id = created.Id }, (RestaurantResponseDTO)created);
         }
 
         // DELETE: api/Restaurants/5

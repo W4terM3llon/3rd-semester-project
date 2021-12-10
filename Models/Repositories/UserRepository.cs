@@ -5,6 +5,7 @@ using RestaurantSystem.Data;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -38,18 +39,31 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(userData.SystemId))
             {
-                User user = await GetAsync(userData.SystemId);
-                user.FirstName = userData.FirstName;
-                user.LastName = userData.LastName;
-                user.Address.Street = userData.Address.Street;
-                user.Address.Appartment = userData.Address.Appartment;
-                user.PhoneNumber = userData.PhoneNumber;
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        User user = await _context.User.Include(user => user.Address).FirstOrDefaultAsync(user => user.SystemId == userData.SystemId);
+                        user.FirstName = userData.FirstName;
+                        user.LastName = userData.LastName;
+                        user.Address.Street = userData.Address.Street;
+                        user.Address.Appartment = userData.Address.Appartment;
+                        user.PhoneNumber = userData.PhoneNumber;
 
-                await _userManager.UpdateAsync(user);
-                await _context.SaveChangesAsync();
-                return user;
+                        await _userManager.UpdateAsync(user);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return user;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
-            else 
+            else
             {
                 return null;
             }
@@ -59,14 +73,27 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                var user = await GetAsync(id);
-                var address = user.Address;
-                await _userManager.DeleteAsync(user);
-                _context.Address.Remove(address);
-                await _context.SaveChangesAsync();
-                return user;
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var user = await _context.User.Include(user => user.Address).FirstOrDefaultAsync(user => user.SystemId == id);
+                        var address = user.Address;
+                        await _userManager.DeleteAsync(user);
+                        _context.Address.Remove(address);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return user;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
-            else 
+            else
             {
                 return null;
             }
@@ -77,17 +104,18 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.User.AnyAsync(user => user.SystemId == id);
         }
 
-        public async Task<User> ConvertAlterUserRequest(UserRequest request, string id)
+        public async Task<User> ConvertAlterUserRequest(UserRequestDTO request, string id)
         {
             var user = new User()
             {
                 SystemId = id != null ? id : new Random().Next(1, 1000).ToString(),
                 FirstName = request.FirstName,
                 LastName = request.LastName,
+                PhoneNumber = request.PhoneNumber,
                 Address = new Address()
                 {
-                    Street = request.AccountingAddress.Street,
-                    Appartment = request.AccountingAddress.Appartment
+                    Street = request.Address.Street,
+                    Appartment = request.Address.Appartment
                 }
             };
 

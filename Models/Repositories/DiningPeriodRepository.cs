@@ -3,6 +3,7 @@ using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace RestaurantSystem.Models.Repositories
         }
         public async Task<IEnumerable<DiningPeriod>> GetAllAsync(string restaurantId)
         {
-            var diningPeriods = await _context.DiningPeriod.Include(diningPeriod => diningPeriod.Restaurant).Where(diningPeriod=>
+            var diningPeriods = await _context.DiningPeriod.Include(diningPeriod => diningPeriod.Restaurant).ThenInclude(restaurant => restaurant.Address).Where(diningPeriod=>
                 (diningPeriod.Restaurant.Id == restaurantId || restaurantId == null)
             ).ToListAsync();
             return diningPeriods;
@@ -28,7 +29,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                var diningPeriod = await _context.DiningPeriod.Include(diningPeriod => diningPeriod.Restaurant).FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == id);
+                var diningPeriod = await _context.DiningPeriod.Include(diningPeriod => diningPeriod.Restaurant).ThenInclude(restaurant => restaurant.Address).FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == id);
                 return diningPeriod;
             }
             else
@@ -42,12 +43,26 @@ namespace RestaurantSystem.Models.Repositories
             {
                 return null;
             }
-            var diningPeriodContext = await _context.DiningPeriod.FirstOrDefaultAsync(dp => dp.Id == diningPeriod.Id);
-            diningPeriodContext.TimeStartMinutes = diningPeriod.TimeStartMinutes;
-            diningPeriodContext.DurationMinutes = diningPeriod.DurationMinutes;
-            diningPeriodContext.Name = diningPeriod.Name;
-            await _context.SaveChangesAsync();
-            return diningPeriodContext;
+
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+            {
+                try
+                {
+                    var diningPeriodContext = await _context.DiningPeriod.FirstOrDefaultAsync(dp => dp.Id == diningPeriod.Id);
+                    diningPeriodContext.TimeStartMinutes = diningPeriod.TimeStartMinutes;
+                    diningPeriodContext.DurationMinutes = diningPeriod.DurationMinutes;
+                    diningPeriodContext.Name = diningPeriod.Name;
+                    await _context.SaveChangesAsync();
+                    transaction.Commit();
+
+                    return diningPeriodContext;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return null;
+                }
+            }
         }
         public async Task<DiningPeriod> CreateAsync(DiningPeriod diningPeriod)
         {
@@ -57,20 +72,47 @@ namespace RestaurantSystem.Models.Repositories
             {
                 return null;
             }
-            await _context.DiningPeriod.AddAsync(diningPeriod);
-            await _context.SaveChangesAsync();
-            return diningPeriod;
+
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+            {
+                try
+                {
+                    await _context.DiningPeriod.AddAsync(diningPeriod);
+                    await _context.SaveChangesAsync();
+                    transaction.Commit();
+
+                    return diningPeriod;
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return null;
+                }
+            }
         }
 
         public async Task<DiningPeriod> DeleteAsync(string id)
         {
             if (await IfExist(id))
             {
-                var diningPeriod = await _context.DiningPeriod.FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == id);
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var diningPeriod = await _context.DiningPeriod.FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == id);
 
-                _context.DiningPeriod.Remove(diningPeriod);
-                await _context.SaveChangesAsync();
-                return diningPeriod;
+                        _context.DiningPeriod.Remove(diningPeriod);
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+
+                        return diningPeriod;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        return null;
+                    }
+                }
             }
             else
             {
@@ -122,7 +164,7 @@ namespace RestaurantSystem.Models.Repositories
             }
         }
 
-        public async Task<DiningPeriod> ConvertAlterDiningPeriodRequest(DiningPeriodRequest request, string id)
+        public async Task<DiningPeriod> ConvertAlterDiningPeriodRequest(DiningPeriodRequestDTO request, string id)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
             if (restaurant == null)

@@ -31,7 +31,7 @@ namespace RestaurantSystem.Controllers
         // GET: api/Dishes
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<Dish>>> GetDish([FromQuery] string restaurantId, string id)
+        public async Task<ActionResult<IEnumerable<DishResponseDTO>>> GetDish([FromQuery] string restaurantId, string id)
         {
             if (restaurantId == null)
             {
@@ -39,13 +39,13 @@ namespace RestaurantSystem.Controllers
             }
 
             var dishes = await _dishRepository.GetAllAsync(restaurantId);
-            return Ok(dishes);
+            return Ok(dishes.Select(b => (DishResponseDTO)b).ToList());
         }
 
         // GET: api/Dishes/5
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<ActionResult<Dish>> GetDish(string id)
+        public async Task<ActionResult<DishResponseDTO>> GetDish(string id)
         {
             if (!await _dishRepository.IfExist(id))
             {
@@ -54,14 +54,14 @@ namespace RestaurantSystem.Controllers
 
             var dish = await _dishRepository.GetAsync(id);
 
-            return Ok(dish);
+            return Ok((DishResponseDTO)dish);
         }
 
         // PUT: api/Dishes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "RestaurantManager")]
-        public async Task<IActionResult> PutDish(string id, DishRequest dishRequest)
+        public async Task<ActionResult<DishResponseDTO>> PutDish(string id, DishRequestDTO dishRequest)
         {
             if (!await _dishRepository.IfExist(id))
             {
@@ -88,14 +88,14 @@ namespace RestaurantSystem.Controllers
 
             var updatedDish = await _dishRepository.UpdateAsync(dish);
 
-            return Ok(updatedDish);
+            return Ok((DishResponseDTO)updatedDish);
         }
 
         // POST: api/Dishes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "RestaurantManager")]
-        public async Task<IActionResult> PostDish(DishRequest dishRequest)
+        public async Task<ActionResult<DishResponseDTO>> PostDish(DishRequestDTO dishRequest)
         {
             var booking = await _dishRepository.ConvertAlterDishRequest(dishRequest, null);
             if (booking == null)
@@ -111,7 +111,7 @@ namespace RestaurantSystem.Controllers
 
             var dish = await _dishRepository.CreateAsync(booking);
 
-            return CreatedAtAction("GetDish", new { id = dish.Id }, dish);
+            return CreatedAtAction("GetDish", new { id = dish.Id }, (DishResponseDTO)dish);
         }
 
         // DELETE: api/Dishes/5

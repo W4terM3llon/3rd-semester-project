@@ -32,15 +32,15 @@ namespace RestaurantSystem.Controllers
         // GET: api/DishCategories
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<DishCategory>>> GetDishCategory()
+        public async Task<ActionResult<IEnumerable<DishCategoryResponseDTO>>> GetDishCategory()
         {
             var dishCategories = await _dishCategoryRepository.GetAllAsync();
-            return Ok(dishCategories);
+            return Ok(dishCategories.Select(b => (DishCategoryResponseDTO)b).ToList());
         }
         // GET: api/DishCategories/5
         [HttpGet("{id}")]
         [AllowAnonymous]
-        public async Task<ActionResult<DishCategory>> GetDishCategory(string id)
+        public async Task<ActionResult<DishCategoryResponseDTO>> GetDishCategory(string id)
         {
             var dishCategory = await _dishCategoryRepository.GetAsync(id);
 
@@ -49,7 +49,7 @@ namespace RestaurantSystem.Controllers
                 return NotFound(new { Error = "Dish with given id not found" });
             }
 
-            return Ok(dishCategory);
+            return Ok((DishCategoryResponseDTO)dishCategory);
         }
         /*
 

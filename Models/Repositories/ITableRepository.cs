@@ -14,6 +14,6 @@ namespace RestaurantSystem.Models.Repositories
         public Task<Table> UpdateAsync(Table table);
         public Task<Table> DeleteAsync(string id);
         public Task<bool> IfExist(string id);
-        public Task<Table> ConvertAlterTableRequest(TableRequest request, string id);
+        public Task<Table> ConvertAlterTableRequest(TableRequestDTO request, string id);
     }
 }

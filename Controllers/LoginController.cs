@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using RestaurantSystem.Models;
+using RestaurantSystem.Models.Requests;
 using RestaurantSystem.Services;
 using System;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace RestaurantSystem.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login([FromBody] Login model)
+        public async Task<IActionResult> Login([FromBody] LoginDTO model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email); //Email is the username too
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
@@ -72,7 +73,7 @@ namespace RestaurantSystem.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromBody] Register model)
+        public async Task<IActionResult> Register([FromBody] RegisterDTO model)
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
@@ -113,29 +114,5 @@ namespace RestaurantSystem.Controllers
 
             return CreatedAtAction("Login", new { id = user.SystemId }, new { Success="User registered" });
         }
-
-        //Implement refresh token later
-        /*
-        [HttpPost]
-        [Route("refresh")]
-        public IActionResult Refresh(string token, string refreshToken)
-        {
-            var principal = _tokenService.GetPrincipalFromExpiredToken(token);
-            var username = principal.Identity.Name;
-            var savedRefreshToken = GetRefreshToken(username); //retrieve the refresh token from a data store
-            if (savedRefreshToken != refreshToken)
-                throw new SecurityTokenException("Invalid refresh token");
-
-            var newJwtToken = _tokenService.GenerateToken(principal.Claims);
-            var newRefreshToken = _tokenService.GenerateRefreshToken();
-            DeleteRefreshToken(username, refreshToken);
-            SaveRefreshToken(username, newRefreshToken);
-
-            return new ObjectResult(new
-            {
-                token = newJwtToken,
-                refreshToken = newRefreshToken
-            });
-        }*/
     }
 }

@@ -63,6 +63,7 @@ C:\Users\Adrian- Admin\Desktop\Restaurant system new\obj\Debug\net5.0\Restaurant
 C:\Users\Adrian- Admin\Desktop\Restaurant system new\obj\Debug\net5.0\ref\Restaurant system new.dll
 C:\Users\Adrian- Admin\Desktop\Restaurant system new\obj\Debug\net5.0\Restaurant system new.pdb
 C:\Users\Adrian- Admin\Desktop\Restaurant system new\obj\Debug\net5.0\Restaurant system new.genruntimeconfig.cache
+<<<<<<< Updated upstream
 C:\Users\matej\Desktop\3rd-semester-project\3rd-semester-project\bin\Debug\net5.0\appsettings.Development.json
 C:\Users\matej\Desktop\3rd-semester-project\3rd-semester-project\bin\Debug\net5.0\appsettings.json
 C:\Users\matej\Desktop\3rd-semester-project\3rd-semester-project\bin\Debug\net5.0\Restaurant system new.exe
@@ -129,3 +130,83 @@ C:\Users\matej\Desktop\3rd-semester-project\3rd-semester-project\obj\Debug\net5.
 C:\Users\matej\Desktop\3rd-semester-project\3rd-semester-project\obj\Debug\net5.0\ref\Restaurant system new.dll
 C:\Users\matej\Desktop\3rd-semester-project\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.pdb
 C:\Users\matej\Desktop\3rd-semester-project\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.genruntimeconfig.cache
+=======
+C:\Users\Adrian- Admin\Desktop\Restaurant system new\bin\Debug\net5.0\Newtonsoft.Json.dll
+C:\Users\Adrian- Admin\Desktop\Restaurant system new\bin\Debug\net5.0\SendGrid.dll
+C:\Users\Adrian- Admin\Desktop\Restaurant system new\bin\Debug\net5.0\StarkbankEcdsa.dll
+C:\Users\Adrian- Admin\Desktop\Restaurant system new\bin\Debug\net5.0\MailKit.dll
+C:\Users\Adrian- Admin\Desktop\Restaurant system new\bin\Debug\net5.0\MimeKit.dll
+C:\Users\Adrian- Admin\Desktop\Restaurant system new\bin\Debug\net5.0\BouncyCastle.Crypto.dll
+>>>>>>> Stashed changes
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.csproj.AssemblyReference.cache
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.AssemblyInfoInputs.cache
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.AssemblyInfo.cs
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.csproj.CoreCompileInputs.cache
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\ref\Restaurant system new.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.pdb
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\appsettings.json
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\appsettings.Development.json
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Restaurant system new.exe
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Restaurant system new.deps.json
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Restaurant system new.runtimeconfig.json
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Restaurant system new.runtimeconfig.dev.json
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Restaurant system new.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\ref\Restaurant system new.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Restaurant system new.pdb
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Humanizer.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\MailKit.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.AspNetCore.Cryptography.Internal.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.Data.SqlClient.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Design.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Relational.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.SqlServer.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.Extensions.Identity.Core.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.Extensions.Identity.Stores.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.Identity.Client.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Microsoft.OpenApi.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\MimeKit.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Newtonsoft.Json.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\BouncyCastle.Crypto.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\SendGrid.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\StarkbankEcdsa.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\System.Configuration.ConfigurationManager.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\System.Diagnostics.DiagnosticSource.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\System.Runtime.Caching.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\unix\lib\netcoreapp3.1\Microsoft.Data.SqlClient.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\win\lib\netcoreapp3.1\Microsoft.Data.SqlClient.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.pdb
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.pdb
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.pdb
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.pdb
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\win\lib\netstandard2.0\System.Runtime.Caching.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\bin\Debug\net5.0\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\staticwebassets\Restaurant system new.StaticWebAssets.Manifest.cache
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\staticwebassets\Restaurant system new.StaticWebAssets.xml
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\scopedcss\bundle\Restaurant system new.styles.css
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.RazorTargetAssemblyInfo.cache
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.csproj.CopyComplete
+C:\Users\Adrian- Admin\Desktop\restaurant group repo\3rd-semester-project\obj\Debug\net5.0\Restaurant system new.genruntimeconfig.cache
