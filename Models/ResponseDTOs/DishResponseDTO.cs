@@ -12,6 +12,7 @@ namespace RestaurantSystem.Models
         public string Id { get; set; }
         public string Name { get; set; }
         public float Price { get; set; }
+        public int Likes { get; set; }
         public string Description { get; set; }
         public DishCategoryResponseDTO DishCategory {get; set;}
         public RestaurantResponseDTO Restaurant { get; set; }
@@ -30,6 +31,7 @@ namespace RestaurantSystem.Models
                     Id = dish.Id,
                     Name = dish.Name,
                     Price = dish.Price,
+                    Likes = dish.Likes,
                     Description = dish.Description,
                     DishCategory = (DishCategoryResponseDTO)dish.DishCategory,
                     Restaurant = (RestaurantResponseDTO)dish.Restaurant

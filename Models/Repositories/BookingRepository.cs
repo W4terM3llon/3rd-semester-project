@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
+using RestaurantSystem.Services;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RestaurantSystem.Models.Repositories
@@ -36,62 +38,47 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Booking> UpdateAsync(Booking booking)
         {
-            if (await IfExist(booking.Id) && await IfTimeAvailable(booking))
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                try
                 {
-                    try
-                    {
-                        var date = new DateTime(booking.Date.Year, booking.Date.Month, booking.Date.Day);
+                    var date = new DateTime(booking.Date.Year, booking.Date.Month, booking.Date.Day);
 
-                        var contextBooking = await GetAsync(booking.Id);
-                        contextBooking.Date = date;
-                        contextBooking.DiningPeriod = booking.DiningPeriod;
-                        contextBooking.Table = booking.Table;
+                    var contextBooking = await GetAsync(booking.Id);
+                    contextBooking.Date = date;
+                    contextBooking.DiningPeriod = booking.DiningPeriod;
+                    contextBooking.Table = booking.Table;
 
-                        await _context.SaveChangesAsync();
-                        transaction.Commit();
+                    await _context.SaveChangesAsync();
+                    transaction.Commit();
 
-                        return booking;
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        return null;
-                    }
+                    return booking;
+                }
+                catch (DbUpdateException ex)
+                {
+                    transaction.Rollback();
+                    throw;
                 }
             }
-            else
-            {
-                return null;
-            }
-
         }
 
         public async Task<Booking> CreateAsync(Booking booking)
         {
-            if (await IfTimeAvailable(booking))
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                try
                 {
-                    try
-                    {
-                        await _context.Booking.AddAsync(booking);
-                        await _context.SaveChangesAsync();
-                        transaction.Commit();
+                    await _context.Booking.AddAsync(booking);
+                    int sth = await _context.SaveChangesAsync();
+                    transaction.Commit();
 
-                        return booking;
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        return null;
-                    }
+                    return booking;
                 }
-            }
-            else
-            {
-                return null;
+                catch (DbUpdateException ex)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
             }
         }
 
@@ -99,7 +86,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
                 {
                     try
                     {
@@ -110,7 +97,7 @@ namespace RestaurantSystem.Models.Repositories
 
                         return booking;
                     }
-                    catch (Exception ex)
+                    catch (DbUpdateException ex)
                     {
                         transaction.Rollback();
                         return null;
@@ -126,18 +113,6 @@ namespace RestaurantSystem.Models.Repositories
         public async Task<bool> IfExist(string id)
         {
             return await _context.Booking.AnyAsync(booking => booking.Id == id);
-        }
-
-        public async Task<bool> IfTimeAvailable(Booking bookingPretender)
-        {
-            if (await _context.Booking.AnyAsync(booking => booking.Date == bookingPretender.Date && booking.Table == bookingPretender.Table && booking.DiningPeriod == bookingPretender.DiningPeriod))
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
         }
 
         public async Task<Booking> ConvertAlterBookingRequest(BookingRequestDTO request, string id)

@@ -29,20 +29,5 @@ namespace RestaurantSystem.Controllers
             var orderStages = await _orderStageRepository.GetAllAsync();
             return Ok(orderStages.Select(b => (OrderStageResponseDTO)b).ToList());
         }
-
-        // GET: api/OrderStages/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<OrderStageResponseDTO>> GetOrderStage(string id)
-        {
-            if (!await _orderStageRepository.IfExist(id))
-            {
-                return NotFound(new { Error = "Order stage with given id not found" });
-            }
-            var orderStage = await _orderStageRepository.GetAsync(id);
-
-            return (OrderStageResponseDTO)orderStage;
-        }
-
-
     }
 }

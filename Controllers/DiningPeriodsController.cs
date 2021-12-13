@@ -31,7 +31,7 @@ namespace RestaurantSystem.Controllers
         // GET: api/DiningPeriods
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<DiningPeriodResponseDTO>>> GetDiningPeriod([FromQuery] string restaurantId, string id)
+        public async Task<ActionResult<IEnumerable<DiningPeriodResponseDTO>>> GetDiningPeriod([FromQuery] string restaurantId)
         {
             if (restaurantId == null)
             {
@@ -42,23 +42,7 @@ namespace RestaurantSystem.Controllers
             return Ok(diningPeriods.Select(b => (DiningPeriodResponseDTO)b).ToList());
         }
 
-        // GET: api/DiningPeriods/5
-        [HttpGet("{id}")]
-        [AllowAnonymous]
-        public async Task<ActionResult<DiningPeriodResponseDTO>> GetDiningPeriod(string id)
-        {
-
-            if (!await _diningPeriodRepository.IfExist(id))
-            {
-                return NotFound(new { Error = "Dining period with given id not found" });
-            }
-
-            var diningPeriod = await _diningPeriodRepository.GetAsync(id);
-            return Ok((DiningPeriodResponseDTO)diningPeriod);
-        }
-
         // PUT: api/DiningPeriods/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "RestaurantManager")]
         public async Task<ActionResult<DiningPeriodResponseDTO>> PutDiningPeriod(string id, DiningPeriodRequestDTO diningPeriodRequest)
@@ -74,8 +58,8 @@ namespace RestaurantSystem.Controllers
                 return BadRequest(new { Error = "Restaurant can not be changed" });
             }
 
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            if (!await _permissionValidation.isManagerDiningPeriodOwnerAsync(id, currentUserEmail))
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+            if (!await _permissionValidation.isManagerDiningPeriodOwnerAsync(id, currentUserSystemId))
             {
                 return Unauthorized(new { Error = "This dining period does not belong to your restaurant" });
             }
@@ -102,7 +86,6 @@ namespace RestaurantSystem.Controllers
         }
 
         // POST: api/DiningPeriods
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "RestaurantManager")]
         public async Task<ActionResult<DiningPeriodResponseDTO>> PostDiningPeriod(DiningPeriodRequestDTO request)
@@ -113,8 +96,8 @@ namespace RestaurantSystem.Controllers
                 return NotFound(new { Error = "One of dining period dependencies not found" });
             }
 
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(request.Restaurant, currentUserEmail))
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(request.Restaurant, currentUserSystemId))
             {
                 return Unauthorized(new { Error = "Restaurant with given Id is not yours" });
             }
@@ -141,8 +124,8 @@ namespace RestaurantSystem.Controllers
         {
             if (await _diningPeriodRepository.IfExist(id))
             {
-                var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-                if (!await _permissionValidation.isManagerDiningPeriodOwnerAsync(id, currentUserEmail))
+                var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+                if (!await _permissionValidation.isManagerDiningPeriodOwnerAsync(id, currentUserSystemId))
                 {
                     return Unauthorized(new { Error = "This dining period does not belong to your restaurant" });
                 }

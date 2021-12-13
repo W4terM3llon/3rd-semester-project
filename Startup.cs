@@ -39,6 +39,7 @@ namespace RestaurantSystem
 
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IPermissionValidation, PermissionValidation>();
+            services.AddScoped<IPasswordHasher<User>, CustomPasswordHasher>();
 
             services.AddScoped<IBookingRepository, BookingRepository>();
             services.AddScoped<IDiningPeriodRepository, DiningPeriodRepository>();

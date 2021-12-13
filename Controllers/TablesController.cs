@@ -31,7 +31,7 @@ namespace RestaurantSystem.Controllers
         // GET: api/Tables
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<TableResponseDTO>>> GetTableAsync([FromQuery] string restaurantId, string id)
+        public async Task<ActionResult<IEnumerable<TableResponseDTO>>> GetTableAsync([FromQuery] string restaurantId)
         {
             if (restaurantId == null)
             {
@@ -42,22 +42,7 @@ namespace RestaurantSystem.Controllers
             return Ok(tables.Select(b => (TableResponseDTO)b).ToList());
         }
 
-        // GET: api/Tables/5
-        [HttpGet("{id}")]
-        [AllowAnonymous]
-        public async Task<ActionResult<TableResponseDTO>> GetTableAsync(string id)
-        {
-            if (!await _tableRepository.IfExist(id))
-            {
-                return NotFound(new { Error = "Table with given id not found" });
-            }
-
-            var table = await _tableRepository.GetAsync(id);
-            return Ok((TableResponseDTO)table);
-        }
-
         // PUT: api/Tables/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "RestaurantManager")]
         public async Task<ActionResult<TableResponseDTO>> PutTableAsync(string id, TableRequestDTO tableRequest)
@@ -73,8 +58,8 @@ namespace RestaurantSystem.Controllers
                 return BadRequest(new { Error = "Restaurant can not be changed" });
             }
 
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            if (!await _permissionValidation.isManagerTableOwnerAsync(id, currentUserEmail))
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+            if (!await _permissionValidation.isManagerTableOwnerAsync(id, currentUserSystemId))
             {
                 return Unauthorized(new { Error = "This table does not belong to your restaurant" });
             }
@@ -92,7 +77,6 @@ namespace RestaurantSystem.Controllers
 
         
         // POST: api/Tables
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         
         [HttpPost]
         [Authorize(Roles = "RestaurantManager")]
@@ -104,8 +88,8 @@ namespace RestaurantSystem.Controllers
                 return NotFound(new { Error = "One of table dependencies not found" });
             }
 
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(tableRequest.Restaurant, currentUserEmail))
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(tableRequest.Restaurant, currentUserSystemId))
             {
                 return Unauthorized(new { Error = "Restaurant with given Id is not yours" });
             }
@@ -123,8 +107,8 @@ namespace RestaurantSystem.Controllers
         {
             if (await _tableRepository.IfExist(id))
             {
-                var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-                if (!await _permissionValidation.isManagerTableOwnerAsync(id, currentUserEmail))
+                var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+                if (!await _permissionValidation.isManagerTableOwnerAsync(id, currentUserSystemId))
                 {
                     return Unauthorized(new { Error = "This table does not belong to your restaurant" });
                 }

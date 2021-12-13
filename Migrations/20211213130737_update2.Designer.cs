@@ -10,8 +10,8 @@ using RestaurantSystem.Data;
 namespace Restaurant_system_new.Migrations
 {
     [DbContext(typeof(RestaurantSystemContext))]
-    [Migration("20211206225603_Restaurant")]
-    partial class Restaurant
+    [Migration("20211213130737_update2")]
+    partial class update2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -262,6 +262,10 @@ namespace Restaurant_system_new.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Likes")
+                        .IsConcurrencyToken()
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -270,6 +274,11 @@ namespace Restaurant_system_new.Migrations
 
                     b.Property<int?>("RestaurantDbId")
                         .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.HasKey("DbId");
 
@@ -511,6 +520,9 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordSalt")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")

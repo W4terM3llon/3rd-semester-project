@@ -10,7 +10,6 @@ namespace RestaurantSystem.Models
     public class DishCategory
     {  
         [Key]
-        [JsonIgnore]
         public int DbId { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }

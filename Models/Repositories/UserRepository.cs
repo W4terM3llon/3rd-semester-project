@@ -104,7 +104,7 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.User.AnyAsync(user => user.SystemId == id);
         }
 
-        public async Task<User> ConvertAlterUserRequest(UserRequestDTO request, string id)
+        public User ConvertAlterUserRequest(UserRequestDTO request, string id)
         {
             var user = new User()
             {

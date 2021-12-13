@@ -31,7 +31,7 @@ namespace RestaurantSystem.Controllers
         // GET: api/Dishes
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<DishResponseDTO>>> GetDish([FromQuery] string restaurantId, string id)
+        public async Task<ActionResult<IEnumerable<DishResponseDTO>>> GetDish([FromQuery] string restaurantId)
         {
             if (restaurantId == null)
             {
@@ -42,23 +42,7 @@ namespace RestaurantSystem.Controllers
             return Ok(dishes.Select(b => (DishResponseDTO)b).ToList());
         }
 
-        // GET: api/Dishes/5
-        [HttpGet("{id}")]
-        [AllowAnonymous]
-        public async Task<ActionResult<DishResponseDTO>> GetDish(string id)
-        {
-            if (!await _dishRepository.IfExist(id))
-            {
-                return NotFound(new { Error = "Dish with given id not found" });
-            }
-
-            var dish = await _dishRepository.GetAsync(id);
-
-            return Ok((DishResponseDTO)dish);
-        }
-
         // PUT: api/Dishes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "RestaurantManager")]
         public async Task<ActionResult<DishResponseDTO>> PutDish(string id, DishRequestDTO dishRequest)
@@ -74,8 +58,8 @@ namespace RestaurantSystem.Controllers
                 return BadRequest(new { Error = "Restaurant can not be changed" });
             }
 
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            if (!await _permissionValidation.isManagerDishOwnerAsync(id, currentUserEmail))
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+            if (!await _permissionValidation.isManagerDishOwnerAsync(id, currentUserSystemId))
             {
                 return Unauthorized(new { Error = "This dish does not belong to your restaurant" });
             }
@@ -91,8 +75,22 @@ namespace RestaurantSystem.Controllers
             return Ok((DishResponseDTO)updatedDish);
         }
 
+        // PUT: api/Dishes/5
+        [HttpPatch("{id}")]
+        [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
+        public async Task<ActionResult<DishResponseDTO>> PatchDish(string id)
+        {
+            if (!await _dishRepository.IfExist(id))
+            {
+                return NotFound(new { Error = "Dish with given id not found" });
+            }
+
+            var updatedDish = await _dishRepository.IncrementLikeAsync(id);
+
+            return Ok((DishResponseDTO)updatedDish);
+        }
+
         // POST: api/Dishes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "RestaurantManager")]
         public async Task<ActionResult<DishResponseDTO>> PostDish(DishRequestDTO dishRequest)
@@ -103,8 +101,8 @@ namespace RestaurantSystem.Controllers
                 return NotFound(new { Error = "One of dish dependencies not found" });
             }
 
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(dishRequest.Restaurant, currentUserEmail))
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(dishRequest.Restaurant, currentUserSystemId))
             {
                 return Unauthorized(new { Error = "Given restaurant is not yours" });
             }
@@ -124,8 +122,8 @@ namespace RestaurantSystem.Controllers
                 return NotFound(new { Error = "Dish with given id not found" });
             }
 
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            if (!await _permissionValidation.isManagerDishOwnerAsync(id, currentUserEmail))
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+            if (!await _permissionValidation.isManagerDishOwnerAsync(id, currentUserSystemId))
             {
                 return Unauthorized(new { Error = "This dish does not belong to your restaurant" });
             }

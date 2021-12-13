@@ -19,7 +19,7 @@ namespace RestaurantSystem.Models
         public string FirstName { get; set; }
         [Required(ErrorMessage = "LastName field is required")]
         public string LastName { get; set; }
-        [Required(ErrorMessage = "AccountingAddress is required")]
+        [Required(ErrorMessage = "Address is required")]
         public AddressRequestDTO Address { get; set; }
     }
 }

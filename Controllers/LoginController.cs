@@ -25,13 +25,11 @@ namespace RestaurantSystem.Controllers
     public class LoginController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
-        private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
 
-        public LoginController(UserManager<User> userManager, IConfiguration configuration, ITokenService tokenService)
+        public LoginController(UserManager<User> userManager, ITokenService tokenService)
         {
             _userManager = userManager;
-            _configuration = configuration;
             _tokenService = tokenService;
 
         }
@@ -40,7 +38,7 @@ namespace RestaurantSystem.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email); //Email is the username too
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
                 var userRoles = await _userManager.GetRolesAsync(user);
@@ -48,7 +46,6 @@ namespace RestaurantSystem.Controllers
                 var authClaims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Actor, user.SystemId),
-                    new Claim(ClaimTypes.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
 
@@ -57,15 +54,11 @@ namespace RestaurantSystem.Controllers
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 }
 
-                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
                 var accessToken = _tokenService.GenerateAccessToken(authClaims);
-                //var refreshToken = _tokenService.GenerateRefreshToken();
 
                 return Ok(new
                 {
                     token = accessToken
-                    //refreshToken = refreshToken
                 });
             }
             return Unauthorized(new {Error="Wrong email or password" } );
@@ -77,7 +70,7 @@ namespace RestaurantSystem.Controllers
         {
             var userExists = await _userManager.FindByEmailAsync(model.Email);
             if (userExists != null)
-                return BadRequest(new { Status = "Error", Message = "User already exists!" });
+                return BadRequest(new { Error = "User already exists!" });
 
             if (model.Email == "" || model.FirstName == "" || model.LastName == "" || model.Address.Street == "" || model.Address.Appartment == "" || model.PhoneNumber == "") { 
                 return BadRequest(new { Error = "Empty fields not allowed"});
@@ -108,7 +101,7 @@ namespace RestaurantSystem.Controllers
                 var enumerator = errors.GetEnumerator();
                 enumerator.MoveNext();
                 var message = string.Join(", ", enumerator.Current.Description);
-                return BadRequest(new { Status = "Error", Message = message });
+                return BadRequest(new { Error = message });
             }
             await _userManager.AddToRoleAsync(user, "Customer");
 

@@ -74,7 +74,6 @@ namespace RestaurantSystem.Models.Repositories
             {
                 try
                 {
-                    //create EveryDayUseAccount
                     var everyDayUseAccount = new User()
                     {
                         FirstName = "Helper",
@@ -145,9 +144,9 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.Restaurant.AnyAsync(Restaurant => Restaurant.Id == id);
         }
 
-        public async Task<Restaurant> ConvertAlterRestaurantRequest(RestaurantRequestDTO request, string currentUserEmail, string id)
+        public async Task<Restaurant> ConvertAlterRestaurantRequest(RestaurantRequestDTO request, string currentUserSystemId, string id)
         {
-            var manager = await _context.User.FirstOrDefaultAsync(manager => manager.Email == currentUserEmail);
+            var manager = await _context.User.FirstOrDefaultAsync(manager => manager.SystemId == currentUserSystemId);
             var restaurant = new Restaurant()
             {
                 Id = id != null ? id : new Random().Next(1, 1000).ToString(),

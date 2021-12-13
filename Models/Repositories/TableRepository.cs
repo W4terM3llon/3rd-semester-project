@@ -130,17 +130,6 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.Table.AnyAsync(table => table.Id == id);
         }
 
-        private async Task<bool> IfDiningPeriodsExist(List<String> AvailablePeriods) {
-            foreach (string diningPeriod in AvailablePeriods)
-            {
-                if (!await _context.DiningPeriod.AnyAsync(period => period.Id == diningPeriod))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
         public async Task<Table> ConvertAlterTableRequest(TableRequestDTO request, string id)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);

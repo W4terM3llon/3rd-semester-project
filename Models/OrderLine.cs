@@ -10,7 +10,6 @@ namespace RestaurantSystem.Models
     public class OrderLine
     {
         [Key]
-        [JsonIgnore]
         public int DbId { get; set; }
         public string Id { get; set; }
         public int Quantity { get; set; }

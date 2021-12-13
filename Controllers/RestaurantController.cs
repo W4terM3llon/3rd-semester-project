@@ -37,22 +37,7 @@ namespace RestaurantSystem.Controllers
             return Ok(restaurants.Select(b => (RestaurantResponseDTO)b).ToList());
         }
 
-        // GET: api/Restaurants/5
-        [HttpGet("{id}")]
-        [AllowAnonymous]
-        public async Task<ActionResult<RestaurantResponseDTO>> GetRestaurantAsync(string id)
-        {
-            if (!await _restaurantRepository.IfExist(id))
-            {
-                return NotFound(new { Error = "Restaurant with given id not found" });
-            }
-
-            var restaurant = await _restaurantRepository.GetAsync(id);
-            return Ok((RestaurantResponseDTO)restaurant);
-        }
-
         // PUT: api/Restaurants/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "RestaurantManager")]
         public async Task<ActionResult<RestaurantResponseDTO>> PutRestaurantAsync(string id, RestaurantRequestDTO request)
@@ -62,26 +47,25 @@ namespace RestaurantSystem.Controllers
                 return NotFound(new { Error = "Restaurant with given id not found" });
             }
 
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(id, currentUserEmail))
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(id, currentUserSystemId))
             {
                 return Unauthorized(new { Error = "This restaurant is not managed by your account" });
             }
             
-            var restaurant = await _restaurantRepository.ConvertAlterRestaurantRequest(request, currentUserEmail, id);
+            var restaurant = await _restaurantRepository.ConvertAlterRestaurantRequest(request, currentUserSystemId, id);
             var returnedRestaurant = await _restaurantRepository.UpdateAsync(restaurant);
 
             return Ok((RestaurantResponseDTO)returnedRestaurant);
         }
 
         // POST: api/Restaurants
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "RestaurantManager")]
         public async Task<ActionResult<RestaurantResponseDTO>> PostRestaurantAsync(RestaurantRequestDTO request)
         {
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            var restaurant = await _restaurantRepository.ConvertAlterRestaurantRequest(request, currentUserEmail, null);
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+            var restaurant = await _restaurantRepository.ConvertAlterRestaurantRequest(request, currentUserSystemId, null);
             var created = await _restaurantRepository.CreateAsync(restaurant, request.EveryDayUseAccountEmail, request.EveryDayUseAccountPassword);
 
             if (created == null)
@@ -102,8 +86,8 @@ namespace RestaurantSystem.Controllers
                 return NotFound(new { Error = "Restaurant with given id not found" });
             }
 
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(id, currentUserEmail))
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
+            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(id, currentUserSystemId))
             {
                 return Unauthorized(new { Error = "This restaurant is not managed by your account" });
             }

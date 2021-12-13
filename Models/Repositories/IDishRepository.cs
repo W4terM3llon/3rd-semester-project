@@ -12,6 +12,7 @@ namespace RestaurantSystem.Models.Repositories
         public Task<Dish> GetAsync(string id);
         public Task<Dish> CreateAsync(Dish dish);
         public Task<Dish> UpdateAsync(Dish dish);
+        public Task<Dish> IncrementLikeAsync(string dishId);
         public Task<Dish> DeleteAsync(string id);
         public Task<bool> IfExist(string id);
         public Task<Dish> ConvertAlterDishRequest(DishRequestDTO request, string id);

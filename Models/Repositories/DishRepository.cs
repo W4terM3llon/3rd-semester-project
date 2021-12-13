@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RestaurantSystem.Models.Repositories
@@ -76,6 +77,26 @@ namespace RestaurantSystem.Models.Repositories
             {
                 return null;
             }
+        }
+
+        public async Task<Dish> IncrementLikeAsync(string dishId)
+        {
+            if (!await IfExist(dishId))
+            {
+                return null;
+            }
+
+            Dish dish = null;
+
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
+            {
+                dish = await GetAsync(dishId);
+                dish.Likes += 1;
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+            }
+
+            return dish;
         }
 
         public async Task<Dish> CreateAsync(Dish dish)

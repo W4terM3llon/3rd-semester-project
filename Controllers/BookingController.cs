@@ -35,7 +35,7 @@ namespace RestaurantSystem.Controllers
         {
             IEnumerable<Booking> bookings = new List<Booking>();
 
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
             if (userRole == "Customer")
             {
@@ -45,7 +45,7 @@ namespace RestaurantSystem.Controllers
                 }
                 else
                 {
-                    if (!await _permissionValidation.isUserTheSameAsync(userId, currentUserEmail))
+                    if (userId != currentUserSystemId)
                     {
                         return Unauthorized(new { Error = "Can not retrieve another costomers booking" });
                     }
@@ -61,8 +61,8 @@ namespace RestaurantSystem.Controllers
                     return BadRequest(new { Error = "RestaurantId and date required" });
                 }
                 else {
-                    if ((userRole == "RestaurantManager" && !await _permissionValidation.isManagerRestaurantOwnerAsync(restaurantId, currentUserEmail)) ||
-                        (userRole == "RestaurantEveryDayUse" && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(restaurantId, currentUserEmail)))
+                    if ((userRole == "RestaurantManager" && !await _permissionValidation.isManagerRestaurantOwnerAsync(restaurantId, currentUserSystemId)) ||
+                        (userRole == "RestaurantEveryDayUse" && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(restaurantId, currentUserSystemId)))
                     {
 
                         return Unauthorized(new { Error = "Can not retrieve bookings of another restaurant" });
@@ -79,42 +79,7 @@ namespace RestaurantSystem.Controllers
             return Ok(bookings.Select(b => (BookingResponseDTO)b).ToList());
         }
 
-        // GET: api/Booking/5
-        [HttpGet("{id}")]
-        [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<ActionResult<BookingResponseDTO>> GetBooking(string id)
-        {
-            if (!await _bookingRepository.IfExist(id))
-            {
-                return NotFound(new { Error = "Booking not found" });
-            }
-
-            var booking = await _bookingRepository.GetAsync(id);
-
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
-            if (userRole == "Customer")
-            {
-                if (!await _permissionValidation.isUserTheSameAsync(booking.User.SystemId, currentUserEmail))
-                    {
-                        return Unauthorized(new { Error = "Can not retrieve another costomers booking" });
-                    }
-            }
-            else if (userRole == "RestaurantManager" || userRole == "RestaurantEveryDayUse")
-            {
-                    if ((userRole == "RestaurantManager" && !await _permissionValidation.isManagerRestaurantOwnerAsync(booking.Restaurant.Id, currentUserEmail)) ||
-                        (userRole == "RestaurantEveryDayUse" && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(booking.Restaurant.Id, currentUserEmail)))
-                    {
-
-                        return Unauthorized(new { Error = "Can not retrieve bookings of another restaurant" });
-                    }
-            }
-
-            return Ok((BookingResponseDTO)booking);
-        }
-
         // PUT: api/Booking/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Roles = "RestaurantManager, Customer")]
         public async Task<ActionResult<BookingResponseDTO>> PutBooking(string id, BookingRequestDTO bookingRequest)
@@ -125,15 +90,15 @@ namespace RestaurantSystem.Controllers
             }
 
             var oldBooking = await _bookingRepository.GetAsync(id);
-            if (bookingRequest.Restaurant != oldBooking.Restaurant.Id || bookingRequest.User != oldBooking.User.SystemId) // not allowed to be changed
+            if (bookingRequest.Restaurant != oldBooking.Restaurant.Id || bookingRequest.User != oldBooking.User.SystemId)
             {
                 return BadRequest(new { Error = "Restaurant, User can not be changed" });
             }
 
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
 
-            if (!await _permissionValidation.isUserTheSameAsync(bookingRequest.User, currentUserEmail))
+            if (bookingRequest.User != currentUserSystemId)
             {
                 return Unauthorized(new { Error = "Can not change booking of another user" });
             }
@@ -154,26 +119,29 @@ namespace RestaurantSystem.Controllers
                 return BadRequest(new { Error = "Chosen dining period does not belong to the chosen restaurant" });
             }
 
-            if (!await _bookingRepository.IfTimeAvailable(booking))
+            Booking updated = null;
+            try
             {
-                return Conflict(new { Error = "Booking collides with other bookings in the system" });
-            }
+                updated = await _bookingRepository.UpdateAsync(booking);
 
-            var updated = await _bookingRepository.UpdateAsync(booking);
+            }
+            catch (DbUpdateException ex)
+            {
+                return (BadRequest(new { Error = "Booking collides with another booking in the system" }));
+            }
 
             return Ok((BookingResponseDTO)updated);
         }
 
         // POST: api/Booking
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "RestaurantManager, Customer")]
         public async Task<ActionResult<BookingResponseDTO>> PostBooking(BookingRequestDTO bookingRequest)
         {
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
 
-            if (!await _permissionValidation.isUserTheSameAsync(bookingRequest.User, currentUserEmail))
+            if (bookingRequest.User != currentUserSystemId)
             {
                 return Unauthorized(new { Error = "Can not make a booking for another user" });
             }
@@ -194,12 +162,16 @@ namespace RestaurantSystem.Controllers
                 return BadRequest(new { Error = "Chosen dining period does not belong to the chosen restaurant" });
             }
 
-            //if (!await _bookingRepository.IfTimeAvailable(booking))
-            //{
-            //    return Conflict(new { Error = "Booking collides with other bookings in the system" });
-            //}
+            Booking created = null;
+            try
+            {
+                created = await _bookingRepository.CreateAsync(booking);
 
-            var created = await _bookingRepository.CreateAsync(booking);
+            }
+            catch (DbUpdateException ex)
+            {
+                return (BadRequest(new { Error = "Booking collides with another booking in the system" }));
+            }
 
             return CreatedAtAction("GetBooking", new { id = created.Id }, (BookingResponseDTO)created);
         }
@@ -210,7 +182,7 @@ namespace RestaurantSystem.Controllers
         public async Task<IActionResult> DeleteBooking(string id)
         {
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
 
             if (!await _bookingRepository.IfExist(id))
             {
@@ -219,7 +191,7 @@ namespace RestaurantSystem.Controllers
 
             var booking = await _bookingRepository.GetAsync(id);
 
-            if (!await _permissionValidation.isUserTheSameAsync(booking.User.SystemId, currentUserEmail))
+            if (booking.User.SystemId !=currentUserSystemId)
             {
                 return Unauthorized(new { Error = "Can not delete another user's booking" });
             }

@@ -10,7 +10,6 @@ namespace RestaurantSystem.Models
     public class Booking
     {
         [Key]
-        [JsonIgnore]
         public int DBId { get; set; }
         public string Id { get; set; }
         public DateTime Date { get; set; }

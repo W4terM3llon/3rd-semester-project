@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantSystem.Data;
 using RestaurantSystem.Models;
+using RestaurantSystem.Services;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,15 +19,16 @@ namespace RestaurantSystem.Models.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable> GetAllAsync(string restaurant, DateTime date)
+        public async Task<IEnumerable> GetAllAsync(string restaurantId, DateTime date)
         {
+            //checking free periods for table and date
             var bookings = await _context.Booking.Include(booking => booking.Restaurant).Include(booking => booking.Table).Where(booking =>
-                (booking.Restaurant.Id == restaurant) && 
+                (booking.Restaurant.Id == restaurantId) && 
                 (booking.Date.Year == date.Year && booking.Date.Month == date.Month && booking.Date.Day == date.Day)
                 ).ToListAsync();
 
-            var tables = await _context.Table.Include(table => table.Restaurant).Where(table => table.Restaurant.Id == restaurant).ToListAsync();
-            var diningPeriods = await _context.DiningPeriod.Include(diningPeriod => diningPeriod.Restaurant).Where(diningPeriod => diningPeriod.Restaurant.Id == restaurant).ToListAsync();
+            var tables = await _context.Table.Include(table => table.Restaurant).Where(table => table.Restaurant.Id == restaurantId).ToListAsync();
+            var diningPeriods = await _context.DiningPeriod.Include(diningPeriod => diningPeriod.Restaurant).Where(diningPeriod => diningPeriod.Restaurant.Id == restaurantId).ToListAsync();
 
             Dictionary<string, List<DiningPeriod>> tableBookedPeriods = new Dictionary<string, List<DiningPeriod>>();
             foreach (var booking in bookings)

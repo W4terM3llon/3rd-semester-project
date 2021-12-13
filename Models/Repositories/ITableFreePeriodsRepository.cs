@@ -8,6 +8,6 @@ namespace RestaurantSystem.Models.Repositories
 {
     public interface ITableFreePeriodsRepository
     {
-        public Task<IEnumerable> GetAllAsync(string restaurant, DateTime date);
+        public Task<IEnumerable> GetAllAsync(string restaurantId, DateTime date);
     }
 }

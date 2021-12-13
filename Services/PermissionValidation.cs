@@ -20,7 +20,7 @@ namespace RestaurantSystem.Services
             _userManager = userManager;
         }
 
-        public async Task<bool> isManagerRestaurantOwnerAsync(string restaurantId, string currentUserEmail)
+        public async Task<bool> isManagerRestaurantOwnerAsync(string restaurantId, string currentUserSystemId)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == restaurantId);
             if (restaurant == null) 
@@ -28,7 +28,7 @@ namespace RestaurantSystem.Services
                 return false;
             }
 
-            var currentUser = await _userManager.FindByEmailAsync(currentUserEmail);
+            var currentUser = await _userManager.Users.FirstOrDefaultAsync(user => user.SystemId == currentUserSystemId);
             var manager = restaurant.Manager;
             if (manager.SystemId != currentUser.SystemId)
             {
@@ -40,7 +40,7 @@ namespace RestaurantSystem.Services
             }
         }
 
-        public async Task<bool> isEveryDayUseAccountRestaurantsOwnershipAsync(string restaurantId, string currentUserEmail)
+        public async Task<bool> isEveryDayUseAccountRestaurantsOwnershipAsync(string restaurantId, string currentUserSystemId)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.EveryDayUseAccount).FirstOrDefaultAsync(restaurant => restaurant.Id == restaurantId);
             if (restaurant == null)
@@ -48,7 +48,7 @@ namespace RestaurantSystem.Services
                 return false;
             }
 
-            var currentUser = await _userManager.FindByEmailAsync(currentUserEmail);
+            var currentUser = await _userManager.Users.FirstOrDefaultAsync(user => user.SystemId == currentUserSystemId);
             var everyDayUseAccount = restaurant.EveryDayUseAccount;
             if (everyDayUseAccount.SystemId != currentUser.SystemId)
             {
@@ -60,50 +60,44 @@ namespace RestaurantSystem.Services
             }
         }
 
-        public async Task<bool> isManagerTableOwnerAsync(string tableId, string currentUserEmail)
+        public async Task<bool> isManagerTableOwnerAsync(string tableId, string currentUserSystemId)
         {
             var table = await _context.Table.Include(table => table.Restaurant).FirstOrDefaultAsync(table => table.Id == tableId);
-            return await isManagerRestaurantOwnerAsync(table.Restaurant.Id, currentUserEmail);
+            return await isManagerRestaurantOwnerAsync(table.Restaurant.Id, currentUserSystemId);
         }
 
-        public async Task<bool> isManagerDishOwnerAsync(string dishId, string currentUserEmail)
+        public async Task<bool> isManagerDishOwnerAsync(string dishId, string currentUserSystemId)
         {
             var dish = await _context.Dish.Include(dish => dish.Restaurant).FirstOrDefaultAsync(dish => dish.Id == dishId);
-            return await isManagerRestaurantOwnerAsync(dish.Restaurant.Id, currentUserEmail);
+            return await isManagerRestaurantOwnerAsync(dish.Restaurant.Id, currentUserSystemId);
         }
-        /*
-        public async Task<bool> isManagerDishCategoryOwnerAsync(string dishCategoryId, string currentUserEmail)
-        {
-            var dishCategory = await _context.DishCategory.Include(dishCategory => dishCategory.Restaurant).FirstOrDefaultAsync(dishCategory => dishCategory.Id == dishCategoryId);
-            return await isManagerRestaurantOwnerAsync(dishCategory.Restaurant.Id, currentUserEmail);
-        }*/
 
-        public async Task<bool> isManagerDiningPeriodOwnerAsync(string diningPeriodId, string currentUserEmail)
+        public async Task<bool> isManagerDiningPeriodOwnerAsync(string diningPeriodId, string currentUserSystemId)
         {
             var diningPeriod = await _context.DiningPeriod.Include(diningPeriod => diningPeriod.Restaurant).FirstOrDefaultAsync(diningPeriod => diningPeriod.Id == diningPeriodId);
-            return await isManagerRestaurantOwnerAsync(diningPeriod.Restaurant.Id, currentUserEmail);
+            return await isManagerRestaurantOwnerAsync(diningPeriod.Restaurant.Id, currentUserSystemId);
         }
 
-        public async Task<bool> isManagerBookingOwnerAsync(string bookingId, string currentUserEmail)
+        public async Task<bool> isManagerBookingOwnerAsync(string bookingId, string currentUserSystemId)
         {
             var booking = await _context.Booking.Include(booking => booking.Restaurant).FirstOrDefaultAsync(booking => booking.Id == bookingId);
-            return await isManagerRestaurantOwnerAsync(booking.Restaurant.Id, currentUserEmail);
+            return await isManagerRestaurantOwnerAsync(booking.Restaurant.Id, currentUserSystemId);
         }
 
-        public async Task<bool> isCustomerBookingOwnerAsync(string bookingId, string currentUserEmail)
+        public async Task<bool> isCustomerBookingOwnerAsync(string bookingId, string currentUserSystemId)
         {
             var booking = await _context.Booking.Include(booking => booking.User).FirstOrDefaultAsync(booking => booking.Id == bookingId);
-            return booking.User.Email == currentUserEmail;
+            return booking.User.SystemId == currentUserSystemId;
         }
-        public async Task<bool> isManagerOrderOwnerAsync(string orderId, string currentUserEmail)
+        public async Task<bool> isManagerOrderOwnerAsync(string orderId, string currentUserSystemId)
         {
             var order = await _context.Order.Include(order => order.Customer).FirstOrDefaultAsync(order => order.Id == orderId);
-            return await isManagerRestaurantOwnerAsync(order.Restaurant.Id, currentUserEmail);
+            return await isManagerRestaurantOwnerAsync(order.Restaurant.Id, currentUserSystemId);
         }
-        public async Task<bool> isCustomerOrderOwnerAsync(string orderId, string currentUserEmail)
+        public async Task<bool> isCustomerOrderOwnerAsync(string orderId, string currentUserSystemId)
         {
             var order = await _context.Order.Include(order => order.Customer).FirstOrDefaultAsync(order => order.Id == orderId);
-            return order.Customer.Email == currentUserEmail;
+            return order.Customer.SystemId == currentUserSystemId;
         }
 
         public async Task<bool> isUserTheSameAsync(string userId, string currentUserEmail)

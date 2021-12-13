@@ -11,25 +11,13 @@ namespace RestaurantSystem.Models
     public class Restaurant
     {
         [Key]
-        [JsonIgnore]
         public int DbId { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }
         public bool IsTableBookingEnabled { get; set; }
         public bool IsDeliveryAvailable { get; set; }
         public Address Address { get; set; }
-
-        [JsonIgnore]
-        public List<Order> Orders { get; set; }
-        [JsonIgnore]
-        public List<Dish> Dishes { get; set; }
-        [JsonIgnore]
-        public List<Table> Tables { get; set; }
-        [JsonIgnore]
-        public List<Booking> Bookings { get; set; }
-        [JsonIgnore]
         public User Manager { get; set; }
-        [JsonIgnore]
         [ForeignKey("RestaurantEveryDayUseAccount")]
         public User EveryDayUseAccount { get; set; }
 }

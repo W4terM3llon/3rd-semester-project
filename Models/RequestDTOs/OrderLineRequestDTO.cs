@@ -10,7 +10,9 @@ namespace RestaurantSystem.Models.Requests
 {
     public class OrderLineRequestDTO
     {
+        [Required(ErrorMessage = "Quantity field is required")]
         public int Quantity { get; set; }
+        [Required(ErrorMessage = "Dish field is required")]
         public string Dish { get; set; }
     }
 }

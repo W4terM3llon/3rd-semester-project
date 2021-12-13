@@ -20,8 +20,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<IEnumerable<Order>> GetAllAsync(string restaurantId, DateTime date, string userId)
         {
-            return await _context.Order/*.Include(order => order.Discount).Include(order => order.Payment).
-                Include(order => order.OrderStage)*/.Include(order => order.OrderLines).ThenInclude(ol => ol.Dish).Include(order => order.Restaurant).Include(order => order.Customer).Include(order => order.OrderStage).Where(order=>
+            return await _context.Order.Include(order => order.OrderLines).ThenInclude(ol => ol.Dish).Include(order => order.Restaurant).Include(order => order.Customer).Include(order => order.OrderStage).Where(order=>
                     (order.Restaurant.Id == restaurantId || restaurantId == null) &&
                     ((order.Date.Year == date.Year && order.Date.Month == date.Month && order.Date.Day == date.Day) || date == DateTime.MinValue) &&
                     (order.Customer.SystemId == userId || userId == null)
@@ -30,7 +29,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Order> GetAsync(string id)
         {
-            var order = await _context.Order/*.Include(order => order.Discount).Include(order => order.Payment).Include(order => order.OrderStage)*/.Include(order => order.OrderLines).Include(order => order.Restaurant).Include(order => order.Customer).Include(order => order.OrderStage).FirstOrDefaultAsync(order => order.Id == id);
+            var order = await _context.Order.Include(order => order.OrderLines).Include(order => order.Restaurant).Include(order => order.Customer).Include(order => order.OrderStage).FirstOrDefaultAsync(order => order.Id == id);
             return order;
         }
 
@@ -160,11 +159,10 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Order> ConvertAlterOrderRequest(OrderRequestDTO request, string id)
         {
-            //var discount = await _context.Discount.FirstOrDefaultAsync(discount => discount.Id == request.Discount);
             var customer = await _context.User.FirstOrDefaultAsync(customer => customer.SystemId == request.Customer);
             var restaurant = await _context.Restaurant.FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
 
-            if (/*discount == null || */customer == null || restaurant == null)
+            if (customer == null || restaurant == null)
             {
                 return null;
             }
@@ -193,22 +191,12 @@ namespace RestaurantSystem.Models.Repositories
 
             var orderPlacedStage = await _context.OrderStage.FirstOrDefaultAsync(stage => stage.Name == "Placed");
 
-            var payment = new Payment
-            {
-                Id = new Random().Next(1, 1000).ToString(),
-                Amount = amount,
-                IsPaid = false,
-                DatePaid = new DateTime(),
-            };
-
             var order = new Order()
             {
                 Id = id != null ? id : new Random().Next(1, 1000).ToString(),
                 Date = DateTime.Now,
-                //Payment = payment,
-                //Discount = discount,
                 OrderLines = orderLines,
-                //OrderStage = orderPlacedStage,
+                OrderStage = orderPlacedStage,
                 Customer = customer,
                 Restaurant = restaurant
 

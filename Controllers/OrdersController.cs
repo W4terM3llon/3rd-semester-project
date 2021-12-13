@@ -38,7 +38,7 @@ namespace RestaurantSystem.Controllers
             IEnumerable<Order> orders = new List<Order>();
 
             //Customer can not see another customers orders
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
             if (userRole == "Customer")
             {
@@ -48,7 +48,7 @@ namespace RestaurantSystem.Controllers
                 }
                 else
                 {
-                    if (!await _permissionValidation.isUserTheSameAsync(userId, currentUserEmail))
+                    if (userId != currentUserSystemId)
                     {
                         return Unauthorized(new { Error = "Can not retrieve another costomers orders" });
                     }
@@ -67,8 +67,8 @@ namespace RestaurantSystem.Controllers
                 else
                 {
                     //Manager and RestaurantEveryDayUse can not retrieve another restaurants bookings
-                    if ((userRole == "RestaurantManager" && !await _permissionValidation.isManagerRestaurantOwnerAsync(restaurantId, currentUserEmail)) ||
-                        (userRole == "RestaurantEveryDayUse" && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(restaurantId, currentUserEmail)))
+                    if ((userRole == "RestaurantManager" && !await _permissionValidation.isManagerRestaurantOwnerAsync(restaurantId, currentUserSystemId)) ||
+                        (userRole == "RestaurantEveryDayUse" && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(restaurantId, currentUserSystemId)))
                     {
 
                         return Unauthorized(new { Error = "Can not retrieve orders of another restaurant" });
@@ -82,50 +82,14 @@ namespace RestaurantSystem.Controllers
 
             return Ok(orders.Select(b => (OrderResponseDTO)b).ToList());
         }
-
-        // GET: api/Orders/5
-        [HttpGet("{id}")]
-        [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
-        public async Task<ActionResult<OrderResponseDTO>> GetOrder(string id)
-        {
-            if (!await _orderRepository.IfExist(id))
-            {
-                return NotFound(new { Error = "Order not found" });
-            }
-
-            var order = await _orderRepository.GetAsync(id);
-
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
-            var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
-            if (userRole == "Customer")
-            {
-                if (!await _permissionValidation.isUserTheSameAsync(order.Customer.SystemId, currentUserEmail))
-                {
-                    return Unauthorized(new { Error = "Can not retrieve another costomers booking" });
-                }
-            }
-            else if (userRole == "RestaurantManager" || userRole == "RestaurantEveryDayUse")
-            {
-                if ((userRole == "RestaurantManager" && !await _permissionValidation.isManagerRestaurantOwnerAsync(order.Restaurant.Id, currentUserEmail)) ||
-                    (userRole == "RestaurantEveryDayUse" && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(order.Restaurant.Id, currentUserEmail)))
-                {
-
-                    return Unauthorized(new { Error = "Can not retrieve orders of another restaurant" });
-                }
-            }
-
-            return Ok((OrderResponseDTO)order);
-        }
-
         
         // PUT: api/Orders/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPatch("{id}")]
         [Authorize(Roles = "RestaurantManager, Customer, RestaurantEveryDayUse")]
         public async Task<ActionResult<OrderResponseDTO>> PatchOrder(string id, string orderStageId)
         {
-            
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
 
             if (!await _orderRepository.IfExist(id))
@@ -139,9 +103,9 @@ namespace RestaurantSystem.Controllers
                 return NotFound(new { Error = "Order stage with given id not found" });
             }
 
-            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(oldOrder.Restaurant.Id, currentUserEmail) && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(oldOrder.Restaurant.Id, currentUserEmail))
+            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(oldOrder.Restaurant.Id, currentUserSystemId) || !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(oldOrder.Restaurant.Id, currentUserSystemId))
             {
-                return Unauthorized(new { Error = "Can not make an order for another user" });
+                return Unauthorized(new { Error = "Can not modify another restaurant's order" });
             }
 
             var orderSaved = await _orderRepository.PatchAsync(id, orderStageId);
@@ -151,15 +115,14 @@ namespace RestaurantSystem.Controllers
         
 
         // POST: api/Orders
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "RestaurantManager, Customer")]
         public async Task<ActionResult<OrderResponseDTO>> PostOrder(OrderRequestDTO orderRequest)
         {
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
 
-            if (!await _permissionValidation.isUserTheSameAsync(orderRequest.Customer, currentUserEmail))
+            if (orderRequest.Customer != currentUserSystemId)
             {
                 return Unauthorized(new { Error = "Can not make an order for another user" });
             }
@@ -204,14 +167,14 @@ namespace RestaurantSystem.Controllers
         public async Task<IActionResult> DeleteOrder(string id)
         {
             var userRole = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Role).Value;
-            var currentUserEmail = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Email).Value;
+            var currentUserSystemId = HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == System.Security.Claims.ClaimTypes.Actor).Value;
             if (!await _orderRepository.IfExist(id))
             {
                 return NotFound(new { Error = "Order not found" });
             }
 
             var order = await _orderRepository.GetAsync(id);
-            if (!await _permissionValidation.isUserTheSameAsync(order.Customer.SystemId, currentUserEmail))
+            if (order.Customer.SystemId != currentUserSystemId)
             {
                 return Unauthorized(new { Error = "Can not delete another user's order" });
             }
