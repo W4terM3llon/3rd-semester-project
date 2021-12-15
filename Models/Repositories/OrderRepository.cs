@@ -20,7 +20,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<IEnumerable<Order>> GetAllAsync(string restaurantId, DateTime date, string userId)
         {
-            return await _context.Order.Include(order => order.OrderLines).ThenInclude(ol => ol.Dish).Include(order => order.Restaurant).Include(order => order.Customer).Include(order => order.OrderStage).Where(order=>
+            return await _context.Order.Include(order => order.OrderLines).ThenInclude(ol => ol.Dish).ThenInclude(dish => dish.DishCategory).Include(order => order.Restaurant).ThenInclude(restaurant => restaurant.Address).Include(order => order.Customer).ThenInclude(customer => customer.Address).Include(order => order.OrderStage).Where(order=>
                     (order.Restaurant.Id == restaurantId || restaurantId == null) &&
                     ((order.Date.Year == date.Year && order.Date.Month == date.Month && order.Date.Day == date.Day) || date == DateTime.MinValue) &&
                     (order.Customer.SystemId == userId || userId == null)
@@ -29,7 +29,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Order> GetAsync(string id)
         {
-            var order = await _context.Order.Include(order => order.OrderLines).Include(order => order.Restaurant).Include(order => order.Customer).Include(order => order.OrderStage).FirstOrDefaultAsync(order => order.Id == id);
+            var order = await _context.Order.Include(order => order.OrderLines).ThenInclude(ol => ol.Dish).ThenInclude(dish => dish.DishCategory).Include(order => order.Restaurant).ThenInclude(restaurant => restaurant.Address).Include(order => order.Customer).ThenInclude(customer => customer.Address).Include(order => order.OrderStage).FirstOrDefaultAsync(order => order.Id == id);
             return order;
         }
 
