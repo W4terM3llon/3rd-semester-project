@@ -98,7 +98,7 @@ namespace RestaurantSystem.Controllers
             }
             var oldOrder = await _orderRepository.GetAsync(id);
 
-            if (!await _orderStageRepository.IfExist(id))
+            if (!await _orderStageRepository.IfExist(orderStageId))
             {
                 return NotFound(new { Error = "Order stage with given id not found" });
             }
