@@ -40,11 +40,11 @@ namespace DesktopClient.Controller
             var request = new RestRequest("register", Method.POST);
             var body = new 
             { 
-                email = user.email, 
-                password = user.password, 
-                phoneNumber = user.phoneNumber, 
-                firstName = user.firstName,
-                lastName = user.lastName,
+                email = user.Email, 
+                password = user.Password, 
+                phoneNumber = user.PhoneNumber, 
+                firstName = user.FirstName,
+                lastName = user.LastName,
                 accountingAddress = new 
                 {
                     street = user.address.street,
