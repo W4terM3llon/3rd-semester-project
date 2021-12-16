@@ -103,7 +103,7 @@ namespace RestaurantSystem.Controllers
                 return NotFound(new { Error = "Order stage with given id not found" });
             }
 
-            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(oldOrder.Restaurant.Id, currentUserSystemId) || !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(oldOrder.Restaurant.Id, currentUserSystemId))
+            if (!await _permissionValidation.isManagerRestaurantOwnerAsync(oldOrder.Restaurant.Id, currentUserSystemId) && !await _permissionValidation.isEveryDayUseAccountRestaurantsOwnershipAsync(oldOrder.Restaurant.Id, currentUserSystemId))
             {
                 return Unauthorized(new { Error = "Can not modify another restaurant's order" });
             }
