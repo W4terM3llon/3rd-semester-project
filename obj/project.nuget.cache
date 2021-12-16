@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "bC6yaWl/Ccpxz2UWwkEUViLGrWKlX8uTuWpLREBCWvYFNIfRp03TcMRZtUjEBI4/klDzXdoQurh2BSPERyRQKg==",
+  "dgSpecHash": "WiEd2zzxqLGBuF1aGLj1ObeCFKflhMLG30NVOILIZX95LEJ5yTqajaib1Q3AmTifaBsE7Mhi1KIUsB0un6FZiQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\matej\\Desktop\\3rd-sem-desktop\\3rd-semester-project\\DesktopClient.csproj",
+  "projectFilePath": "D:\\Pro\\RestaurantSystem\\DesktopClient\\DesktopClient.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\matej\\.nuget\\packages\\restsharp\\106.13.0\\restsharp.106.13.0.nupkg.sha512"
+    "C:\\Users\\filip\\.nuget\\packages\\restsharp\\106.13.0\\restsharp.106.13.0.nupkg.sha512"
   ],
   "logs": []
 }

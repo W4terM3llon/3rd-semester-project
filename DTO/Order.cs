@@ -11,8 +11,6 @@ namespace DesktopClient.DTO
         
         public string id { get; set; }
         public DateTime date { get; set; }
-        //public Payment Payment { get; set; }
-        //public Discount Discount { get; set; }
         public List<OrderLine> orderLines { get; set; }
         public OrderStage orderStage { get; set; }
         public User customer { get; set; }

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\matej\\Desktop\\3rd-sem-desktop\\3rd-semester-project\\DesktopClient.csproj": {}
+    "D:\\Pro\\RestaurantSystem\\DesktopClient\\DesktopClient.csproj": {}
   },
   "projects": {
-    "C:\\Users\\matej\\Desktop\\3rd-sem-desktop\\3rd-semester-project\\DesktopClient.csproj": {
+    "D:\\Pro\\RestaurantSystem\\DesktopClient\\DesktopClient.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\matej\\Desktop\\3rd-sem-desktop\\3rd-semester-project\\DesktopClient.csproj",
+        "projectUniqueName": "D:\\Pro\\RestaurantSystem\\DesktopClient\\DesktopClient.csproj",
         "projectName": "DesktopClient",
-        "projectPath": "C:\\Users\\matej\\Desktop\\3rd-sem-desktop\\3rd-semester-project\\DesktopClient.csproj",
-        "packagesPath": "C:\\Users\\matej\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\matej\\Desktop\\3rd-sem-desktop\\3rd-semester-project\\obj\\",
+        "projectPath": "D:\\Pro\\RestaurantSystem\\DesktopClient\\DesktopClient.csproj",
+        "packagesPath": "C:\\Users\\filip\\.nuget\\packages\\",
+        "outputPath": "D:\\Pro\\RestaurantSystem\\DesktopClient\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\matej\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\filip\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -63,7 +63,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.403\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }

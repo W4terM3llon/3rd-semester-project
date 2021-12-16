@@ -1,6 +1,5 @@
 ﻿using DesktopClient.Controller;
 using DesktopClient.DTO;
-using DesktopClient.View;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,20 +22,10 @@ namespace DesktopClient
         }
 
         #region EventHandlers
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
+    
         private void registerButton_Click(object sender, EventArgs e)
         {
-            new RegisterForm(this).Show();
-            Hide();
+            Register();
         }
 
         private void loginButton_Click(object sender, EventArgs e)
@@ -60,22 +49,17 @@ namespace DesktopClient
             }
             else
             {
-//                new HomeForm(this, content.token).Show();
-
-                new OrderForm(this, content.token).Show();
+                new HomeForm(this, content.token).Show();
                 Hide();
             }
         }
+
+        private void Register() 
+        {
+            new RegisterForm(this).Show();
+            Hide();
+        }
         #endregion
 
-        private void emailText_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pwdText_TextChanged(object sender, EventArgs e)
-        {
-
-        }
     }
 }

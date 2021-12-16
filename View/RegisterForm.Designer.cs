@@ -52,6 +52,7 @@ namespace DesktopClient
             this.fnText = new System.Windows.Forms.TextBox();
             this.cityText = new System.Windows.Forms.TextBox();
             this.zipText = new System.Windows.Forms.TextBox();
+            this.backButton = new System.Windows.Forms.Button();
             emailLabel = new System.Windows.Forms.Label();
             pswdLabel = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
@@ -75,7 +76,6 @@ namespace DesktopClient
             emailLabel.Size = new System.Drawing.Size(36, 15);
             emailLabel.TabIndex = 2;
             emailLabel.Text = "Email";
-            emailLabel.Click += new System.EventHandler(this.emailLabel_Click_1);
             // 
             // pswdLabel
             // 
@@ -86,7 +86,6 @@ namespace DesktopClient
             pswdLabel.Size = new System.Drawing.Size(57, 15);
             pswdLabel.TabIndex = 4;
             pswdLabel.Text = "Password";
-            pswdLabel.Click += new System.EventHandler(this.pswdLabel_Click_1);
             // 
             // label1
             // 
@@ -97,7 +96,6 @@ namespace DesktopClient
             label1.Size = new System.Drawing.Size(89, 15);
             label1.TabIndex = 6;
             label1.Text = "Password again";
-            label1.Click += new System.EventHandler(this.label1_Click_1);
             // 
             // pnLabel
             // 
@@ -108,7 +106,6 @@ namespace DesktopClient
             pnLabel.Size = new System.Drawing.Size(86, 15);
             pnLabel.TabIndex = 8;
             pnLabel.Text = "Phone number";
-            pnLabel.Click += new System.EventHandler(this.pnLabel_Click_1);
             // 
             // addressLabel
             // 
@@ -119,7 +116,6 @@ namespace DesktopClient
             addressLabel.Size = new System.Drawing.Size(49, 15);
             addressLabel.TabIndex = 10;
             addressLabel.Text = "Address";
-            addressLabel.Click += new System.EventHandler(this.label2_Click_1);
             // 
             // label2
             // 
@@ -170,7 +166,6 @@ namespace DesktopClient
             label4.Size = new System.Drawing.Size(28, 15);
             label4.TabIndex = 15;
             label4.Text = "City";
-            label4.Click += new System.EventHandler(this.label4_Click);
             // 
             // label5
             // 
@@ -181,6 +176,17 @@ namespace DesktopClient
             label5.Size = new System.Drawing.Size(53, 15);
             label5.TabIndex = 17;
             label5.Text = "Zip code";
+            // 
+            // label6
+            // 
+            label6.Anchor = System.Windows.Forms.AnchorStyles.None;
+            label6.AutoSize = true;
+            label6.Font = new System.Drawing.Font("Segoe UI", 25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            label6.Location = new System.Drawing.Point(12, 9);
+            label6.Name = "label6";
+            label6.Size = new System.Drawing.Size(199, 46);
+            label6.TabIndex = 31;
+            label6.Text = "Registration";
             // 
             // regButton
             // 
@@ -200,7 +206,6 @@ namespace DesktopClient
             this.emailText.Name = "emailText";
             this.emailText.Size = new System.Drawing.Size(171, 23);
             this.emailText.TabIndex = 1;
-            this.emailText.TextChanged += new System.EventHandler(this.emailText_TextChanged_1);
             // 
             // pswdText
             // 
@@ -210,7 +215,6 @@ namespace DesktopClient
             this.pswdText.Size = new System.Drawing.Size(171, 23);
             this.pswdText.TabIndex = 3;
             this.pswdText.UseSystemPasswordChar = true;
-            this.pswdText.TextChanged += new System.EventHandler(this.pswdText_TextChanged_1);
             // 
             // pswdRepeatText
             // 
@@ -220,7 +224,6 @@ namespace DesktopClient
             this.pswdRepeatText.Size = new System.Drawing.Size(171, 23);
             this.pswdRepeatText.TabIndex = 5;
             this.pswdRepeatText.UseSystemPasswordChar = true;
-            this.pswdRepeatText.TextChanged += new System.EventHandler(this.pswdRepeatText_TextChanged_1);
             // 
             // pnText
             // 
@@ -229,7 +232,6 @@ namespace DesktopClient
             this.pnText.Name = "pnText";
             this.pnText.Size = new System.Drawing.Size(171, 23);
             this.pnText.TabIndex = 7;
-            this.pnText.TextChanged += new System.EventHandler(this.pnText_TextChanged_1);
             // 
             // streetText
             // 
@@ -239,7 +241,6 @@ namespace DesktopClient
             this.streetText.Name = "streetText";
             this.streetText.Size = new System.Drawing.Size(171, 23);
             this.streetText.TabIndex = 9;
-            this.streetText.TextChanged += new System.EventHandler(this.textBox1_TextChanged_1);
             // 
             // appartText
             // 
@@ -274,7 +275,6 @@ namespace DesktopClient
             this.cityText.Name = "cityText";
             this.cityText.Size = new System.Drawing.Size(171, 23);
             this.cityText.TabIndex = 14;
-            this.cityText.TextChanged += new System.EventHandler(this.textBox1_TextChanged_2);
             // 
             // zipText
             // 
@@ -284,24 +284,24 @@ namespace DesktopClient
             this.zipText.Name = "zipText";
             this.zipText.Size = new System.Drawing.Size(171, 23);
             this.zipText.TabIndex = 16;
-            this.zipText.TextChanged += new System.EventHandler(this.zipText_TextChanged);
             // 
-            // label6
+            // backButton
             // 
-            label6.Anchor = System.Windows.Forms.AnchorStyles.None;
-            label6.AutoSize = true;
-            label6.Font = new System.Drawing.Font("Segoe UI", 25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            label6.Location = new System.Drawing.Point(12, 9);
-            label6.Name = "label6";
-            label6.Size = new System.Drawing.Size(199, 46);
-            label6.TabIndex = 31;
-            label6.Text = "Registration";
+            this.backButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.backButton.Location = new System.Drawing.Point(713, 12);
+            this.backButton.Name = "backButton";
+            this.backButton.Size = new System.Drawing.Size(75, 23);
+            this.backButton.TabIndex = 32;
+            this.backButton.Text = "Go Back";
+            this.backButton.UseVisualStyleBackColor = true;
+            this.backButton.Click += new System.EventHandler(this.backButton_Click);
             // 
             // RegisterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.backButton);
             this.Controls.Add(label6);
             this.Controls.Add(label11);
             this.Controls.Add(this.lnText);
@@ -327,7 +327,6 @@ namespace DesktopClient
             this.Controls.Add(this.regButton);
             this.Name = "RegisterForm";
             this.Text = "Register";
-            this.Load += new System.EventHandler(this.Register_Load_1);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -337,19 +336,15 @@ namespace DesktopClient
 
         private System.Windows.Forms.Button regButton;
         private System.Windows.Forms.TextBox emailText;
-        private System.Windows.Forms.Label emailLabel;
-        private System.Windows.Forms.Label pswdLabel;
         private System.Windows.Forms.TextBox pswdText;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox pswdRepeatText;
-        private System.Windows.Forms.Label pnLabel;
         private System.Windows.Forms.TextBox pnText;
-        private System.Windows.Forms.Label addressLabel;
         private System.Windows.Forms.TextBox streetText;
         private System.Windows.Forms.TextBox appartText;
         private System.Windows.Forms.TextBox lnText;
         private System.Windows.Forms.TextBox fnText;
         private System.Windows.Forms.TextBox cityText;
         private System.Windows.Forms.TextBox zipText;
+        private System.Windows.Forms.Button backButton;
     }
 }

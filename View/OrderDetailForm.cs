@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace DesktopClient.View
+namespace DesktopClient
 {
     public partial class OrderDetailForm : Form
     {
@@ -49,7 +49,7 @@ namespace DesktopClient.View
 
         private void buttonClose_MouseClick(object sender, MouseEventArgs e)
         {
-            Hide();
+            Close();
             
         }
 

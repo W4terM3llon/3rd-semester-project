@@ -10,9 +10,10 @@ namespace DesktopClient.DTO
     {
         public string id { get; set; }
         public string name { get; set; }
-        public bool IsTableBookingEnabled { get; set; }
-        public bool IsDeliveryAvailable { get; set; }
+        public bool isTableBookingEnabled { get; set; }
+        public bool isDeliveryAvailable { get; set; }
         public Address address { get; set; }
-
+        public string everyDayUseAccountEmail { get; set; }
+        public string everyDayUseAccountPassword { get; set; }
     }
 }

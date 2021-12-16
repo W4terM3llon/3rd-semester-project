@@ -8,10 +8,9 @@ namespace DesktopClient.DTO
 {
     public class Table
     {
-        public int DbId { get; set; }
-        public string Id { get; set; }
-        public string SeatNumber { get; set; }
-        public string Description { get; set; }
-        public Restaurant Restaurant { get; set; }
+        public string id { get; set; }
+        public string seatNumber { get; set; }
+        public string description { get; set; }
+        public Restaurant restaurant { get; set; }
     }
 }

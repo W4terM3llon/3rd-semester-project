@@ -24,79 +24,14 @@ namespace DesktopClient
         }
 
         #region EventHandlers
-        private void emailLabel_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void emailText_TextChanged_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pswdLabel_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pswdText_TextChanged_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pswdRepeatText_TextChanged_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pnText_TextChanged_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pnLabel_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label2_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox1_TextChanged_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Register_Load_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox1_TextChanged_2(object sender, EventArgs e)
-        {
-
-        }
-
         private void regButton_Click(object sender, EventArgs e)
         {
             Register();
         }
-
-        private void zipText_TextChanged(object sender, EventArgs e)
+        
+        private void backButton_Click(object sender, EventArgs e)
         {
-
+            Back();
         }
         #endregion
 
@@ -123,7 +58,7 @@ namespace DesktopClient
                     MessageBox.Show($"Successful registration");
                     loginForm.Show();
                     Close();
-                    
+
                 }
                 else if (responseCode == 400)
                 {
@@ -136,7 +71,14 @@ namespace DesktopClient
                 MessageBox.Show("Passwords don't match");
             }
         }
-        
+
+        private void Back() 
+        {
+            loginForm.Show();
+            Close();
+        }
+
         #endregion
+
     }
 }

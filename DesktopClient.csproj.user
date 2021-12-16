@@ -3,10 +3,46 @@
   <PropertyGroup />
   <ItemGroup />
   <ItemGroup>
+    <Compile Update="View\AddPeriodForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="View\OrderDetailForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="View\OrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\UpdatePeriodForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\DinPerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\UpdateTableForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\AddTableForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\UpdateDishForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\AddDishForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\BookingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\DishForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\TableForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\RestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\AddRestForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="View\HomeForm.cs">

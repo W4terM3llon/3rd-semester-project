@@ -1,5 +1,5 @@
 ﻿
-namespace DesktopClient.View
+namespace DesktopClient
 {
     partial class OrderDetailForm
     {

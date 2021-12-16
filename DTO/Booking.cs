@@ -8,12 +8,11 @@ namespace DesktopClient.DTO
 {
     public class Booking
     {
-        public int DBId { get; set; }
-        public string Id { get; set; }
-        public DateTime Date { get; set; }
-        public Table Table { get; set; }
-        public DiningPeriod DiningPeriod { get; set; }
-        public User User { get; set; }
-        public Restaurant Restaurant { get; set; }
+        public string id { get; set; }
+        public DateTime date { get; set; }
+        public Table table { get; set; }
+        public DiningPeriod diningPeriod { get; set; }
+        public User user { get; set; }
+        public Restaurant restaurant { get; set; }
     }
 }

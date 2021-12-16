@@ -10,11 +10,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace DesktopClient.View
+namespace DesktopClient
 {
     public partial class OrderForm : Form
     {
-        private LoginForm loginForm;
+        private RestForm restForm;
         private string JWTtoken;
         private IDesktopApiClient dataAccess;
         private IDesktopApiClient dataAccessStagesAccess;
@@ -23,10 +23,10 @@ namespace DesktopClient.View
         private List<OrderStage> orderStages;
         
         
-        public OrderForm(LoginForm loginForm, string JWTtoken)
+        public OrderForm(RestForm restForm)
         {
-            this.loginForm = loginForm;
-            this.JWTtoken = JWTtoken;
+            this.restForm = restForm;
+            this.JWTtoken = restForm.homeForm.JWTtoken;
             dataAccess = new DesktopApiClient("https://localhost:44394/api/Orders");
             dataAccessStagesAccess = new DesktopApiClient("https://localhost:44394/api/OrderStages");
             InitializeComponent();
@@ -54,7 +54,7 @@ namespace DesktopClient.View
             comboBox1.Items.Clear();
             listView1.Items.Clear();
             string date = dateTimePicker1.CustomFormat = "yyyy-MM-dd";
-            orders = dataAccess.GetOrders("763", dateTimePicker1.Text, JWTtoken);
+            orders = dataAccess.GetOrders(restForm.restaurant.id, dateTimePicker1.Text, JWTtoken);
             orderStages = dataAccessStagesAccess.GetOrderStages(JWTtoken);
 
             List<string> strArr = new List<string>();
@@ -136,13 +136,6 @@ namespace DesktopClient.View
             }
         }
 
-
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void button2_Click(object sender, EventArgs e)
         {
             LoadFormData();
@@ -152,6 +145,12 @@ namespace DesktopClient.View
         {
             new OrderDetailForm(order, this).Show();
             //Hide();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            restForm.Show();
+            this.Close();
         }
     }
 }

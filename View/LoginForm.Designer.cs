@@ -52,7 +52,6 @@ namespace DesktopClient
             pwdLabel.Size = new System.Drawing.Size(57, 15);
             pwdLabel.TabIndex = 1;
             pwdLabel.Text = "Password";
-            pwdLabel.Click += new System.EventHandler(this.label1_Click);
             // 
             // emailLabel
             // 
@@ -63,7 +62,6 @@ namespace DesktopClient
             emailLabel.Size = new System.Drawing.Size(36, 15);
             emailLabel.TabIndex = 2;
             emailLabel.Text = "Email";
-            emailLabel.Click += new System.EventHandler(this.label2_Click);
             // 
             // regTextLabel
             // 
@@ -93,7 +91,6 @@ namespace DesktopClient
             this.emailText.Name = "emailText";
             this.emailText.Size = new System.Drawing.Size(100, 23);
             this.emailText.TabIndex = 3;
-            this.emailText.TextChanged += new System.EventHandler(this.emailText_TextChanged);
             // 
             // pwdText
             // 
@@ -104,7 +101,6 @@ namespace DesktopClient
             this.pwdText.Size = new System.Drawing.Size(100, 23);
             this.pwdText.TabIndex = 4;
             this.pwdText.UseSystemPasswordChar = true;
-            this.pwdText.TextChanged += new System.EventHandler(this.pwdText_TextChanged);
             // 
             // registerButton
             // 
@@ -142,7 +138,7 @@ namespace DesktopClient
             this.Controls.Add(this.loginButton);
             this.Controls.Add(pwdLabel);
             this.Name = "LoginForm";
-            this.Text = "Form1";
+            this.Text = "Login";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -151,11 +147,8 @@ namespace DesktopClient
         #endregion
 
         private System.Windows.Forms.Button loginButton;
-        private System.Windows.Forms.Label pwdLabel;
-        private System.Windows.Forms.Label emailLabel;
         private System.Windows.Forms.TextBox emailText;
         private System.Windows.Forms.TextBox pwdText;
-        private System.Windows.Forms.Label regTextLabel;
         private System.Windows.Forms.Button registerButton;
     }
 }
