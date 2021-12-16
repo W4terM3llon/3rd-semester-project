@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace DesktopClient.DTO
 {
-    public class Address
+   public class OrderLine
     {
         public string id { get; set; }
-        public string street { get; set; }
-        public string appartment { get; set; }
+        public int quantity { get; set; }
+        public Dish dish { get; set; }
     }
 }

@@ -108,15 +108,15 @@ namespace DesktopClient
             {
                
                 Address address = new Address();
-                address.Appartment = appartText.Text;
-                address.Street = streetText.Text;
+                address.appartment = appartText.Text;
+                address.street = streetText.Text;
                 User user = new User();
-                user.Email = emailText.Text;
-                user.Password = pswdText.Text;
-                user.PhoneNumber = pnText.Text;
-                user.FirstName = fnText.Text;
-                user.LastName = lnText.Text;
-                user.Address = address;
+                user.email = emailText.Text;
+                user.password = pswdText.Text;
+                user.phoneNumber = pnText.Text;
+                user.firstName = fnText.Text;
+                user.lastName = lnText.Text;
+                user.address = address;
                 int responseCode = dataAccess.Register(user);
                 if (responseCode == 201)
                 {

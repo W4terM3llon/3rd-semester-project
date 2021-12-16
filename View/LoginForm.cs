@@ -1,5 +1,6 @@
 ﻿using DesktopClient.Controller;
 using DesktopClient.DTO;
+using DesktopClient.View;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -59,7 +60,9 @@ namespace DesktopClient
             }
             else
             {
-                new HomeForm(this, content.token).Show();
+//                new HomeForm(this, content.token).Show();
+
+                new OrderForm(this, content.token).Show();
                 Hide();
             }
         }

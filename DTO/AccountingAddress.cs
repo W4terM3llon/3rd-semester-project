@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DesktopClient.DTO
 {
-    class AccountingAddress
+    public class AccountingAddress
     {
         public string Street { get; set; }
         public string Appartment { get; set; }

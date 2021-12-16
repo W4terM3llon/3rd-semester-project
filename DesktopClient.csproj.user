@@ -3,6 +3,12 @@
   <PropertyGroup />
   <ItemGroup />
   <ItemGroup>
+    <Compile Update="View\OrderDetailForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="View\OrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="View\HomeForm.cs">
       <SubType>Form</SubType>
     </Compile>

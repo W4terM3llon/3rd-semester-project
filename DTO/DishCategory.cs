@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace DesktopClient.DTO
 {
-    public class Address
+    public class DishCategory
     {
         public string id { get; set; }
-        public string street { get; set; }
-        public string appartment { get; set; }
+        public string name { get; set; }
     }
 }
