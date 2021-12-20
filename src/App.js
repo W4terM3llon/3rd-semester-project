@@ -19,7 +19,7 @@ function App() {
         <Container>
           <Routes>
             <Route exact path="/home" element={<Restaurants />} />
-            <Route exact path="/restaurant-details" element={<RestaurantDetails />} />
+            <Route exact path="/restaurant/:id" element={<RestaurantDetails />} />
             <Route exact path="/booking-confirmation" element={<BookingConfirmation />} />
             <Route exact path="/cart" element={<Cart />} />
             <Route exact path="/my-order-history" element={<MyOrders />} />

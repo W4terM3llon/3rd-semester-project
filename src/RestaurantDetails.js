@@ -10,13 +10,16 @@ import Dish from "./Dish";
 import Table from "./Table";
 
 export default function Restaurants() {
-  const { chosenRestaurantDishesState, chosenRestaurantTablesState, chosenRestaurantIdState } = useContext(
-    ChosenRestaurantContext
-  );
+  const {
+    chosenRestaurantDishesState,
+    chosenRestaurantTablesState,
+    chosenRestaurantIdState,
+  } = useContext(ChosenRestaurantContext);
   const { availableRestaurantsState } = useContext(RestaurantsContext);
   const { bookingDateState } = useContext(BookingContext);
 
-  const [availableRestaurants, setAvailableRestaurants] = availableRestaurantsState;
+  const [availableRestaurants, setAvailableRestaurants] =
+    availableRestaurantsState;
   const [chosenRestaurantId, setChosenRestaurantId] = chosenRestaurantIdState;
   const [chosenRestaurantDishes, setChosenRestaurantDishes] =
     chosenRestaurantDishesState;
@@ -34,6 +37,7 @@ export default function Restaurants() {
   const [tablesToShow, setTablesToShow] = useState(chosenRestaurantTables);
   const [dishesToShow, setDishesToShow] = useState(chosenRestaurantDishes);
 
+ 
   useEffect(() => {
     var restaurant = availableRestaurants.filter(
       (restaurant) => restaurant.id == chosenRestaurantId
@@ -43,7 +47,7 @@ export default function Restaurants() {
     } else {
       setRestaurantDetails({});
     }
-  }, []);
+  }, [chosenRestaurantId, availableRestaurants]);
 
   useEffect(() => {
     var dishesByCategoryTemp = {};
@@ -62,7 +66,6 @@ export default function Restaurants() {
 
   useEffect(() => {
     var tablesBySeatNumberTemp = {};
-    console.log(chosenRestaurantTables)
     chosenRestaurantTables.map((table) => {
       if (table.seatNumber.toString() in tablesBySeatNumberTemp) {
         tablesBySeatNumberTemp[table.seatNumber.toString()].push(table);
@@ -76,9 +79,7 @@ export default function Restaurants() {
     setTablesToShow(chosenRestaurantTables);
   }, [chosenRestaurantTables]);
 
-  useEffect(() => {
-    
-  }, [chosenRestaurantTables]);
+  useEffect(() => {}, [chosenRestaurantTables]);
 
   function dishFilterClicked(dish) {
     setDishesToShow(
@@ -89,7 +90,6 @@ export default function Restaurants() {
   }
 
   function tableFilterClicked(table) {
-    console.log(table[0])
     setTablesToShow(
       chosenRestaurantTables.filter((tb) => tb.seatNumber == table[0])
     );
@@ -99,36 +99,76 @@ export default function Restaurants() {
 
   return (
     <Container className="mt-5">
-      <h2 className="text-center p-0">{restaurantDetails.name}</h2>
-      <Row>
-        <Col xs={3}>
-          <Container className="rounded bg-light">
-            <Col>
-              {restaurantDetails.isTableBookingEnabled ? (
-                <>
-                  <h4 className="text-center">Tables</h4>
-                  <h5 className="text-muted fs-5">By seat number</h5>
-                  <Form.Group>
-                    <Form.Control
-                      type="date"
-                      value={bookingDate}
-                      onChange={(e) => {
-                        setBookingDate(e.target.value);
-                        setShowTables(true);
-                        setShowDishes(false);
-                      }}
-                    />
-                  </Form.Group>
-                  {tablesBySeatNumber.map((table, index) => (
+      {restaurantDetails == undefined ? (
+        <Row>
+          <Col className="text-center"><h5>Restaurant not found</h5></Col>
+        </Row>
+      ) : (
+        <>
+          <h2 className="text-center p-0">{restaurantDetails.name}</h2>
+          <Row>
+            <Col xs={3}>
+              <Container className="rounded bg-light">
+                <Col>
+                  {restaurantDetails.isTableBookingEnabled ? (
+                    <>
+                      <h4 className="text-center">Tables</h4>
+                      <h5 className="text-muted fs-5">By seat number</h5>
+                      <Form.Group>
+                        <Form.Control
+                          type="date"
+                          value={bookingDate}
+                          onChange={(e) => {
+                            setBookingDate(e.target.value);
+                            setShowTables(true);
+                            setShowDishes(false);
+                          }}
+                        />
+                      </Form.Group>
+                      {tablesBySeatNumber.map((table, index) => (
+                        <Row className="my-1">
+                          <Col>
+                            <span
+                              onClick={() => {
+                                tableFilterClicked(table);
+                              }}
+                              style={{ cursor: "pointer" }}
+                            >
+                              {table[0]} seats ({table[1].length})
+                            </span>
+                          </Col>
+                        </Row>
+                      ))}
+                      <Row>
+                        <Col>
+                          <span
+                            onClick={() => {
+                              setTablesToShow(chosenRestaurantTables);
+                              setShowTables(true);
+                              setShowDishes(false);
+                            }}
+                            style={{ cursor: "pointer" }}
+                          >
+                            show all
+                          </span>
+                        </Col>
+                      </Row>
+                    </>
+                  ) : (
+                    ""
+                  )}
+                  <h4 className="text-center">Dishes</h4>
+                  <h5 className="text-muted fs-5">By category</h5>
+                  {dishesByCategory.map((dish, index) => (
                     <Row className="my-1">
                       <Col>
                         <span
                           onClick={() => {
-                            tableFilterClicked(table);
+                            dishFilterClicked(dish);
                           }}
                           style={{ cursor: "pointer" }}
                         >
-                          {table[0]} seats ({table[1].length})
+                          {dish[0]} ({dish[1].length})
                         </span>
                       </Col>
                     </Row>
@@ -137,9 +177,9 @@ export default function Restaurants() {
                     <Col>
                       <span
                         onClick={() => {
-                          setTablesToShow(chosenRestaurantTables);
-                          setShowTables(true);
-                          setShowDishes(false);
+                          setDishesToShow(chosenRestaurantDishes);
+                          setShowTables(false);
+                          setShowDishes(true);
                         }}
                         style={{ cursor: "pointer" }}
                       >
@@ -147,60 +187,28 @@ export default function Restaurants() {
                       </span>
                     </Col>
                   </Row>
-                </>
-              ) : (
-                ""
-              )}
-              <h4 className="text-center">Dishes</h4>
-              <h5 className="text-muted fs-5">By category</h5>
-              {dishesByCategory.map((dish, index) => (
-                <Row className="my-1">
-                  <Col>
-                    <span
-                      onClick={() => {
-                        dishFilterClicked(dish);
-                      }}
-                      style={{ cursor: "pointer" }}
-                    >
-                      {dish[0]} ({dish[1].length})
-                    </span>
-                  </Col>
-                </Row>
-              ))}
-              <Row>
-                <Col>
-                  <span
-                    onClick={() => {
-                      setDishesToShow(chosenRestaurantDishes);
-                      setShowTables(false);
-                      setShowDishes(true);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    show all
-                  </span>
                 </Col>
-              </Row>
+              </Container>
             </Col>
-          </Container>
-        </Col>
-        <Col xs={9}>
-          {showTables
-            ? tablesToShow.map((table) => (
-                <Row className="mb-2">
-                  <Table table={table} />
-                </Row>
-              ))
-            : ""}
-          {showDishes
-            ? dishesToShow.map((dish) => (
-                <Row className="mb-2">
-                  <Dish dish={dish} />
-                </Row>
-              ))
-            : ""}
-        </Col>
-      </Row>
+            <Col xs={9}>
+              {showTables
+                ? tablesToShow.map((table) => (
+                    <Row className="mb-2">
+                      <Table table={table} />
+                    </Row>
+                  ))
+                : ""}
+              {showDishes
+                ? dishesToShow.map((dish) => (
+                    <Row className="mb-2">
+                      <Dish dish={dish} />
+                    </Row>
+                  ))
+                : ""}
+            </Col>
+          </Row>
+        </>
+      )}
     </Container>
   );
 }

@@ -16,12 +16,17 @@ import {
   UserContext,
 } from "./AppContext";
 import configData from "./config.json";
+import { getTimeString } from "./services";
 
 export default function BookingConfirmation() {
   const { jwtTokenState } = useContext(JwtTokenContext);
   const { userIdState } = useContext(UserContext);
-  const { bookingTableState, bookingTimePeriodState, bookingDateState } =
-    useContext(BookingContext);
+  const {
+    bookingTableState,
+    bookingTimePeriodState,
+    bookingDateState,
+    fetchBookingHistory,
+  } = useContext(BookingContext);
   const { fetchTablesFreePeriods, chosenRestaurantTablesState } = useContext(
     ChosenRestaurantContext
   );
@@ -41,7 +46,7 @@ export default function BookingConfirmation() {
   const [showBookingSuccess, setShowBookingSuccess] = useState(false);
 
   function confirmBooking() {
-    if (bookingDate || bookingTable || bookingTimePeriod || userId) {
+    if (!bookingDate || !bookingTable || !bookingTimePeriod || !userId) {
       setShowBookingError(true);
       setShowBookingSuccess(false);
       return;
@@ -81,6 +86,8 @@ export default function BookingConfirmation() {
           fetchTablesFreePeriods(chosenRestaurantTables);
           setShowBookingError(false);
           setShowBookingSuccess(true);
+
+          fetchBookingHistory();
         } else {
           setShowBookingError(true);
           setShowBookingSuccess(false);
@@ -93,11 +100,7 @@ export default function BookingConfirmation() {
     <Container className="d-flex justify-content-center align-items-center mt-5">
       <Col xs={12} md={8} xl={4}>
         <Row>
-          <Alert
-            variant="warning"
-            className="mt-2"
-            show={showNotLoggedin}
-          >
+          <Alert variant="warning" className="mt-2" show={showNotLoggedin}>
             <Alert.Heading>Please login to make a booking</Alert.Heading>
             <p>
               Proceed to <Link to="/login">login</Link> or{" "}
@@ -115,7 +118,7 @@ export default function BookingConfirmation() {
               <ListGroup.Item>
                 Time:{" "}
                 {bookingTimePeriod.timeStartMinutes ? (
-                  bookingTimePeriod.timeStartMinutes
+                  getTimeString(bookingTimePeriod.timeStartMinutes)
                 ) : (
                   <span className="text-danger">*Choose time period</span>
                 )}
@@ -139,7 +142,11 @@ export default function BookingConfirmation() {
                 )}
               </ListGroup.Item>
             </ListGroup>
-            <Button onClick={confirmBooking} className="mt-2" disabled={jwtToken === ""}>
+            <Button
+              onClick={confirmBooking}
+              className="mt-2"
+              disabled={jwtToken === ""}
+            >
               Confirm
             </Button>
           </Card>

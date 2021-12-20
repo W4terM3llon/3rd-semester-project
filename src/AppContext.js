@@ -34,7 +34,7 @@ export default function AppContext({ children }) {
   const [bookingTable, setBookingTable] = useState({});
   const [bookingTimePeriod, setBookingTimePeriod] = useState({});
 
-  const [orderLines, setOrderLines] = useState([])
+  const [orderLines, setOrderLines] = useState([]);
 
   const [bookingHistory, setBookingHistory] = useState([]);
   const [orderHistory, setOrderHistory] = useState([]);
@@ -130,7 +130,7 @@ export default function AppContext({ children }) {
     }
   }, [jwtToken]);
 
-  function fetchOrderHistory(){
+  function fetchOrderHistory() {
     fetch(`${configData.SERVER_URL}api/Orders?userId=${userId}`, {
       method: "GET",
       headers: {
@@ -162,39 +162,42 @@ export default function AppContext({ children }) {
       .catch((err) => {});
   }
 
+  function fetchBookingHistory() {
+    fetch(`${configData.SERVER_URL}api/Booking?userId=${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    })
+      .then((response) => {
+        return new Promise((resolve) =>
+          response
+            .json()
+            .then((data) =>
+              resolve({
+                ok: response.ok,
+                status: response.status,
+                body: data,
+              })
+            )
+            .catch((err) => {})
+        );
+      })
+      .then((data) => {
+        if (data.ok) {
+          setBookingHistory(data.body);
+        } else {
+          setBookingHistory([]);
+        }
+      })
+      .catch((err) => {});
+  }
+
   useEffect(() => {
     if (userId != "") {
-      fetch(`${configData.SERVER_URL}api/Booking?userId=${userId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwtToken}`,
-        },
-      })
-        .then((response) => {
-          return new Promise((resolve) =>
-            response
-              .json()
-              .then((data) =>
-                resolve({
-                  ok: response.ok,
-                  status: response.status,
-                  body: data,
-                })
-              )
-              .catch((err) => {})
-          );
-        })
-        .then((data) => {
-          if (data.ok) {
-            setBookingHistory(data.body);
-          } else {
-            setBookingHistory([]);
-          }
-        })
-        .catch((err) => {});
-
-        fetchOrderHistory()
+      fetchBookingHistory();
+      fetchOrderHistory();
     }
   }, [userId]);
 
@@ -266,7 +269,6 @@ export default function AppContext({ children }) {
           tables.forEach((table) => {
             table["diningPeriods"] = data.body[table.id.toString()];
           });
-          console.log(tables);
           setChosenRestaurantTables(tables);
         } else {
           console.log("could not fetch tables free periods");
@@ -275,9 +277,9 @@ export default function AppContext({ children }) {
       .catch((err) => {});
   }
 
-  useEffect(()=>{
-    fetchTablesFreePeriods(chosenRestaurantTables)
-  }, [bookingDate])
+  useEffect(() => {
+    fetchTablesFreePeriods(chosenRestaurantTables);
+  }, [bookingDate]);
 
   useEffect(() => {
     fetch(
@@ -369,13 +371,20 @@ export default function AppContext({ children }) {
       })
       .then((data) => {
         if (data.ok) {
-          console.log(data.body);
           setDishCategories(data.body);
         } else {
           console.log("could not fetch dish categories");
         }
       })
       .catch((err) => {});
+
+    //set chosenRestaurantId when url points to any restaurant
+    let id = window.location.pathname.split("/").at(-1);
+    setChosenRestaurantId(id);
+    window.addEventListener("popstate", () => {
+      let id = window.location.pathname.split("/").at(-1);
+      setChosenRestaurantId(id);
+    });
   }, []);
 
   function logOutUser() {
@@ -442,7 +451,7 @@ export default function AppContext({ children }) {
                 value={{
                   orderLinesState: [orderLines, setOrderLines],
                   orderHistoryState: [orderHistory, setOrderHistory],
-                  fetchOrderHistory: fetchOrderHistory
+                  fetchOrderHistory: fetchOrderHistory,
                 }}
               >
                 <BookingContext.Provider
@@ -454,6 +463,7 @@ export default function AppContext({ children }) {
                       setBookingTimePeriod,
                     ],
                     bookingHistoryState: [bookingHistory, setBookingHistory],
+                    fetchBookingHistory: fetchBookingHistory,
                   }}
                 >
                   {children}

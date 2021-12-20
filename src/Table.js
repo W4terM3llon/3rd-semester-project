@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { Button, Card, Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { BookingContext } from "./AppContext";
+import { getTimeString } from "./services";
 
 export default function Table({ table }) {
   const { bookingTableState, bookingTimePeriodState } =
@@ -33,7 +34,7 @@ export default function Table({ table }) {
                 setBookingTimePeriod(freePeriod);
               }}
             >
-              {freePeriod.timeStartMinutes}
+              {getTimeString(freePeriod.timeStartMinutes)}
             </Button>
           ))
         )}

@@ -21,8 +21,6 @@ export default function Dish({ dish }) {
   );
   const [showItemNotAdded, setShowItemNotAdded] = useState(false);
 
-  console.log(orderLines);
-
   function isDishInOrderLines() {
     return orderLines.filter((ol) => ol.dish.id == dish.id).length != 0;
   }
@@ -67,7 +65,7 @@ export default function Dish({ dish }) {
           {dish.restaurant.name}, {dish.dishCategory.name}
         </Card.Subtitle>
         <Card.Text>{dish.description}</Card.Text>
-        <span>{dish.price}</span>
+        <span>${dish.price}</span>
         <Form className="d-flex justify-content-end">
           <Alert
             variant="warning"
@@ -86,7 +84,6 @@ export default function Dish({ dish }) {
               value={quantity}
               onChange={(e) => {
                 setQuantity(parseInt(e.target.value));
-                console.log(e.target.value);
               }}
             >
               {[...Array(100).keys()]

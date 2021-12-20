@@ -14,11 +14,11 @@ export default function Restaurants() {
   return (
     <Container className="mt-5">
       <Col>
-        {availableRestaurants.map((restaurant) => (
-          <Row className="mb-3">
+        {availableRestaurants.map((restaurant, index) => (
+          <Row key={index} className="mb-3">
             <Link
               onClick={() => setChosenRestaurantId(restaurant.id)}
-              to="/restaurant-details"
+              to={`/restaurant/${restaurant.id}`}
               style={{ textDecoration: "none" }}
               className="text-black"
             >
