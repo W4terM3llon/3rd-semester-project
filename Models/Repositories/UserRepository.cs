@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Restaurant_system_new.Models.Requests;
 using RestaurantSystem.Data;
+using RestaurantSystem.Services;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(userData.SystemId))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
                 {
                     try
                     {
@@ -73,7 +74,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
                     try
                     {
@@ -108,7 +109,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             var user = new User()
             {
-                SystemId = id != null ? id : new Random().Next(1, 1000).ToString(),
+                SystemId = id != null ? id : IdGenerator.GenerateId(),
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 PhoneNumber = request.PhoneNumber,

@@ -11,6 +11,7 @@ namespace RestaurantSystem.Models
     {
         [Key]
         public int DBId { get; set; }
+        [StringLength(30)]
         public string Id { get; set; }
         public DateTime Date { get; set; }
         public Table Table { get; set; }

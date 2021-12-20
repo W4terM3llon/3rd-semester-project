@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
+using RestaurantSystem.Services;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -44,7 +45,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(table.Id))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
                 {
                     try
                     {
@@ -78,7 +79,7 @@ namespace RestaurantSystem.Models.Repositories
                 return null;
             }
 
-            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.ReadCommitted))
             {
                 try
                 {
@@ -100,7 +101,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
                     try
                     {
@@ -140,7 +141,7 @@ namespace RestaurantSystem.Models.Repositories
 
             var table = new Table()
             {
-                Id = id != null ? id : new Random().Next(1, 1000).ToString(),
+                Id = id != null ? id : IdGenerator.GenerateId(),
                 SeatNumber = request.SeatNumber,
                 Description = request.Description,
                 Restaurant = restaurant

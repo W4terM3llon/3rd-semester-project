@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
+using RestaurantSystem.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +53,7 @@ namespace RestaurantSystem.Models.Repositories
 
             var dishCategory = new DishCategory()
             {
-                Id = new Random().Next(1, 1000).ToString(),
+                Id = IdGenerator.GenerateId(),
                 Name = request.Name
             };
             return dishCategory;

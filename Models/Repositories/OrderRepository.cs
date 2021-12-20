@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
+using RestaurantSystem.Services;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -35,7 +36,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Order> CreateAsync(Order order)
         {
-            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.ReadCommitted))
             {
                 try
                 {
@@ -63,7 +64,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
                     try
                     {
@@ -94,7 +95,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(orderId))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
                 {
                     try
                     {
@@ -180,7 +181,7 @@ namespace RestaurantSystem.Models.Repositories
                     int quantity = orderLineRequest.Quantity;
                     var orderLine = new OrderLine
                     {
-                        Id = new Random().Next(1, 1000).ToString(),
+                        Id = IdGenerator.GenerateId(),
                         Dish = dish,
                         Quantity = quantity,
                     };
@@ -189,11 +190,11 @@ namespace RestaurantSystem.Models.Repositories
                 }
             }
 
-            var orderPlacedStage = await _context.OrderStage.FirstOrDefaultAsync(stage => stage.Name == "Placed");
+            var orderPlacedStage = await _context.OrderStage.FirstOrDefaultAsync(stage => stage.Name == "Processing");
 
             var order = new Order()
             {
-                Id = id != null ? id : new Random().Next(1, 1000).ToString(),
+                Id = id != null ? id : IdGenerator.GenerateId(),
                 Date = DateTime.Now,
                 OrderLines = orderLines,
                 OrderStage = orderPlacedStage,

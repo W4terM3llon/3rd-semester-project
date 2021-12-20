@@ -12,6 +12,7 @@ namespace RestaurantSystem.Models
     {
         [Key]
         public int DbId { get; set; }
+        [StringLength(30)]
         public string Id { get; set; }
         public string Name { get; set; }
         public bool IsTableBookingEnabled { get; set; }

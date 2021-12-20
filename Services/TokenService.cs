@@ -29,7 +29,7 @@ namespace RestaurantSystem.Services
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(5),
+                expires: DateTime.Now.AddMinutes(60 * 12),
                 signingCredentials: signinCredentials
             );
 

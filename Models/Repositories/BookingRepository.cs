@@ -33,7 +33,9 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Booking> GetAsync(string id)
         {
-            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).ThenInclude(user => user.Address).Include(booking => booking.DiningPeriod).Include(booking => booking.Restaurant).ThenInclude(restaurant => restaurant.Address).FirstOrDefaultAsync(booking => booking.Id == id);
+            return await _context.Booking.Include(booking => booking.Table).Include(booking => booking.User).ThenInclude(user => user.Address)
+                .Include(booking => booking.DiningPeriod).Include(booking => booking.Restaurant).ThenInclude(restaurant => restaurant.Address)
+                .FirstOrDefaultAsync(booking => booking.Id == id);
         }
 
         public async Task<Booking> UpdateAsync(Booking booking)
@@ -64,7 +66,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Booking> CreateAsync(Booking booking)
         {
-            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.ReadCommitted))
             {
                 try
                 {
@@ -86,7 +88,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
                     try
                     {
@@ -115,6 +117,19 @@ namespace RestaurantSystem.Models.Repositories
             return await _context.Booking.AnyAsync(booking => booking.Id == id);
         }
 
+        public bool IfBookingDateCorrect(DateTime dateTime, int diningPeriodStartMinutes)
+        {
+            DateTime currentDate = DateTime.Now;
+            if (dateTime.Date.CompareTo(currentDate.Date) >= 0 && diningPeriodStartMinutes > currentDate.Date.Hour * 60 + currentDate.Date.Minute)
+            {
+                return true;
+            }
+            else 
+            {
+                return false;
+            }
+        }
+
         public async Task<Booking> ConvertAlterBookingRequest(BookingRequestDTO request, string id)
         {
             var restaurant = await _context.Restaurant.Include(restaurant => restaurant.Manager).FirstOrDefaultAsync(restaurant => restaurant.Id == request.Restaurant);
@@ -130,7 +145,7 @@ namespace RestaurantSystem.Models.Repositories
 
             var booking = new Booking()
             {
-                Id = id != null ? id : new Random().Next(1, 1000).ToString(),
+                Id = id != null ? id : IdGenerator.GenerateId(),
                 Table = table,
                 User =  user,
                 DiningPeriod = diningPeriod,

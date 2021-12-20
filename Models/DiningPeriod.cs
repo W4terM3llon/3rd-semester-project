@@ -11,6 +11,7 @@ namespace RestaurantSystem.Models
     {
         [Key]
         public int DbId { get; set; }
+        [StringLength(30)]
         public string Id { get; set; }
         public string Name { get; set; }
         public int TimeStartMinutes { get; set; } //start of booking in minutes in a day

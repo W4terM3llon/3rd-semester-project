@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
+using RestaurantSystem.Services;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -43,7 +44,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(dishRequest.Id))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
                 {
                     try
                     {
@@ -88,7 +89,7 @@ namespace RestaurantSystem.Models.Repositories
 
             Dish dish = null;
 
-            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
             {
                 dish = await GetAsync(dishId);
                 dish.Likes += 1;
@@ -101,7 +102,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Dish> CreateAsync(Dish dish)
         {
-            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.ReadCommitted))
             {
                 try
                 {
@@ -131,7 +132,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
                     try
                     {
@@ -173,7 +174,7 @@ namespace RestaurantSystem.Models.Repositories
 
             var dish = new Dish()
             {
-                Id = id != null ? id : new Random().Next(1, 1000).ToString(),
+                Id = id != null ? id : IdGenerator.GenerateId(),
                 Name = request.Name,
                 Price = request.Price,
                 Description = request.Description,

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RestaurantSystem.Data;
 
 namespace Restaurant_system_new.Migrations
 {
     [DbContext(typeof(RestaurantSystemContext))]
-    partial class RestaurantSystemContextModelSnapshot : ModelSnapshot
+    [Migration("20211220144906_uptate10")]
+    partial class uptate10
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,8 +133,7 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Id")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Street")
                         .HasColumnType("nvarchar(max)");
@@ -156,8 +157,7 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Id")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("RestaurantDbId")
                         .HasColumnType("int");
@@ -192,8 +192,7 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Id")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -225,8 +224,7 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Id")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Likes")
                         .HasColumnType("int");
@@ -257,8 +255,7 @@ namespace Restaurant_system_new.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Id")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -282,8 +279,7 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Id")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("OrderStageDbId")
                         .HasColumnType("int");
@@ -313,8 +309,7 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Id")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("OrderDbId")
                         .HasColumnType("int");
@@ -339,8 +334,7 @@ namespace Restaurant_system_new.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Id")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -361,8 +355,7 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Id")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeliveryAvailable")
                         .HasColumnType("bit");
@@ -401,8 +394,7 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Id")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("RestaurantDbId")
                         .HasColumnType("int");
@@ -477,8 +469,7 @@ namespace Restaurant_system_new.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SystemId")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RestaurantSystem.Data;
 using RestaurantSystem.Models.Requests;
+using RestaurantSystem.Services;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -39,7 +40,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(newRestaurantData.Id))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.RepeatableRead))
                 {
                     try
                     {
@@ -70,7 +71,7 @@ namespace RestaurantSystem.Models.Repositories
 
         public async Task<Restaurant> CreateAsync(Restaurant restaurant, string everyDayUseAccountEmail, string everyDayUseAccountPassword)
         {
-            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+            using (var transaction = _context.Database.BeginTransaction(IsolationLevel.ReadCommitted))
             {
                 try
                 {
@@ -81,7 +82,7 @@ namespace RestaurantSystem.Models.Repositories
                         Address = null,
                         Email = everyDayUseAccountEmail,
                         UserName = everyDayUseAccountEmail,
-                        SystemId = new Random().Next(1, 1000).ToString(),
+                        SystemId = IdGenerator.GenerateId(),
                         SecurityStamp = Guid.NewGuid().ToString(),
                     };
                     var result = await _userManager.CreateAsync(everyDayUseAccount, everyDayUseAccountPassword);
@@ -111,7 +112,7 @@ namespace RestaurantSystem.Models.Repositories
         {
             if (await IfExist(id))
             {
-                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.Serializable))
+                using (var transaction = _context.Database.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
                     try
                     {
@@ -149,7 +150,7 @@ namespace RestaurantSystem.Models.Repositories
             var manager = await _context.User.FirstOrDefaultAsync(manager => manager.SystemId == currentUserSystemId);
             var restaurant = new Restaurant()
             {
-                Id = id != null ? id : new Random().Next(1, 1000).ToString(),
+                Id = id != null ? id : IdGenerator.GenerateId(),
                 Name = request.Name,
                 IsTableBookingEnabled = request.IsTableBookingEnabled,
                 IsDeliveryAvailable = request.IsDeliveryAvailable,

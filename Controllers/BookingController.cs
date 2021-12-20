@@ -152,6 +152,11 @@ namespace RestaurantSystem.Controllers
                 return NotFound(new { Error = "One of booking dependencies not found" });
             }
 
+            if (!_bookingRepository.IfBookingDateCorrect(booking.Date, booking.DiningPeriod.TimeStartMinutes))
+            {
+                return BadRequest(new { Error = "Can not make a booking for past days and periods" });
+            }
+
             if (!await _permissionValidation.isTableRestaurantOwnershipAsync(bookingRequest.Table, bookingRequest.Restaurant))
             {
                 return BadRequest(new { Error = "Chosen table does not belong to the chosen restaurant" });

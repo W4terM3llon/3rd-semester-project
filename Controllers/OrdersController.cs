@@ -153,7 +153,7 @@ namespace RestaurantSystem.Controllers
 
             if (!await _orderStageRepository.IfExist("1"))
             {
-                return NotFound(new { Error = "Beginning order stage with id 1 is required in the databse" });
+                return StatusCode(500 ,new { Error = "Beginning order stage with id 1 is required in the databse" });
             }
 
             var saved = await _orderRepository.CreateAsync(order);

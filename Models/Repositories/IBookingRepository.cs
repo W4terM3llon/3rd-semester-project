@@ -14,6 +14,7 @@ namespace RestaurantSystem.Models.Repositories
         public Task<Booking> UpdateAsync(Booking bookingRequest);
         public Task<Booking> DeleteAsync(string id);
         public Task<bool> IfExist(string id);
+        public bool IfBookingDateCorrect(DateTime dateTime, int diningPeriodStartMinutes);
         public Task<Booking> ConvertAlterBookingRequest(BookingRequestDTO request, string id);
     }
 }
